@@ -222,7 +222,7 @@ def _ida_query_NZPY(idadb, query, silent, first_row_only, autocommit):
 
                 data = [firstRow]
                 data.extend(cursor.fetchall())
-                result = pd.DataFrame(data, columns= colnames)
+                result = pd.DataFrame(data if firstRow else [], columns= colnames)
                 #convert to Series if only one column
                 if len(result.columns) == 1:
                     result = result[result.columns[0]]
