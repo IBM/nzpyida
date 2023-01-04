@@ -11,7 +11,7 @@
 
 from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
-from nzpyida.wrappers.utils import map_to_props, materialize_df
+from nzpyida.wrappers.utils import map_to_props, materialize_df, make_temp_table_name
 from nzpyida.wrappers.model_manager import ModelManager
 
 class DecisionTreeClassifier:
@@ -24,9 +24,9 @@ class DecisionTreeClassifier:
         self.model_name = model_name
         self.temp_out_tables = []
 
-    def fit(self, in_df: IdaDataFrame, id: str, target: str, in_column: str=None,
+    def fit(self, in_df: IdaDataFrame, id_column: str, target_column: str, in_column: str=None,
         col_def_type: str=None, col_def_role: str=None, col_properties_table: str=None,
-        weights: str=None, eval: str=None, min_improve: float=0.02, min_split: int=50,
+        weights: str=None, eval_measure: str=None, min_improve: float=0.02, min_split: int=50,
         max_depth: int=10, val_table: str=None, val_weights: str=None, qmeasure: str=None,
         statistics: str=None):
         """
@@ -39,14 +39,14 @@ class DecisionTreeClassifier:
 
         params = map_to_props({
             'model': self.model_name,
-            'id': id,
-            'target': target,
+            'id': id_column,
+            'target': target_column,
             'incolumn': in_column,
             'coldeftype': col_def_type,
             'coldefrole': col_def_role,
             'colpropertiestable': col_properties_table,
             'weights': weights,
-            'eval': eval,
+            'eval': eval_measure,
             'minimprove': min_improve,
             'minsplit': min_split,
             'maxdepth': max_depth,
@@ -63,7 +63,7 @@ class DecisionTreeClassifier:
             if need_delete:
                 self.idadb.drop_view(temp_view_name)
 
-    def predict(self, in_df: IdaDataFrame, out_table: str=None, id: str=None, target: str=None, 
+    def predict(self, in_df: IdaDataFrame, out_table: str=None, id_column: str=None, target_column: str=None, 
         prob: bool=False, out_table_prob: str=None) -> IdaDataFrame:
         """
         Make predictions based on the decision tree model. The model must exist.
@@ -74,13 +74,13 @@ class DecisionTreeClassifier:
         using_temp_out_table = False
         if not out_table:
             using_temp_out_table = True
-            out_table = self.idadb._get_valid_tablename()
+            out_table = make_temp_table_name()
 
         params = map_to_props({
             'model': self.model_name,
-            'outtable': out_table, 
-            'id': id, 
-            'target': target, 
+            'outtable': out_table,
+            'id': id_column,
+            'target': target_column,
             'prob': prob,
             'outtableprob': out_table_prob,
             'intable': temp_view_name
@@ -99,16 +99,16 @@ class DecisionTreeClassifier:
 
         return out_df
 
-    def score(self, in_df: IdaDataFrame, id: str=None, target: str=None) -> float:
+    def score(self, in_df: IdaDataFrame, id_column: str, target_column: str) -> float:
         """
         Scores the decision tree model. The model must exist.
         """
 
-        out_table = self.idadb._get_valid_tablename()
-        
+        out_table = make_temp_table_name()
+
         pred_view_needs_delete, true_view_needs_delete = False, False
         try:
-            pred_df = self.predict(in_df=in_df, out_table=out_table, id=id)
+            pred_df = self.predict(in_df=in_df, out_table=out_table, id_column=id_column)
 
             pred_view, pred_view_needs_delete = materialize_df(pred_df)
             true_view, true_view_needs_delete = materialize_df(in_df)
@@ -117,11 +117,11 @@ class DecisionTreeClassifier:
                 'pred_table': pred_view,
                 'true_table': true_view,
                 'pred_id': 'ID',
-                'true_id': id,
+                'true_id': id_column,
                 'pred_column': 'CLASS',
-                'true_column': target
+                'true_column': target_column
             })
-
+            print(params)
             res = pred_df.ida_query(f'call NZA..CERROR(\'{params}\')')
             return 1-res[0]
         finally:
@@ -145,5 +145,5 @@ class DecisionTreeClassifier:
     def __enter__(self):
         return self
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, ex_type, value, traceback):
         self.clean_up()

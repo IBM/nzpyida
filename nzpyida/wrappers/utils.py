@@ -9,7 +9,10 @@
 # The full license is in the LICENSE file, distributed with this software.
 #----------------------------------------------------------------------------- 
 from typing import Dict, Tuple, Any
+from time import time
+import random
 from nzpyida.frame import IdaDataFrame
+
 
 def map_to_props(data: Dict[str, Any]) -> str:
     """
@@ -31,8 +34,14 @@ def materialize_df(df: IdaDataFrame) -> Tuple[str, bool]:
     """
 
     if df.internal_state.views:
-        temp_view_name = df._idadb._get_valid_tablename()
+        temp_view_name = make_temp_table_name()
         df.internal_state._create_view(viewname=temp_view_name)
         return temp_view_name, True
     else:
         return df.tablename, False
+
+def make_temp_table_name(prefix: str='DATA_FRAME_') -> str:
+    """
+    Generate temp table name.
+    """
+    return f'{prefix}{random.randint(0, 100000)}_{int(time())}'
