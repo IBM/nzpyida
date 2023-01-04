@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #-----------------------------------------------------------------------------
 # Copyright (c) 2023, IBM Corp.
@@ -9,25 +9,38 @@
 # The full license is in the LICENSE file, distributed with this software.
 #----------------------------------------------------------------------------- 
 
+from pandas import DataFrame
 from nzpyida.base import IdaDataBase
-from typing import List
 
 class ModelManager:
+    """
+    Manages in-database models.
+    """
+
     def __init__(self, idadb: IdaDataBase):
         self.idadb = idadb
 
-    def list_models(self, query: str=''):
+    def list_models(self, query: str='') -> DataFrame:
+        """
+        Retrieve existing models (in the current database) and returns result as a data frame.
+        """
+
         if query:
-            return self.idadb.ida_query('select * from V_NZA_MODELS where {}'.format(query))
-        else:
-            return self.idadb.ida_query('select * from V_NZA_MODELS')
+            return self.idadb.ida_query(f'select * from V_NZA_MODELS where {query}')
+        return self.idadb.ida_query('select * from V_NZA_MODELS')
 
     def model_exists(self, name: str) -> bool:
-        ret = self.idadb.ida_query('call NZA..MODEL_EXISTS(\'model={}\')'.format(name))
+        """
+        Checks if a model with the given name exists.
+        """
+
+        ret = self.idadb.ida_query(f'call NZA..MODEL_EXISTS(\'model={name}\')')
         return not ret.empty and ret[0]
 
     def drop_model(self, name: str):
+        """
+        Drops the model with the given name. Does noting if there is no such madel in the database.
+        """
+
         if self.model_exists(name):
-            self.idadb.ida_query('call nza..DROP_MODEL(\'model={}\')'.format(name))
-
-
+            self.idadb.ida_query(f'call nza..DROP_MODEL(\'model={name}\')')
