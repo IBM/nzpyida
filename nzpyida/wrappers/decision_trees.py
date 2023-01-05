@@ -9,10 +9,12 @@
 # The full license is in the LICENSE file, distributed with this software.
 #----------------------------------------------------------------------------- 
 
+from typing import Tuple
 from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
 from nzpyida.wrappers.utils import map_to_props, materialize_df, make_temp_table_name
 from nzpyida.wrappers.model_manager import ModelManager
+
 
 class DecisionTreeClassifier:
     """
@@ -121,9 +123,61 @@ class DecisionTreeClassifier:
                 'pred_column': 'CLASS',
                 'true_column': target_column
             })
-            print(params)
+
             res = pred_df.ida_query(f'call NZA..CERROR(\'{params}\')')
             return 1-res[0]
+        finally:
+            self.idadb.drop_table(out_table)
+            if pred_view_needs_delete:
+                self.idadb.drop_view(pred_view)
+            if true_view_needs_delete:
+                self.idadb.drop_view(true_view)
+
+    def conf_matrix(self, in_df: IdaDataFrame, id_column: str, target_column: str, 
+        out_matrix_table: str=None) -> Tuple[IdaDataFrame, float, float]:
+        """
+        Makes a predition for a test data set given by the user and returns a confusion matrix,
+        together with other stats (ACC and WACC).
+        """
+        out_table = make_temp_table_name()
+
+        pred_view_needs_delete, true_view_needs_delete = False, False
+        try:
+            pred_df = self.predict(in_df=in_df, out_table=out_table, id_column=id_column)
+
+            pred_view, pred_view_needs_delete = materialize_df(pred_df)
+            true_view, true_view_needs_delete = materialize_df(in_df)
+
+            using_temp_out_table = False
+            if not out_matrix_table:
+                using_temp_out_table = True
+                out_matrix_table = make_temp_table_name()
+
+            params = map_to_props({
+                'resulttable': pred_view,
+                'intable': true_view,
+                'resultid': 'ID',
+                'id': id_column,
+                'resulttarget': 'CLASS',
+                'target': target_column,
+                'matrixTable': out_matrix_table
+            })
+            pred_df.ida_query(f'call NZA..CONFUSION_MATRIX(\'{params}\')')
+
+            if using_temp_out_table:
+                self.temp_out_tables.append(out_matrix_table)
+
+            out_df = IdaDataFrame(self.idadb, out_matrix_table)
+
+            params = map_to_props({
+                'matrixTable': out_matrix_table
+            })
+
+            res_acc = pred_df.ida_query(f'call NZA..CMATRIX_ACC(\'{params}\')')
+            res_wacc = pred_df.ida_query(f'call NZA..CMATRIX_WACC(\'{params}\')')
+
+            return out_df, res_acc[0], res_wacc[0]
+
         finally:
             self.idadb.drop_table(out_table)
             if pred_view_needs_delete:
@@ -137,6 +191,7 @@ class DecisionTreeClassifier:
         """
         for table_name in self.temp_out_tables:
             self.idadb.drop_table(table_name)
+        self.temp_out_tables = []
 
     def __str__(self):
         params = map_to_props({'model': self.model_name})

@@ -7,7 +7,7 @@
 # Distributed under the terms of the BSD Simplified License.
 #
 # The full license is in the LICENSE file, distributed with this software.
-#----------------------------------------------------------------------------- 
+#-----------------------------------------------------------------------------
 
 from pandas import DataFrame
 from nzpyida.base import IdaDataBase
