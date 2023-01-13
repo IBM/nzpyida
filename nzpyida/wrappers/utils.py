@@ -12,6 +12,7 @@ from typing import Dict, Tuple, Any
 from time import time
 import random
 from nzpyida.frame import IdaDataFrame
+from nzpyida.wrappers.auto_delete_context import AutoDeleteContext
 
 
 def map_to_props(data: Dict[str, Any]) -> str:
@@ -45,3 +46,14 @@ def make_temp_table_name(prefix: str='DATA_FRAME_') -> str:
     Generate temp table name.
     """
     return f'{prefix}{random.randint(0, 100000)}_{int(time())}'
+
+def get_auto_delete_context(out_table_attr_name: str) -> AutoDeleteContext:
+    """
+    Returns an auto delete context manager assigned to the current thread.
+    If nothing is assigned, raise an exception with appropriate error message.
+    The 'out_table_attr_name' is included in that message.
+    """
+    if AutoDeleteContext.current() is None:
+        raise RuntimeError(f'This code needs to run inside of AutoDeleteContext context manager or \
+            you need to set an output table name in {out_table_attr_name} function attribute')
+    return AutoDeleteContext.current()

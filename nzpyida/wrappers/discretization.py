@@ -12,6 +12,7 @@
 from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
 from nzpyida.wrappers.utils import map_to_props, materialize_df, make_temp_table_name
+from nzpyida.wrappers.utils import get_auto_delete_context
 
 
 class Discretization:
@@ -21,7 +22,6 @@ class Discretization:
 
     def __init__(self, idadb: IdaDataBase):
         self.idadb = idadb
-        self.temp_out_tables = []
         self.params = {}
         self.proc = ""
 
@@ -31,9 +31,9 @@ class Discretization:
         """
 
         temp_view_name, need_delete = materialize_df(in_df)
-        using_temp_out_table = False
+        auto_delete_context = None
         if not out_table:
-            using_temp_out_table = True
+            auto_delete_context = get_auto_delete_context('out_table')
             out_table = make_temp_table_name()
         in_columns = ';'.join(in_df.columns)
 
@@ -54,8 +54,8 @@ class Discretization:
 
         out_df = IdaDataFrame(self.idadb, out_table)
 
-        if using_temp_out_table:
-            self.temp_out_tables.append(out_table)
+        if auto_delete_context:
+            auto_delete_context.add_table_to_delete(out_table)
 
         return out_df
 
@@ -68,9 +68,9 @@ class Discretization:
         temp_view_name, need_delete = materialize_df(in_df)
         bin_view_name, bin_view_need_delete = materialize_df(in_bin_df)
 
-        using_temp_out_table = False
+        auto_delete_context = None
         if not out_table:
-            using_temp_out_table = True
+            auto_delete_context = get_auto_delete_context('out_table')
             out_table = make_temp_table_name()
 
         params = map_to_props({
@@ -91,24 +91,10 @@ class Discretization:
 
         out_df = IdaDataFrame(self.idadb, out_table)
 
-        if using_temp_out_table:
-            self.temp_out_tables.append(out_table)
+        if auto_delete_context:
+            auto_delete_context.add_table_to_delete(out_table)
 
         return out_df
-
-    def clean_up(self):
-        """
-        Cleans up temporary tables created for discretization done in this object.
-        """
-        for table_name in self.temp_out_tables:
-            self.idadb.drop_table(table_name)
-        self.temp_out_tables = []
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, ex_type, value, traceback):
-        self.clean_up()
 
 
 class EWDisc(Discretization):
