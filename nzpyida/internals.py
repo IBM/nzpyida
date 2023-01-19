@@ -323,12 +323,13 @@ class InternalState(object):
         if not self.views:
             return ("SELECT " + self.get_columns() + " FROM " + self.name)
 
+        alias = " as t1 " if self._idadf._idadb._is_netezza_system() else ""
         query = "%s"
         for index, view in enumerate(self.views[::-1]):
             if index == (len(self.views)-1):
                 view = view % self.name
             if index != 0:
-                view = "(" + view + ")"
+                view = "(" + view + ")%s" %(alias)
             query = query %(view)
         return query
 
