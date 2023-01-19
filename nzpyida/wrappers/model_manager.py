@@ -8,9 +8,8 @@
 #
 # The full license is in the LICENSE file, distributed with this software.
 #-----------------------------------------------------------------------------
-
-from pandas import DataFrame
 from nzpyida.base import IdaDataBase
+from nzpyida.frame import IdaDataFrame
 
 class ModelManager:
     """
@@ -20,14 +19,12 @@ class ModelManager:
     def __init__(self, idadb: IdaDataBase):
         self.idadb = idadb
 
-    def list_models(self, query: str='') -> DataFrame:
+    def list_models(self) -> IdaDataFrame:
         """
         Retrieve existing models (in the current database) and returns result as a data frame.
         """
 
-        if query:
-            return self.idadb.ida_query(f'select * from V_NZA_MODELS where {query}')
-        return self.idadb.ida_query('select * from V_NZA_MODELS')
+        return IdaDataFrame(idadb=self.idadb, tablename='inza.V_NZA_MODELS')
 
     def model_exists(self, name: str) -> bool:
         """
