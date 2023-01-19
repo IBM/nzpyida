@@ -98,7 +98,7 @@ class DecisionTreeClassifier(PredictiveModeling):
 
             auto_delete_context = None
             if not out_matrix_table:
-                auto_delete_context = get_auto_delete_context('out_table')
+                auto_delete_context = get_auto_delete_context('out_matrix_table')
                 out_matrix_table = make_temp_table_name()
 
             params = map_to_props({

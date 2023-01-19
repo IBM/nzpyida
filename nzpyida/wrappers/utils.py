@@ -7,7 +7,7 @@
 # Distributed under the terms of the BSD Simplified License.
 #
 # The full license is in the LICENSE file, distributed with this software.
-#----------------------------------------------------------------------------- 
+#-----------------------------------------------------------------------------
 from typing import Dict, Tuple, Any
 from time import time
 import random
@@ -54,6 +54,6 @@ def get_auto_delete_context(out_table_attr_name: str) -> AutoDeleteContext:
     The 'out_table_attr_name' is included in that message.
     """
     if AutoDeleteContext.current() is None:
-        raise RuntimeError(f'This code needs to run inside of AutoDeleteContext context manager or \
-            you need to set an output table name in {out_table_attr_name} function attribute')
+        raise RuntimeError('This code needs to run inside of AutoDeleteContext context manager or '
+        f'you need to set an output table name in {out_table_attr_name} function attribute')
     return AutoDeleteContext.current()
