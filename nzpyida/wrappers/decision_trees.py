@@ -33,8 +33,7 @@ class DecisionTreeClassifier(PredictiveModeling):
     def fit(self, in_df: IdaDataFrame, id_column: str, target_column: str, in_column: str=None,
         col_def_type: str=None, col_def_role: str=None, col_properties_table: str=None,
         weights: str=None, eval_measure: str=None, min_improve: float=0.02, min_split: int=50,
-        max_depth: int=10, val_table: str=None, val_weights: str=None, qmeasure: str=None,
-        statistics: str=None):
+        max_depth: int=10, statistics: str=None):
         """
         Grows the decision tree and stores its model in the database.
         """
@@ -51,9 +50,6 @@ class DecisionTreeClassifier(PredictiveModeling):
             'minimprove': min_improve,
             'minsplit': min_split,
             'maxdepth': max_depth,
-            'valtable': val_table,
-            'valweights': val_weights,
-            'qmeasure': qmeasure,
             'statistics': statistics
         }
 
