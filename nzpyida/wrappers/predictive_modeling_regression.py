@@ -39,7 +39,7 @@ class PredictiveModelingRegression(PredictiveModeling):
     
     def score_all(self, in_df: IdaDataFrame, id_column: str, target_column: str) -> float:
         """
-        Scores the model using MSE, MAE, RSE and MAE. The model must exist.
+        Scores the model using MSE, MAE, RSE and RAE. The model must exist.
         """
 
         out_table = make_temp_table_name()
@@ -63,11 +63,12 @@ class PredictiveModelingRegression(PredictiveModeling):
             res1 = pred_df.ida_query(f'call NZA..MSE(\'{params}\')')
             res2 = pred_df.ida_query(f'call NZA..MAE(\'{params}\')')
             res3 = pred_df.ida_query(f'call NZA..RSE(\'{params}\')')
-            res4 = pred_df.ida_query(f'call NZA..MAE(\'{params}\')')
+            res4 = pred_df.ida_query(f'call NZA..RAE(\'{params}\')')
             res_dict = {
                 "MSE": res1[0],
                 "MAE": res2[0],
-                "RSE": res3[0]
+                "RSE": res3[0],
+                "RAE": res4[0]
             }
             return res_dict
         finally:
