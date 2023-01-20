@@ -10,11 +10,11 @@
 #-----------------------------------------------------------------------------
 from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
-from nzpyida.wrappers.utils import map_to_props, materialize_df, make_temp_table_name
-from nzpyida.wrappers.predictive_modeling import PredictiveModeling
+
+from nzpyida.wrappers.regression import Regression
 
 
-class LinearRegression(PredictiveModeling):
+class LinearRegression(Regression):
     """
     Linear regression predictive model.
     """
@@ -23,7 +23,7 @@ class LinearRegression(PredictiveModeling):
         super().__init__(idadb, model_name)
         self.fit_proc = 'LINEAR_REGRESSION'
         self.predict_proc = 'PREDICT_LINEAR_REGRESSION'
-        self.score_proc = 'MSE'
+
 
     def fit(self, in_df: IdaDataFrame, id_column: str, target_column: str, in_column: str=None,
         col_def_type: str=None, col_def_role: str=None, col_properties_table: str=None,
@@ -45,57 +45,3 @@ class LinearRegression(PredictiveModeling):
         }
         
         self._fit(in_df=in_df, params=params)
- 
-    def predict(self, in_df: IdaDataFrame, out_table: str=None, id_column: str=None) -> IdaDataFrame:
-        """
-        Makes predictions based on this model. The model must exist.
-        """
-        
-        params = {
-            'id': id_column
-        }
-
-        return self._predict(in_df=in_df, params=params, out_table=out_table)
-
-    def score(self, in_df: IdaDataFrame, id_column: str, target_column: str) -> float:
-        """
-        Scores the model. The model must exist.
-        """
-
-        return self._score(in_df=in_df, id_column=id_column, target_column=target_column)
-
-
-    def score_all(self, in_df: IdaDataFrame, id_column: str, target_column: str) -> float:
-        """
-        Scores the model using MSE, MAE, RSE and MAE. The model must exist.
-        """
-
-        out_table = make_temp_table_name()
-
-        pred_view_needs_delete, true_view_needs_delete = False, False
-        try:
-            pred_df = self.predict(in_df=in_df, out_table=out_table, id_column=id_column)
-
-            pred_view, pred_view_needs_delete = materialize_df(pred_df)
-            true_view, true_view_needs_delete = materialize_df(in_df)
-
-            params = map_to_props({
-                'pred_table': pred_view,
-                'true_table': true_view,
-                'pred_id': id_column,
-                'true_id': id_column,
-                'pred_column': target_column,
-                'true_column': target_column
-            })
-
-            res1 = pred_df.ida_query(f'call NZA..MSE(\'{params}\')')
-            res2 = pred_df.ida_query(f'call NZA..MAE(\'{params}\')')
-            res3 = pred_df.ida_query(f'call NZA..RSE(\'{params}\')')
-            res4 = pred_df.ida_query(f'call NZA..MAE(\'{params}\')')
-            return res1[0], res2[0], res3[0], res4[0]
-        finally:
-            self.idadb.drop_table(out_table)
-            if pred_view_needs_delete:
-                self.idadb.drop_view(pred_view)
-            if true_view_needs_delete:
-                self.idadb.drop_view(true_view)
