@@ -11,10 +11,10 @@
 
 from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
-from nzpyida.wrappers.predictive_modeling_regression import PredictiveModelingRegression
+from nzpyida.wrappers.regression import Regression
 from nzpyida.wrappers.utils import map_to_props, materialize_df, make_temp_table_name
 
-class DecisionTreeRegressor(PredictiveModelingRegression):
+class DecisionTreeRegressor(Regression):
     """
     Decision tree based regressor
     """
@@ -28,7 +28,8 @@ class DecisionTreeRegressor(PredictiveModelingRegression):
 
     def fit(self, in_df: IdaDataFrame, id_column: str, target_column: str, in_column: str=None, 
             col_def_type: str=None, col_def_role: str=None, col_properties_table: str=None, eval_measure: str=None,
-            min_improve: float=0.1, min_split: int=50, max_depth: int=10, statistics: str=None):
+            min_improve: float=0.1, min_split: int=50, max_depth: int=10, 
+            val_table: str=None, qmeasure: str=None, statistics: str=None):
         
         params = {
             'id': id_column,
@@ -41,6 +42,8 @@ class DecisionTreeRegressor(PredictiveModelingRegression):
             'minimprove': min_improve,
             'minsplit': min_split,
             'maxdepth': max_depth,
+            'valtable': val_table,
+            'qmeasure': qmeasure,
             'statistics': statistics
         }
 
@@ -56,3 +59,7 @@ class DecisionTreeRegressor(PredictiveModelingRegression):
             }
 
         return self._predict(in_df=in_df, params=params, out_table=out_table)
+    
+    def __str__(self):
+        params = map_to_props({'model': self.model_name})
+        return self.idadb.ida_query(f'call NZA..PRINT_DECTREE(\'{params}\')')[0]

@@ -14,7 +14,7 @@ from nzpyida.wrappers.utils import map_to_props, materialize_df, make_temp_table
 from nzpyida.wrappers.predictive_modeling import PredictiveModeling
 
 
-class PredictiveModelingRegression(PredictiveModeling):
+class Regression(PredictiveModeling):
     def __init__(self, idadb: IdaDataBase, model_name: str):
         super().__init__(idadb, model_name)
         self.score_proc = 'MSE'

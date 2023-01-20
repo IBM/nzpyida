@@ -11,10 +11,10 @@
 from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
 
-from nzpyida.wrappers.predictive_modeling_regression import PredictiveModelingRegression
+from nzpyida.wrappers.regression import Regression
 
 
-class LinearRegression(PredictiveModelingRegression):
+class LinearRegression(Regression):
     """
     Linear regression predictive model.
     """
