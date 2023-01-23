@@ -25,7 +25,6 @@ class DecisionTreeClassifier(Classification):
         super().__init__(idadb, model_name)
         self.fit_proc = 'GROW_DECTREE'
         self.predict_proc = 'PREDICT_DECTREE'
-        self.score_proc = 'CERROR'
         self.score_inv = True
         self.target_column_in_output = 'CLASS'
         self.id_column_in_output = 'ID'
