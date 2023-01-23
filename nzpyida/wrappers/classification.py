@@ -10,6 +10,7 @@ class Classification(PredictiveModeling):
     def __init__(self, idadb: IdaDataBase, model_name: str):
         super().__init__(idadb, model_name)
         self.score_proc = 'CERROR'
+        self.score_inv = True
 
     def predict(self, in_df: IdaDataFrame, out_table: str=None, id_column: str=None) -> IdaDataFrame:
         """

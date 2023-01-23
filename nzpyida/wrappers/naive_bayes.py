@@ -8,14 +8,12 @@
 #
 # The full license is in the LICENSE file, distributed with this software.
 #----------------------------------------------------------------------------- 
-from typing import Tuple
+
 from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
 from nzpyida.wrappers.classification import Classification
-from nzpyida.wrappers.utils import map_to_props, materialize_df, make_temp_table_name
-from nzpyida.wrappers.utils import get_auto_delete_context
 
-class CategoricalNB(Classification):
+class NaiveBayesClassifier(Classification):
     """
     Naive Bayes classifier
     """
@@ -23,7 +21,6 @@ class CategoricalNB(Classification):
         super().__init__(idadb, model_name)
         self.fit_proc = 'NAIVEBAYES'
         self.predict_proc = 'PREDICT_NAIVEBAYES'
-        self.score_inv = True
         self.target_column_in_output = "CLASS"
         self.id_column_in_output = 'ID'
 
