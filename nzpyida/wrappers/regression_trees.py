@@ -12,7 +12,7 @@
 from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
 from nzpyida.wrappers.regression import Regression
-from nzpyida.wrappers.utils import map_to_props, materialize_df, make_temp_table_name
+from nzpyida.wrappers.utils import map_to_props
 
 class DecisionTreeRegressor(Regression):
     """
@@ -62,4 +62,4 @@ class DecisionTreeRegressor(Regression):
     
     def __str__(self):
         params = map_to_props({'model': self.model_name})
-        return self.idadb.ida_query(f'call NZA..PRINT_DECTREE(\'{params}\')')[0]
+        return self.idadb.ida_query(f'call NZA..PRINT_REGTREE(\'{params}\')')[0]
