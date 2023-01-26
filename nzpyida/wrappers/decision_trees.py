@@ -20,7 +20,7 @@ class DecisionTreeClassifier(Classification):
 
     def __init__(self, idadb: IdaDataBase, model_name: str):
         super().__init__(idadb, model_name)
-        self.fit_proc = 'GROW_DECTREE'
+        self.fit_proc = 'DECTREE'
         self.predict_proc = 'PREDICT_DECTREE'
         self.target_column_in_output = 'CLASS'
         self.id_column_in_output = 'ID'
