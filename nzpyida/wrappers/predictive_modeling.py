@@ -79,7 +79,7 @@ class PredictiveModeling:
 
         return out_df
 
-    def _score(self, in_df: IdaDataFrame, id_column: str, target_column: str) -> float:
+    def _score(self, in_df: IdaDataFrame, predict_params:dict, target_column: str) -> float:
         """
         Scores the model. The model must exist.
         """
@@ -89,14 +89,12 @@ class PredictiveModeling:
         pred_view_needs_delete, true_view_needs_delete = False, False
         try:
 
-            params = {
-                'id': id_column
-            }
-
-            pred_df = self._predict(in_df=in_df, params=params, out_table=out_table)
+            pred_df = self._predict(in_df=in_df, params=predict_params, out_table=out_table)
 
             pred_view, pred_view_needs_delete = materialize_df(pred_df)
             true_view, true_view_needs_delete = materialize_df(in_df)
+
+            id_column = predict_params.get('id')
 
             params = map_to_props({
                 'pred_table': pred_view,

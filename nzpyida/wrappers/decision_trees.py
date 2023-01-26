@@ -22,8 +22,6 @@ class DecisionTreeClassifier(Classification):
         super().__init__(idadb, model_name)
         self.fit_proc = 'DECTREE'
         self.predict_proc = 'PREDICT_DECTREE'
-        self.target_column_in_output = 'CLASS'
-        self.id_column_in_output = 'ID'
 
     def fit(self, in_df: IdaDataFrame, id_column: str, target_column: str, in_column: str=None,
         col_def_type: str=None, col_def_role: str=None, col_properties_table: str=None,
