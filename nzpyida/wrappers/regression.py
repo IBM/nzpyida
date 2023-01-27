@@ -35,7 +35,11 @@ class Regression(PredictiveModeling):
         Scores the model. The model must exist.
         """
 
-        return self._score(in_df=in_df, id_column=id_column, target_column=target_column)
+        params = {
+            'id': id_column
+        }
+
+        return self._score(in_df=in_df, predict_params=params, target_column=target_column)
     
     def score_all(self, in_df: IdaDataFrame, id_column: str, target_column: str) -> float:
         """

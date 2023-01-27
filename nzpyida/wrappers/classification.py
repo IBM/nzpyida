@@ -9,6 +9,8 @@ from typing import Tuple
 class Classification(PredictiveModeling):
     def __init__(self, idadb: IdaDataBase, model_name: str):
         super().__init__(idadb, model_name)
+        self.target_column_in_output = 'CLASS'
+        self.id_column_in_output = 'ID'
         self.score_proc = 'CERROR'
         self.score_inv = True
 
@@ -27,8 +29,11 @@ class Classification(PredictiveModeling):
         """
         Scores the model. The model must exist.
         """
+        params = {
+            'id': id_column
+        }
 
-        return self._score(in_df=in_df, id_column=id_column, target_column=target_column)
+        return self._score(in_df=in_df, predict_params=params, target_column=target_column)
 
     def conf_matrix(self, in_df: IdaDataFrame, id_column: str, target_column: str, 
         out_matrix_table: str=None) -> Tuple[IdaDataFrame, float, float]:

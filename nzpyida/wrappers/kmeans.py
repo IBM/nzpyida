@@ -82,7 +82,11 @@ class KMeans(PredictiveModeling):
         Scores the model. The model must exist.
         """
 
-        return self._score(in_df=in_df, id_column=id_column, target_column=target_column)
+        params = {
+            'id': id_column
+        }
+
+        return self._score(in_df=in_df, predict_params=params, target_column=target_column)
 
     def __str__(self):
         params = map_to_props({'model': self.model_name})
