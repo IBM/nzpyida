@@ -26,19 +26,6 @@ CREATE TABLE test_table_2 (col1 int, col2 int, col3 int);
 insert into test_table_2 (col1, col2, col3) values (12, 23, 34);
 """
 
-@pytest.fixture
-def idadb():
-    nzpy_cfg = {
-        "user":"admin",
-        "password":"password", 
-        "host":'127.0.0.1', 
-        "port":5480, 
-        "database":"telco", 
-        "logLevel":0, 
-        "securityLevel":1
-        }
-
-    return IdaDataBase(nzpy_cfg)
 
 @pytest.fixture
 def create_test_table(idadb: IdaDataBase):
