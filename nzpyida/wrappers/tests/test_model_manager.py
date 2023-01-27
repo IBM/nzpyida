@@ -26,10 +26,10 @@ def mm(idadb: IdaDataBase):
 def create_delete_model(idadb: IdaDataBase):
     DecisionTreeClassifier(idadb, model_name=MOD_NAME).fit(IdaDataFrame(idadb, "training_data2").loc[:10], 
                                                            id_column='imsi', target_column='is_fraud')
-    """yield
+    yield
     ret = idadb.ida_query(f'call NZA..MODEL_EXISTS(\'model={MOD_NAME}\')')
     if not ret.empty and ret[0]:
-        idadb.ida_query(f'call nza..DROP_MODEL(\'model={MOD_NAME}\')')"""
+        idadb.ida_query(f'call nza..DROP_MODEL(\'model={MOD_NAME}\')')
 
 
 def test_list_models(mm: ModelManager):
