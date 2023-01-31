@@ -7,7 +7,7 @@
 # Distributed under the terms of the BSD Simplified License.
 #
 # The full license is in the LICENSE file, distributed with this software.
-#----------------------------------------------------------------------------- 
+#-----------------------------------------------------------------------------
 from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
 from nzpyida.wrappers.utils import map_to_props, materialize_df, make_temp_table_name
@@ -17,10 +17,24 @@ from nzpyida.wrappers.model_manager import ModelManager
 
 class PredictiveModeling:
     """
-    Generic class for predictove modeling algorithms.
+    Generic class for predictive modeling algorithms.
     """
 
     def __init__(self, idadb: IdaDataBase, model_name: str):
+        """
+        Creates the predictive modeling class.
+
+        Parameters:
+        -----------
+
+        idada : IdaDataBase
+            database connector
+
+        model_name : str
+            model name - if it exists in the database, it will be used, otherwise
+            it must be trained using fit() function before prediction or scoring is called.
+        """
+
         self.idadb = idadb
         self.model_name = model_name
         self.fit_proc = ''
@@ -33,8 +47,16 @@ class PredictiveModeling:
     def _fit(self, in_df: IdaDataFrame, params:dict):
         """
         Trains the model.
+
+        Parameters:
+        -----------
+        in_df : IdaDataFrame
+            the input data frame
+
+        params : dict
+            the dictionary of attributes used to build the model
         """
-        
+
         ModelManager(self.idadb).drop_model(self.model_name)
 
         temp_view_name, need_delete = materialize_df(in_df)
@@ -42,7 +64,7 @@ class PredictiveModeling:
         params['model'] = self.model_name
         params['intable'] = temp_view_name
         params_s = map_to_props(params)
-        
+
         try:
             self.idadb.ida_query(f'call NZA..{self.fit_proc}(\'{params_s}\')')
         finally:
@@ -52,8 +74,24 @@ class PredictiveModeling:
     def _predict(self, in_df: IdaDataFrame, params:dict, out_table: str=None) -> IdaDataFrame:
         """
         Makes predictions based on the model. The model must exist.
+
+        Parameters:
+        -----------
+        in_df : IdaDataFrame
+            the input data frame
+
+        params : dict
+            the dictionary of attributes used for making predictions
+
+        out_table : str, optional
+            the output table where the predictions will be stored
+
+        Returns:
+        --------
+        IdaDataFrame
+            the data frame containing row identifiers and predicted target values
         """
-        
+
         temp_view_name, need_delete = materialize_df(in_df)
 
         auto_delete_context = None
@@ -65,7 +103,7 @@ class PredictiveModeling:
         params['intable'] = temp_view_name
         params['outtable'] = out_table
         params_s = map_to_props(params)
-        
+
         try:
             self.idadb.ida_query(f'call NZA..{self.predict_proc}(\'{params_s}\')')
         finally:
@@ -82,6 +120,22 @@ class PredictiveModeling:
     def _score(self, in_df: IdaDataFrame, predict_params:dict, target_column: str) -> float:
         """
         Scores the model. The model must exist.
+
+        Parameters:
+        -----------
+        in_df : IdaDataFrame
+            the input data frame
+
+        predict_params : dict
+            the dictionary of attributes used for making predictions
+
+        target_column : str
+            the input table column representing the class
+
+        Returns:
+        --------
+        float
+            the model score
         """
 
         out_table = make_temp_table_name()

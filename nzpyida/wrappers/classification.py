@@ -1,13 +1,41 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+#-----------------------------------------------------------------------------
+# Copyright (c) 2023, IBM Corp.
+# All rights reserved.
+#
+# Distributed under the terms of the BSD Simplified License.
+#
+# The full license is in the LICENSE file, distributed with this software.
+#-----------------------------------------------------------------------------
+from typing import Tuple
 from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
 from nzpyida.wrappers.utils import map_to_props, materialize_df, make_temp_table_name
 from nzpyida.wrappers.utils import get_auto_delete_context
 from nzpyida.wrappers.predictive_modeling import PredictiveModeling
-from typing import Tuple
 
 
 class Classification(PredictiveModeling):
+    """
+    Base class for classification algorithms.
+    """
+
     def __init__(self, idadb: IdaDataBase, model_name: str):
+        """
+        Creates the classifier class.
+
+        Parameters:
+        -----------
+
+        idada : IdaDataBase
+            database connector
+
+        model_name : str
+            model name - if it exists in the database, it will be used, otherwise
+            it must be trained using fit() function before prediction or scoring is called.
+        """
+
         super().__init__(idadb, model_name)
         self.target_column_in_output = 'CLASS'
         self.id_column_in_output = 'ID'
@@ -17,30 +45,84 @@ class Classification(PredictiveModeling):
     def predict(self, in_df: IdaDataFrame, out_table: str=None, id_column: str=None) -> IdaDataFrame:
         """
         Makes predictions based on this model. The model must exist.
+
+        Parameters:
+        -----------
+        in_df : IdaDataFrame
+            the input data frame for predictions
+
+        out_table : str, optional
+            the output table where the predictions will be stored
+
+        id_column : str, optional
+            the input table column identifying a unique instance id
         """
-        
+
         params = {
             'id': id_column
         }
 
         return self._predict(in_df=in_df, params=params, out_table=out_table)
-    
+
     def score(self, in_df: IdaDataFrame, id_column: str, target_column: str) -> float:
         """
         Scores the model. The model must exist.
+
+        Parameters:
+        -----------
+        in_df : IdaDataFrame
+            the input data frame for scoring
+
+        id_column : str
+            the input table column identifying a unique instance id
+
+        target_column : str
+            the input table column representing the class
+
+        Returns:
+        --------
+        float
+            the model score
         """
+
         params = {
             'id': id_column
         }
 
         return self._score(in_df=in_df, predict_params=params, target_column=target_column)
 
-    def conf_matrix(self, in_df: IdaDataFrame, id_column: str, target_column: str, 
+    def conf_matrix(self, in_df: IdaDataFrame, id_column: str, target_column: str,
         out_matrix_table: str=None) -> Tuple[IdaDataFrame, float, float]:
         """
         Makes a predition for a test data set given by the user and returns a confusion matrix,
         together with other stats (ACC and WACC).
+
+        Parameters:
+        -----------
+        in_df : IdaDataFrame
+            the input data frame for scoring
+
+        id_column : str
+            the input table column identifying a unique instance id
+
+        target_column : str
+            the input table column representing the class
+
+        out_matrix_table : str, optional
+            the output table where the confidence matrix will be stored
+
+        Returns:
+        --------
+        IdaDataFrame
+            the confidence matrix data frame
+
+        float
+            classification accuracy (ACC)
+
+        float
+            weighted classification accuracy (WACC)
         """
+
         out_table = make_temp_table_name()
 
         pred_view_needs_delete, true_view_needs_delete = False, False

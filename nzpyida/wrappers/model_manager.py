@@ -17,11 +17,25 @@ class ModelManager:
     """
 
     def __init__(self, idadb: IdaDataBase):
+        """
+        Creates the context.
+
+        Parameters:
+        -----------
+        idadb : IdaDataBase
+            the database connector
+        """
+
         self.idadb = idadb
 
     def list_models(self) -> IdaDataFrame:
         """
         Retrieve existing models (in the current database) and returns result as a data frame.
+
+        Returns:
+        --------
+        IdaDataFrame
+            the data frame with the list of models
         """
 
         return IdaDataFrame(idadb=self.idadb, tablename='inza.V_NZA_MODELS')
@@ -29,6 +43,16 @@ class ModelManager:
     def model_exists(self, name: str) -> bool:
         """
         Checks if a model with the given name exists.
+
+        Parameters:
+        -----------
+        name : str
+            the name of model
+
+        Returns:
+        --------
+        bool
+            True if the model with the given name exists, otherwise False
         """
 
         ret = self.idadb.ida_query(f'call NZA..MODEL_EXISTS(\'model={name}\')')
@@ -37,6 +61,11 @@ class ModelManager:
     def drop_model(self, name: str):
         """
         Drops the model with the given name. Does noting if there is no such madel in the database.
+
+        Parameters:
+        -----------
+        name : str
+            the name of model
         """
 
         if self.model_exists(name):

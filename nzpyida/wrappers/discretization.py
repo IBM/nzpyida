@@ -21,6 +21,15 @@ class Discretization:
     """
 
     def __init__(self, idadb: IdaDataBase):
+        """
+        Creates the discretization class.
+
+        Parameters:
+        -----------
+        idadb : IdaDataBase
+            database connector
+        """
+
         self.idadb = idadb
         self.params = {}
         self.proc = ""
@@ -28,6 +37,19 @@ class Discretization:
     def fit(self, in_df: IdaDataFrame, out_table: str=None) -> IdaDataFrame:
         """
         Create bins limits based on the given data frame.
+
+        Parameters:
+        -----------
+        in_df : IdaDataFrame
+            the input data frame
+
+        out_table : str, optional
+            the output table with dicretization bins
+
+        Returns:
+        --------
+        IdaDataFrame
+            the data frame with discretization bins
         """
 
         temp_view_name, need_delete = materialize_df(in_df)
@@ -59,10 +81,26 @@ class Discretization:
 
         return out_df
 
-    def apply(self, in_df: IdaDataFrame, in_bin_df: IdaDataFrame, keep_org_values: bool=False, 
+    def apply(self, in_df: IdaDataFrame, in_bin_df: IdaDataFrame, keep_org_values: bool=False,
         out_table: str=None):
         """
         Apply discretization limits to the given data frame.
+
+        Parameters:
+        -----------
+        in_df : IdaDataFrame
+            the input data frame
+
+        in_bin_df : IdaDataFrame
+            the data frame with discretization bins
+
+        keep_org_values : bool, optional
+            a flag indicating whether the discretized columns should replace the original
+            columns (False) or should be added with another name (True).
+            The name of the columns is then prefixed with 'disc_'
+
+        out_table : str, optional
+            the output table or view to store the discretized data into
         """
 
         temp_view_name, need_delete = materialize_df(in_df)
@@ -103,6 +141,18 @@ class EWDisc(Discretization):
     """
 
     def __init__(self, idadb: IdaDataBase, bins: int=10):
+        """
+        Creates the discretization class.
+
+        Parameters:
+        -----------
+        idadb : IdaDataBase
+            database connector
+
+        bins : int, optional
+            the default number of discretization bins to be calculated
+        """
+
         super().__init__(idadb)
         self.proc = 'EWDISC'
         self.params = {'bins': bins}
@@ -114,6 +164,24 @@ class EFDisc(Discretization):
     """
 
     def __init__(self, idadb: IdaDataBase, bins: int=10, bin_precision: float=0.1):
+        """
+        Creates the discretization class.
+
+        Parameters:
+        -----------
+        idadb : IdaDataBase
+            database connector
+
+        bins : int, optional
+            the default number of discretization bins to be calculated
+
+        bin_precision : float, optional
+            the precision allowed for considering an even distribution of data records in
+            the calculated discretization bins. The number of data records in each bin
+            must be within [iw-<binprec>*iw,iw+<binprec>*iw] where iw is the size of the
+            input table divided by the number of requested discretization bin limits.
+        """
+
         super().__init__(idadb)
         self.proc = 'EFDISC'
         self.params = {'bins': bins, 'binprec': bin_precision}
@@ -125,6 +193,18 @@ class EMDisc(Discretization):
     """
 
     def __init__(self, idadb: IdaDataBase, target: str):
+        """
+        Creates the discretization class.
+
+        Parameters:
+        -----------
+        idadb : IdaDataBase
+            database connector
+
+        target : str
+            the input table column containing a class label
+        """
+
         super().__init__(idadb)
         self.proc = 'EMDISC'
         self.params = {'target': target}
