@@ -7,7 +7,7 @@
 # Distributed under the terms of the BSD Simplified License.
 #
 # The full license is in the LICENSE file, distributed with this software.
-#----------------------------------------------------------------------------- 
+#-----------------------------------------------------------------------------
 from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
 from nzpyida.wrappers.classification import Classification
@@ -22,9 +22,15 @@ class KNeighborsClassifier(Classification):
         """
         Creates the classifier class.
 
-        :param idada: database connector
-        :param model_name: model name - if it exists in the database, it will be used, otherwise
-        it must be trained using fit() function before prediction or scoring is called.
+        Parameters:
+        -----------
+
+        idada : IdaDataBase
+            database connector
+
+        model_name : str
+            model name - if it exists in the database, it will be used, otherwise
+            it must be trained using fit() function before prediction or scoring is called.
         """
         super().__init__(idadb, model_name)
         self.fit_proc = 'KNN'
@@ -35,18 +41,36 @@ class KNeighborsClassifier(Classification):
         """
         Builds a K-Nearest Neighbors Classification or Regression model.
         
-        :param in_df: the input data frame
-        :param id_column: the input table column identifying a unique instance id
-        :param target_column: the input table column representing the class
-        :param in_column: the input table columns with special properties, separated by a semi-colon (;).
+        Parameters:
+        -----------
+
+        in_df : IdaDataFrame
+            the input data frame
+
+        id_column : str
+            the input table column identifying a unique instance id
+
+        target_column : str
+            the input table column representing the class
+
+        in_column : str, optional
+            the input table columns with special properties, separated by a semi-colon (;).
             Each column is followed by one or several of the following properties:
             its type: ':nom' (for nominal), ':cont' (for continuous).
                 Per default, all numerical types are continuous, other types are nominal.
             its role: ':id', ':target', ':input', ':ignore'.
-        :param col_def_type: default type of the input table columns. Allowed values are 'nom' and 'cont'.
+
+        col_def_type : str, optional
+            default type of the input table columns. Allowed values are 'nom' and 'cont'.
             If the parameter is undefined, all numeric columns are considered continuous, other columns nominal.
-        :param col_def_role: default role of the input table columns. Allowed values are 'input' and 'ignore'. If the parameter is undefined, all columns are considered 'input'
-        :param col_properties_table: the input table where column properties for the input table columns are stored. If the parameter is undefined, the input table column properties will be detected automatically.
+
+        col_def_role : str, optional
+            default role of the input table columns. Allowed values are 'input' and 'ignore'.
+            If the parameter is undefined, all columns are considered 'input'
+
+        col_properties_table : str, optional
+            the input table where column properties for the input table columns are stored.
+            If the parameter is undefined, the input table column properties will be detected automatically.
         """
         
         params = {
@@ -65,22 +89,47 @@ class KNeighborsClassifier(Classification):
         """
         Applies a K-Nearest Neighbors model to generate classification or regression predictions for a data frame.
         
-        :param in_df: the input data frame
-        :param out_table: the output table where the predictions will be stored
-        :param id_column: the input table column identifying a unique instance id
-        :param target_column: the input table column representing the class
-        :param distance: the distance function. Allowed values are: euclidean, manhatthan, canberra, maximum
-        :param k: number of nearest neighbors to consider
-        :param stand: flag indicating whether the measurements in the input table are standardized before calculating the distance
-        :param fast: flag indicating that the algorithm used coresets based method
-        :param weights: the input table containing optional class weights for the input table <target> column.
-            The <weights> table is used only when the <target> column is not numeric. If the parameter is undefined, we assume that the weights are uniformly equal to 1.
+        Parameters:
+        -----------
+
+        in_df : IdaDataFrame
+            the input data frame
+
+        out_table : str, optional
+            the output table where the predictions will be stored
+
+        id_column : str, optional
+            the input table column identifying a unique instance id
+
+        target_column : str, optional
+            the input table column representing the class
+
+        distance : str, optional
+            the distance function. Allowed values are: euclidean, manhatthan, canberra, maximum
+
+        k : int, optional
+            number of nearest neighbors to consider
+
+        stand : bool, optional
+            flag indicating whether the measurements in the input table are standardized before 
+            calculating the distance
+
+        fast : bool, optional
+            flag indicating that the algorithm used coresets based method
+
+        weights : str, optional
+            the input table containing optional class weights for the input table <target> column.
+            The <weights> table is used only when the <target> column is not numeric.
+            If the parameter is undefined, we assume that the weights are uniformly equal to 1.
             The <weights> table contains following columns:
                 weight: a numeric column containing the class weight,
                 class: a column to be joined with the <target> column of <intable>, defining class weights.
             For classes not occurring in this table, weights of 1 are assumed.
 
-        :return: a data frame with id and predicted class
+        Returns:
+        --------
+        IdaDataFrame
+            a data frame with id and predicted class
 
         """
         
@@ -101,21 +150,44 @@ class KNeighborsClassifier(Classification):
         """
         Scores the model and returns classification error ratio.
 
-        :param in_df: the input data frame used to test the model
-        :param id_column: the input table column identifying a unique instance id
-        :param target_column: the input table column representing the class in the input data frame
-        :param distance: the distance function. Allowed values are: euclidean, manhatthan, canberra, maximum
-        :param k: number of nearest neighbors to consider
-        :param stand: flag indicating whether the measurements in the input table are standardized before calculating the distance
-        :param fast: flag indicating that the algorithm used coresets based method
-        :param weights: the input table containing optional class weights for the input table <target> column.
-            The <weights> table is used only when the <target> column is not numeric. If the parameter is undefined, we assume that the weights are uniformly equal to 1.
+        Parameters:
+        -----------
+
+        in_df : IdaDataFrame
+            the input data frame used to test the model
+
+        id_column : str
+            the input table column identifying a unique instance id
+
+        target_column : str
+            the input table column representing the class in the input data frame
+
+        distance : str, optional
+            the distance function. Allowed values are: euclidean, manhatthan, canberra, maximum
+
+        k : int, optional
+            number of nearest neighbors to consider
+
+        stand : bool, optional
+            flag indicating whether the measurements in the input table are standardized before
+            calculating the distance
+
+        fast : bool, optional
+            flag indicating that the algorithm used coresets based method
+
+        weights : str, optional
+            the input table containing optional class weights for the input table <target> column.
+            The <weights> table is used only when the <target> column is not numeric.
+            If the parameter is undefined, we assume that the weights are uniformly equal to 1.
             The <weights> table contains following columns:
                 weight: a numeric column containing the class weight,
                 class: a column to be joined with the <target> column of <intable>, defining class weights.
             For classes not occurring in this table, weights of 1 are assumed.
 
-        :return: model classification error ratio
+        Returns:
+        --------
+        float
+            model classification error ratio
         """
 
         params = {
