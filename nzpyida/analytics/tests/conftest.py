@@ -16,7 +16,7 @@ def idadb():
     nzpy_cfg = {
         "user":"admin",
         "password":"password", 
-        "host":'127.0.0.1', 
+        "host":'9.30.57.160', 
         "port":5480, 
         "database":"telco", 
         "logLevel":0, 

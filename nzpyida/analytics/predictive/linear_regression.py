@@ -11,7 +11,7 @@
 from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
 
-from nzpyida.wrappers.regression import Regression
+from nzpyida.analytics.predictive.regression import Regression
 
 
 class LinearRegression(Regression):

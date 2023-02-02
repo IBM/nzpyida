@@ -8,19 +8,19 @@
 #
 # The full license is in the LICENSE file, distributed with this software.
 #-----------------------------------------------------------------------------
-
 from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
-from nzpyida.wrappers.regression import Regression
-from nzpyida.wrappers.utils import map_to_props
+from nzpyida.analytics.predictive.classification import Classification
 
-class DecisionTreeRegressor(Regression):
+
+class DecisionTreeClassifier(Classification):
     """
-    Decision tree based regressor
+    Decision tree based classifier.
     """
+
     def __init__(self, idadb: IdaDataBase, model_name: str):
         """
-        Creates the regressor class.
+        Creates the classifier class.
 
         Parameters:
         -----------
@@ -34,22 +34,18 @@ class DecisionTreeRegressor(Regression):
         """
 
         super().__init__(idadb, model_name)
-        self.fit_proc = 'REGTREE'
-        self.predict_proc = 'PREDICT_REGTREE'
-        self.target_column_in_output = "CLASS"
-        self.id_column_in_output = 'ID'
+        self.fit_proc = 'DECTREE'
+        self.predict_proc = 'PREDICT_DECTREE'
 
-
-    def fit(self, in_df: IdaDataFrame, id_column: str, target_column: str, in_column: str=None, 
-            col_def_type: str=None, col_def_role: str=None, col_properties_table: str=None, 
-            eval_measure: str=None, min_improve: float=0.1, min_split: int=50, max_depth: int=10, 
-            val_table: str=None, qmeasure: str=None, statistics: str=None):
+    def fit(self, in_df: IdaDataFrame, id_column: str, target_column: str, in_column: str=None,
+        col_def_type: str=None, col_def_role: str=None, col_properties_table: str=None,
+        weights: str=None, eval_measure: str=None, min_improve: float=0.02, min_split: int=50,
+        max_depth: int=10, val_table: str=None, val_weights: str=None, qmeasure: str=None,
+        statistics: str=None):
         """
-        Creates a regression tree model based on provided data and store it in a database.
+        Grows the decision tree and stores its model in the database.
 
         Parameters:
-        -----------
-
         in_df : IdaDataFrame
             the input data frame
 
@@ -57,22 +53,17 @@ class DecisionTreeRegressor(Regression):
             the input table column identifying a unique instance id
 
         target_column : str, optional
-            the input table column representing the prediction target, definition of multitargets
-            can be processed by 'incolumn' parameter and column properties.
-
-        nominal_colums : str, optional
-            the input table nominal columns, if any, separated by a semi-colon (;).
-            Parameter 'nominalCols' is deprecated please use 'incolumn' intead.
+            the input table column representing the class
 
         in_column : str, optional
             the input table columns with special properties, separated by a semi-colon (;).
             Each column is followed by one or several of the following properties:
                 its type: ':nom' (for nominal), ':cont' (for continuous).
-                Per default, all numerical types are con-tinuous, other types are nominal.
+                    Per default, all numerical types are continuous, other types are nominal.
                 its role: ':id', ':target', ':input', ':ignore'.
             (Remark: ':objweight' is unsupported, i.e. ':objweight' same as ':ignore').
-            (Remark: ':colweight(<wgt>)' is unsupported, i.e. ':colweight(<wgt>)' same
-            as ':colweight(1)' same as ':input').
+            (Remark: ':colweight(<wgt>)' is unsupported, i.e. ':colweight(<wgt>)' same as ':col-weight(1)'
+            same as ':input').
             If the parameter is undefined, all columns of the input table have default properties.
 
         col_def_type : str, optional
@@ -87,15 +78,24 @@ class DecisionTreeRegressor(Regression):
         col_properties_table : str, optional
             the input table where column properties for the input table columns are stored.
             The format of this table is the output format of stored procedure nza..COLUMN_PROPERTIES().
-            If the parameter is undefined, the input table column properties will be
-            detected automatically.
-            (Remark: colPropertiesTable with "COLROLE" column with value 'objweight' is
-            unsupported, i.e. same as 'ignore')
-            (Remark: colPropertiesTable with "COLWEIGHT" column with value '<wgt>' is unsup-ported,
+            If the parameter is undefined, the input table column properties will be detected automatically.
+            (Remark: colPropertiesTable with "COLROLE" column with value 'objweight' is unsupported,
+            i.e. same as 'ignore')
+            (Remark: colPropertiesTable with "COLWEIGHT" column with value '<wgt>' is unsupported,
             i.e. same as '1')
 
+        weights : str, optional
+            the input table containing optional instance or class weights for the input table columns.
+            If the parameter is undefined, we assume that the weights are uniformly equal to 1.
+            The <weights> table contains following columns:
+                weight: a numeric column containing the instance or class weight,
+                id: a column to be joined with the <id> column of <intable>, defining instance weights,
+                class: a column to be joined with the <target> column of <intable>, defining class weights.
+            The id or class column can be missing, at least one of them must be present.
+            For instances or classes not occurring in this table, weights of 1 are assumed.
+
         eval_measure : str, optional
-            the split evaluation measure. Allowed values are: variance.
+            the class impurity measure used for split evaluation. Allowed values are 'entropy' and 'gini'
 
         min_improve : float, optional
             the minimum improvement of the split evaluation measure required
@@ -110,26 +110,28 @@ class DecisionTreeRegressor(Regression):
             the input table containing the validation dataset.
             If this parameter is undefined, no pruning will be performed.
 
+        val_weights : str, optional
+            the input table containing optional instance or class weights for the validation dataset.
+            It is similar to the <weights> table.
+
         qmeasure : str, optional
-            the quality measure for pruning the tree. Allowed values are: mse, r2.
+            the quality measure for pruning.
+            Allowed values are Acc or wAcc.
 
         statistics : str, optional
             flags indicating which statistics to collect.
             Allowed values are: none, columns, values:n, all.
             If statistics=none, no statistics are collected.
-            If statistics=columns, statistics on the input table columns like mean value
-            are collected.
-            If statistics=values:n with n a positive number, statistics about the columns
-            and the column val-ues are collected. Up to <n> column value statistics
-            are collected:
-            If a nominal column contains more than <n> values, only the <n> most frequent
-            column stat-istics are kept.
-            If a numeric column contains more than <n> values, the values will be discretized
-            and the stat-istics will be collected on the discretized values.
+            If statistics=columns, statistics on the input table columns like mean value are collected.
+            If statistics=values:n with n a positive number, statistics about the columns and the column
+            values are collected. Up to <n> column value statistics are collected:
+                If a nominal column contains more than <n> values, only the <n> most frequent column
+                statistics are kept.
+                If a numeric column contains more than <n> values, the values will be discretized and
+                the statistics will be collected on the discretized values.
             Indicating statistics=all is equal to statistics=values:100.
-
         """
-
+        
         params = {
             'id': id_column,
             'target': target_column,
@@ -137,11 +139,13 @@ class DecisionTreeRegressor(Regression):
             'coldeftype': col_def_type,
             'coldefrole': col_def_role,
             'colpropertiestable': col_properties_table,
+            'weights': weights,
             'eval': eval_measure,
             'minimprove': min_improve,
             'minsplit': min_split,
             'maxdepth': max_depth,
             'valtable': val_table,
+            'valweights': val_weights,
             'qmeasure': qmeasure,
             'statistics': statistics
         }
@@ -149,31 +153,31 @@ class DecisionTreeRegressor(Regression):
         self._fit(in_df=in_df, params=params)
 
     def predict(self, in_df: IdaDataFrame, out_table: str=None, id_column: str=None, target_column: str=None,
-                variance: bool=False):
+        prob: bool=False, out_table_prob: str=None) -> IdaDataFrame:
         """
         Makes predictions based on this model. The model must exist.
 
         Parameters:
         -----------
         in_df : IdaDataFrame
-            the input data frame to predict
+            the input data frame
 
         out_table : str, optional
             the output table where the predictions will be stored
 
         id_column : str, optional
             the input table column identifying a unique instance id
-            Default: <id> column used to build the model
 
         target_column : str, optional
-            the input table column representing the prediction target.
-            The specified target column will not be used for prediction and is permitted
-            to contain NULL values.
-            Default: <target> column used to build the model.
+            the input table column representing the class
 
-        variance : bool, optional
-            a flag indicating whether the variance of the predictions should be included
-            into the output table
+        prob : bool, optional
+            the flag indicating whether the probability of the predicted class should be included i
+            nto the output table or not
+
+        out_table_prob : str, optional
+            if specified, the probability output table where class probability predictions
+            will be stored
 
         Returns:
         --------
@@ -184,11 +188,8 @@ class DecisionTreeRegressor(Regression):
         params = {
             'id': id_column,
             'target': target_column,
-            'var': variance
-            }
+            'prob': prob,
+            'outtableprob': out_table_prob
+        }
 
         return self._predict(in_df=in_df, params=params, out_table=out_table)
-
-    def __str__(self):
-        params = map_to_props({'model': self.model_name})
-        return self.idadb.ida_query(f'call NZA..PRINT_REGTREE(\'{params}\')')[0]

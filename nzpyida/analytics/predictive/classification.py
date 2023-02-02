@@ -11,9 +11,9 @@
 from typing import Tuple
 from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
-from nzpyida.wrappers.utils import map_to_props, materialize_df, make_temp_table_name
-from nzpyida.wrappers.utils import get_auto_delete_context
-from nzpyida.wrappers.predictive_modeling import PredictiveModeling
+from nzpyida.analytics.utils import map_to_props, materialize_df, make_temp_table_name
+from nzpyida.analytics.utils import get_auto_delete_context
+from nzpyida.analytics.predictive.predictive_modeling import PredictiveModeling
 
 
 class Classification(PredictiveModeling):

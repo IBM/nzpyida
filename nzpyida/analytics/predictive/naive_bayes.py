@@ -11,7 +11,7 @@
 
 from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
-from nzpyida.wrappers.classification import Classification
+from nzpyida.analytics.predictive.classification import Classification
 
 class NaiveBayesClassifier(Classification):
     """
