@@ -38,7 +38,7 @@ class ModelManager:
             the data frame with the list of models
         """
 
-        return IdaDataFrame(idadb=self.idadb, tablename='inza.V_NZA_MODELS')
+        return IdaDataFrame(idadb=self.idadb, tablename='INZA.V_NZA_MODELS')
 
     def model_exists(self, name: str) -> bool:
         """
@@ -69,4 +69,4 @@ class ModelManager:
         """
 
         if self.model_exists(name):
-            self.idadb.ida_query(f'call nza..DROP_MODEL(\'model={name}\')')
+            self.idadb.ida_query(f'call NZA..DROP_MODEL(\'model={name}\')')

@@ -24,12 +24,12 @@ def mm(idadb: IdaDataBase):
 
 @pytest.fixture(scope='module')
 def create_delete_model(idadb: IdaDataBase):
-    DecisionTreeClassifier(idadb, model_name=MOD_NAME).fit(IdaDataFrame(idadb, "training_data2").loc[:10], 
-                                                           id_column='imsi', target_column='is_fraud')
+    df = IdaDataFrame(idadb, 'TRAINING_DATA2', indexer='IMSI')
+    DecisionTreeClassifier(idadb, model_name=MOD_NAME).fit(df.loc[:10], id_column='IMSI', target_column='IS_FRAUD')
     yield
     ret = idadb.ida_query(f'call NZA..MODEL_EXISTS(\'model={MOD_NAME}\')')
     if not ret.empty and ret[0]:
-        idadb.ida_query(f'call nza..DROP_MODEL(\'model={MOD_NAME}\')')
+        idadb.ida_query(f'call NZA..DROP_MODEL(\'model={MOD_NAME}\')')
 
 
 def test_list_models(mm: ModelManager):
