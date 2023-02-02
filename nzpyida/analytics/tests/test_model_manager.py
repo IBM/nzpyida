@@ -11,8 +11,8 @@
 
 from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
-from nzpyida.wrappers.model_manager import ModelManager
-from nzpyida.wrappers.decision_trees import DecisionTreeClassifier
+from nzpyida.analytics.model_manager import ModelManager
+from nzpyida.analytics.predictive.decision_trees import DecisionTreeClassifier
 
 import pytest
 

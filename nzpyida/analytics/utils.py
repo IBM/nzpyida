@@ -12,7 +12,7 @@ from typing import Dict, Tuple, Any
 from time import time
 import random
 from nzpyida.frame import IdaDataFrame
-from nzpyida.wrappers.auto_delete_context import AutoDeleteContext
+from nzpyida.analytics.auto_delete_context import AutoDeleteContext
 
 
 def map_to_props(data: Dict[str, Any]) -> str:

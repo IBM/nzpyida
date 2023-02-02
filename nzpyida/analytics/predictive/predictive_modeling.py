@@ -10,9 +10,9 @@
 #-----------------------------------------------------------------------------
 from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
-from nzpyida.wrappers.utils import map_to_props, materialize_df, make_temp_table_name
-from nzpyida.wrappers.utils import get_auto_delete_context
-from nzpyida.wrappers.model_manager import ModelManager
+from nzpyida.analytics.utils import map_to_props, materialize_df, make_temp_table_name
+from nzpyida.analytics.utils import get_auto_delete_context
+from nzpyida.analytics.model_manager import ModelManager
 
 
 class PredictiveModeling:

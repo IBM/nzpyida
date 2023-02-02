@@ -10,7 +10,7 @@
 #-----------------------------------------------------------------------------
 
 from nzpyida import IdaDataBase, IdaDataFrame
-from nzpyida.wrappers.auto_delete_context import AutoDeleteContext
+from nzpyida.analytics.auto_delete_context import AutoDeleteContext
 import pytest
 from nzpy.core import ProgrammingError
 import importlib
