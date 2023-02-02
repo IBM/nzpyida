@@ -46,4 +46,5 @@ def test_model_exist(mm: ModelManager, create_delete_model):
 def test_drop_model(mm: ModelManager, create_delete_model):
     mm.drop_model(MOD_NAME)
     models_length = len(mm.list_models())
-    assert MOD_NAME not in mm.list_models().head(models_length)[["MODELNAME"]].values
+    assert models_length == 0 or MOD_NAME not in mm.list_models().head(models_length)[["MODELNAME"]].values
+    
