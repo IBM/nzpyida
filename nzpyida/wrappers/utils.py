@@ -60,7 +60,8 @@ def materialize_df(df: IdaDataFrame) -> Tuple[str, bool]:
 
     if df.internal_state.views:
         temp_view_name = make_temp_table_name()
-        df.internal_state._create_view(viewname=temp_view_name)
+        query = f'CREATE VIEW "{temp_view_name}" AS ({df.internal_state.get_state()})'
+        df.ida_query(query, autocommit = True)
         return temp_view_name, True
     else:
         return df.tablename, False
