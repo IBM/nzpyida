@@ -33,7 +33,10 @@ def map_to_props(data: Dict[str, Any]) -> str:
 
     ret = []
     for k, v in data.items():
-        if v is not None:
+        if isinstance(v, list):
+            if len(v):
+                ret.append(f"{k}={';'.join(map(str, v))}")
+        elif v is not None:
             ret.append(f"{k}={v}")
     return ",".join(ret)
 
@@ -110,3 +113,35 @@ def get_auto_delete_context(out_table_attr_name: str) -> AutoDeleteContext:
         raise RuntimeError('This code needs to run inside of AutoDeleteContext context manager or '
         f'you need to set an output table name in {out_table_attr_name} function attribute')
     return AutoDeleteContext.current()
+
+def call_proc_df_in_out(proc: str, in_df: IdaDataFrame, params: dict, out_table: str=None) -> IdaDataFrame:
+    """
+    Generic function for data processing.
+    """
+
+    temp_view_name, need_delete = materialize_df(in_df)
+
+    auto_delete_context = None
+    if not out_table:
+        auto_delete_context = get_auto_delete_context('out_table')
+        out_table = make_temp_table_name()
+
+    params['intable'] = temp_view_name
+    params['outtable'] = out_table
+
+    params_s = map_to_props(params)
+
+    try:
+        in_df.ida_query(f'call NZA..{proc}(\'{params_s}\')')
+    finally:
+        if need_delete:
+            in_df._idadb.drop_view(temp_view_name)
+
+    if not in_df._idadb.exists_table_or_view(out_table):
+        # stored procedure call was successful by did not produce a table
+        return None
+
+    if auto_delete_context:
+        auto_delete_context.add_table_to_delete(out_table)
+
+    return IdaDataFrame(in_df._idadb, out_table)
