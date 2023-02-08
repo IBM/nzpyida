@@ -610,7 +610,7 @@ class IdaDataBase(object):
         ####
 
         # Try to retrieve the cache
-        if show_all:
+        if show_all and not self._is_netezza_system():
             cache = self._retrieve_cache("cache_show_tables")
             if cache is not None:
                 return cache
