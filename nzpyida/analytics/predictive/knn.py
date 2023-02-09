@@ -201,3 +201,46 @@ class KNeighborsClassifier(Classification):
         }
 
         return self._score(in_df=in_df, predict_params=params, target_column=target_column)
+
+    def conf_matrix(self, in_df: IdaDataFrame, id_column: str, target_column: str, out_matrix_table: str = None,
+                    distance: str='euclidean', k: int=3, stand: bool=True, fast: bool=True, weights: str=None):
+        """
+        Makes a predition for a test data set given by the user and returns a confusion matrix,
+        together with other stats (ACC and WACC).
+
+        Parameters:
+        -----------
+        in_df : IdaDataFrame
+            the input data frame for scoring
+
+        id_column : str
+            the input table column identifying a unique instance id
+
+        target_column : str
+            the input table column representing the class
+
+        out_matrix_table : str, optional
+            the output table where the confidence matrix will be stored
+
+        Returns:
+        --------
+        IdaDataFrame
+            the confidence matrix data frame
+
+        float
+            classification accuracy (ACC)
+
+        float
+            weighted classification accuracy (WACC)
+        """
+        params = {
+            'id': id_column,
+            'target': target_column,
+            'distance': distance,
+            'k': k,
+            'stand': stand,
+            'fast': fast,
+            'weights': weights
+        }
+
+        return self._conf_matrix(in_df=in_df, params=params, out_matrix_table=out_matrix_table)

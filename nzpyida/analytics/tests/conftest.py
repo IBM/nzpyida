@@ -24,3 +24,8 @@ def idadb():
         }
 
     return IdaDataBase(nzpy_cfg)
+
+MOD_NAME = "TEST_MOD1"
+
+OUT_TABLE_PRED = "OUT_TABLE_PRED"
+OUT_TABLE_CM = "OUT_TABLE_CM"
