@@ -118,6 +118,8 @@ def call_proc_df_in_out(proc: str, in_df: IdaDataFrame, params: dict, out_table:
     """
     Generic function for data processing.
     """
+    if not isinstance(in_df, IdaDataFrame):
+        raise TypeError("Argument in_df should be an IdaDataFrame")
 
     temp_view_name, need_delete = materialize_df(in_df)
 

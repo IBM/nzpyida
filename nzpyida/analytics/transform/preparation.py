@@ -12,7 +12,7 @@ from nzpyida.frame import IdaDataFrame
 from nzpyida.analytics.utils import call_proc_df_in_out
 
 
-def std_norm(in_df: IdaDataFrame, id_column: str, in_column: str, by: str=None,
+def std_norm(in_df: IdaDataFrame, id_column: str, in_column: str, by_column: str=None,
     out_table: str=None) -> IdaDataFrame:
     """
     Normalize and stardardize columns of the input data frame and returns that in a new data frame.
@@ -33,7 +33,7 @@ def std_norm(in_df: IdaDataFrame, id_column: str, in_column: str, by: str=None,
         by :C to make the columns be a row unit vector or by :V to divide the column
         values by the length of the longest row vector.
 
-    by : str, optional
+    by_column : str, optional
         the input table column which splits the data into groups for which the operation
         is to be performed
 
@@ -49,7 +49,7 @@ def std_norm(in_df: IdaDataFrame, id_column: str, in_column: str, by: str=None,
     params = {
         'id': id_column,
         'incolumn': in_column,
-        'by': by
+        'by': by_column
     }
     return call_proc_df_in_out(proc='STD_NORM', in_df=in_df, params=params, out_table=out_table)
 
@@ -97,8 +97,8 @@ def impute_data(in_df: IdaDataFrame, in_column: str=None, method: str=None,
     return call_proc_df_in_out(proc='IMPUTE_DATA', in_df=in_df, params=params, out_table=out_table)
 
 
-def random_sample(in_df: IdaDataFrame, size: int, fraction: float=None,
-    by: str=None, out_signature: str=None, rand_seed: int=None, out_table: str=None) -> IdaDataFrame:
+def random_sample(in_df: IdaDataFrame, size: int, fraction: float=None, by_column: str=None, 
+    out_signature: str=None, rand_seed: int=None, out_table: str=None) -> IdaDataFrame:
     """
     Creates a random sample of a data frame a fixed size or a fixed probability and
     returns the result in a new data frame.
@@ -118,7 +118,7 @@ def random_sample(in_df: IdaDataFrame, size: int, fraction: float=None,
         and <size> must not be specified. Otherwise, one of both parameters <num> or <size>
         must be specified.
 
-    by : str
+    by_column : str
         the column used to stratify the input table. If indicated, stratified sampling is
         done: it ensures that each value of the column is represented in the sample in
         about the same percentage as in the original input table.
@@ -142,7 +142,7 @@ def random_sample(in_df: IdaDataFrame, size: int, fraction: float=None,
     params = {
         'size': size,
         'fraction': fraction,
-        'by': by,
+        'by': by_column,
         'outsignature': out_signature,
         'randseed': rand_seed
     }

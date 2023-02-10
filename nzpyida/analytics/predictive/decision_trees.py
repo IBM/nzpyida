@@ -8,6 +8,7 @@
 #
 # The full license is in the LICENSE file, distributed with this software.
 #-----------------------------------------------------------------------------
+from typing import List
 from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
 from nzpyida.analytics.predictive.classification import Classification
@@ -37,11 +38,11 @@ class DecisionTreeClassifier(Classification):
         self.fit_proc = 'DECTREE'
         self.predict_proc = 'PREDICT_DECTREE'
 
-    def fit(self, in_df: IdaDataFrame, id_column: str, target_column: str, in_column: str=None,
-        col_def_type: str=None, col_def_role: str=None, col_properties_table: str=None,
-        weights: str=None, eval_measure: str=None, min_improve: float=0.02, min_split: int=50,
-        max_depth: int=10, val_table: str=None, val_weights: str=None, qmeasure: str=None,
-        statistics: str=None):
+    def fit(self, in_df: IdaDataFrame, id_column: str, target_column: str,
+        in_columns: List[str]=None, col_def_type: str=None, col_def_role: str=None,
+        col_properties_table: str=None, weights: str=None, eval_measure: str=None,
+        min_improve: float=0.02, min_split: int=50, max_depth: int=10, val_table: str=None,
+        val_weights: str=None, qmeasure: str=None, statistics: str=None):
         """
         Grows the decision tree and stores its model in the database.
 
@@ -55,15 +56,15 @@ class DecisionTreeClassifier(Classification):
         target_column : str, optional
             the input table column representing the class
 
-        in_column : str, optional
-            the input table columns with special properties, separated by a semi-colon (;).
+        in_columns : str, optional
+            the list of input table columns with special properties.
             Each column is followed by one or several of the following properties:
                 its type: ':nom' (for nominal), ':cont' (for continuous).
                     Per default, all numerical types are continuous, other types are nominal.
                 its role: ':id', ':target', ':input', ':ignore'.
             (Remark: ':objweight' is unsupported, i.e. ':objweight' same as ':ignore').
-            (Remark: ':colweight(<wgt>)' is unsupported, i.e. ':colweight(<wgt>)' same as ':col-weight(1)'
-            same as ':input').
+            (Remark: ':colweight(<wgt>)' is unsupported, i.e. ':colweight(<wgt>)' same as
+            ':col-weight(1)' same as ':input').
             If the parameter is undefined, all columns of the input table have default properties.
 
         col_def_type : str, optional
@@ -135,7 +136,7 @@ class DecisionTreeClassifier(Classification):
         params = {
             'id': id_column,
             'target': target_column,
-            'incolumn': in_column,
+            'incolumn': in_columns,
             'coldeftype': col_def_type,
             'coldefrole': col_def_role,
             'colpropertiestable': col_properties_table,
@@ -152,8 +153,8 @@ class DecisionTreeClassifier(Classification):
 
         self._fit(in_df=in_df, params=params)
 
-    def predict(self, in_df: IdaDataFrame, out_table: str=None, id_column: str=None, target_column: str=None,
-        prob: bool=False, out_table_prob: str=None) -> IdaDataFrame:
+    def predict(self, in_df: IdaDataFrame, out_table: str=None, id_column: str=None,
+        target_column: str=None, prob: bool=False, out_table_prob: str=None) -> IdaDataFrame:
         """
         Makes predictions based on this model. The model must exist.
 
@@ -172,8 +173,8 @@ class DecisionTreeClassifier(Classification):
             the input table column representing the class
 
         prob : bool, optional
-            the flag indicating whether the probability of the predicted class should be included i
-            nto the output table or not
+            the flag indicating whether the probability of the predicted class should be included
+            into the output table or not
 
         out_table_prob : str, optional
             if specified, the probability output table where class probability predictions

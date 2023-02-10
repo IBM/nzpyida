@@ -42,7 +42,8 @@ class Classification(PredictiveModeling):
         self.score_proc = 'CERROR'
         self.score_inv = True
 
-    def predict(self, in_df: IdaDataFrame, out_table: str=None, id_column: str=None) -> IdaDataFrame:
+    def predict(self, in_df: IdaDataFrame, out_table: str=None,
+        id_column: str=None) -> IdaDataFrame:
         """
         Makes predictions based on this model. The model must exist.
 
@@ -122,6 +123,8 @@ class Classification(PredictiveModeling):
         float
             weighted classification accuracy (WACC)
         """
+        if not isinstance(in_df, IdaDataFrame):
+            raise TypeError("Argument id_df should be an IdaDataFrame")
 
         out_table = make_temp_table_name()
 

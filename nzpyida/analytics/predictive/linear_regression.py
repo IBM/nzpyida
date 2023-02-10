@@ -8,6 +8,7 @@
 #
 # The full license is in the LICENSE file, distributed with this software.
 #-----------------------------------------------------------------------------
+from typing import List
 from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
 
@@ -39,10 +40,10 @@ class LinearRegression(Regression):
         self.predict_proc = 'PREDICT_LINEAR_REGRESSION'
 
 
-    def fit(self, in_df: IdaDataFrame, id_column: str, target_column: str, in_column: str=None,
-        nominal_colums: str=None, col_def_type: str=None, col_def_role: str=None, 
-        col_properties_table: str=None, use_svd_solver: bool=False, intercept: bool=True, 
-        calculate_diagnostics: bool=False):
+    def fit(self, in_df: IdaDataFrame, id_column: str, target_column: str,
+        in_columns: List[str]=None, nominal_colums: str=None, col_def_type: str=None,
+        col_def_role: str=None, col_properties_table: str=None, use_svd_solver: bool=False,
+        intercept: bool=True, calculate_diagnostics: bool=False):
         """
         Creates a linear regression model based on provided data and store it in a database.
 
@@ -63,8 +64,8 @@ class LinearRegression(Regression):
             the input table nominal columns, if any, separated by a semi-colon (;).
             Parameter 'nominalCols' is deprecated please use 'incolumn' intead.
 
-        in_column : str, optional
-            the input table columns with special properties, separated by a semi-colon (;).
+        in_columns : List[str], optional
+            the list of input table columns with special properties.
             Each column is followed by one or several of the following properties:
                 its type: ':nom' (for nominal), ':cont' (for continuous).
                 Per default, all numerical types are con-tinuous, other types are nominal.
@@ -85,7 +86,8 @@ class LinearRegression(Regression):
 
         col_properties_table : str, optional
             the input table where column properties for the input table columns are stored.
-            The format of this table is the output format of stored procedure nza..COLUMN_PROPERTIES().
+            The format of this table is the output format of stored procedure
+            nza..COLUMN_PROPERTIES().
             If the parameter is undefined, the input table column properties will be
             detected automatically.
             (Remark: colPropertiesTable with "COLROLE" column with value 'objweight' is
@@ -109,7 +111,7 @@ class LinearRegression(Regression):
             'id': id_column,
             'target': target_column,
             'nominalCols': nominal_colums,
-            'incolumn': in_column,
+            'incolumn': in_columns,
             'coldeftype': col_def_type,
             'coldefrole': col_def_role,
             'colpropertiestable': col_properties_table,

@@ -38,7 +38,8 @@ class Regression(PredictiveModeling):
         super().__init__(idadb, model_name)
         self.score_proc = 'MSE'
 
-    def predict(self, in_df: IdaDataFrame, out_table: str=None, id_column: str=None) -> IdaDataFrame:
+    def predict(self, in_df: IdaDataFrame, out_table: str=None,
+        id_column: str=None) -> IdaDataFrame:
         """
         Makes predictions based on this model. The model must exist.
 
@@ -93,7 +94,8 @@ class Regression(PredictiveModeling):
 
         return self._score(in_df=in_df, predict_params=params, target_column=target_column)
 
-    def score_all(self, in_df: IdaDataFrame, id_column: str, target_column: str) -> Dict[str, float]:
+    def score_all(self, in_df: IdaDataFrame, id_column: str,
+        target_column: str) -> Dict[str, float]:
         """
         Scores the model using MSE, MAE, RSE and RAE. The model must exist.
 
@@ -113,6 +115,8 @@ class Regression(PredictiveModeling):
         dict
             the model scores in a dictionary with MSE, MAE, RSE and RAE as keys
         """
+        if not isinstance(in_df, IdaDataFrame):
+            raise TypeError("Argument in_df should be an IdaDataFrame")
 
         out_table = make_temp_table_name()
 
@@ -126,9 +130,11 @@ class Regression(PredictiveModeling):
             params = map_to_props({
                 'pred_table': pred_view,
                 'true_table': true_view,
-                'pred_id': id_column if self.id_column_in_output is None else self.id_column_in_output,
+                'pred_id': id_column if self.id_column_in_output is None
+                    else self.id_column_in_output,
                 'true_id': id_column,
-                'pred_column': target_column if self.target_column_in_output is None else self.target_column_in_output,
+                'pred_column': target_column if self.target_column_in_output is None
+                    else self.target_column_in_output,
                 'true_column': target_column
             })
 

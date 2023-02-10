@@ -7,8 +7,8 @@
 # Distributed under the terms of the BSD Simplified License.
 #
 # The full license is in the LICENSE file, distributed with this software.
-#----------------------------------------------------------------------------- 
-
+#-----------------------------------------------------------------------------
+from typing import List
 from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
 from nzpyida.analytics.predictive.classification import Classification
@@ -35,9 +35,9 @@ class NaiveBayesClassifier(Classification):
         self.fit_proc = 'NAIVEBAYES'
         self.predict_proc = 'PREDICT_NAIVEBAYES'
 
-    def fit(self, in_df: IdaDataFrame, id_column: str, target_column: str, in_column: str=None,
-            col_def_type: str=None, col_def_role: str=None, col_properties_table: str=None, 
-            disc: str=None, bins: int=10):
+    def fit(self, in_df: IdaDataFrame, id_column: str, target_column: str,
+        in_columns: List[str]=None, col_def_type: str=None, col_def_role: str=None,
+        col_properties_table: str=None, disc: str=None, bins: int=10):
         """
         Builds a Naive Bayes model.
 
@@ -52,46 +52,48 @@ class NaiveBayesClassifier(Classification):
         target_column : str
             the input table column representing the class
 
-        in_column : str
+        in_columns : List[str], optional
             the input table columns with special properties, separated by a semi-colon (;).
             Each column is followed by one or several of the following properties:
                 its type: ':nom' (for nominal), ':cont' (for continuous).
                 Per default, all numerical types are con-tinuous, other types are nominal.
                 its role: ':id', ':target', ':input', ':ignore'.
             (Remark: ':objweight' is unsupported, i.e. ':objweight' same as ':ignore').
-            (Remark: ':colweight(<wgt>)' is unsupported, i.e. ':colweight(<wgt>)' same as ':colweight(1)'
-            same as ':input').
+            (Remark: ':colweight(<wgt>)' is unsupported, i.e. ':colweight(<wgt>)' same
+            as ':colweight(1)' same as ':input').
             If the parameter is undefined, all columns of the input table have default properties.
 
-        col_def_type : str
+        col_def_type : str, optional
             default type of the input table columns. Allowed values are 'nom' and 'cont'.
             If the parameter is undefined, all numeric columns are considered continuous,
             other columns nominal.
 
-        col_def_role : str
+        col_def_role : str, optional
             default role of the input table columns. Allowed values are 'input' and 'ignore'.
             If the parameter is undefined, all columns are considered 'input' columns.
 
-        col_properties_table : str
+        col_properties_table : str, optional
             the input table where column properties for the input table columns are stored.
-            The format of this table is the output format of stored procedure nza..COLUMN_PROPERTIES().
-            If the parameter is undefined, the input table column properties will be detected automatically.
+            The format of this table is the output format of stored procedure
+            nza..COLUMN_PROPERTIES().
+            If the parameter is undefined, the input table column properties will be detected
+            automatically.
             (Remark: colPropertiesTable with "COLROLE" column with value 'objweight' is unsupported,
             i.e. same as 'ignore')
             (Remark: colPropertiesTable with "COLWEIGHT" column with value '<wgt>' is unsupported,
             i.e. same as '1')
 
-        disc : str
+        disc : str, optional
             discretization type for numeric columns [ew, ef, em]
 
-        bins : int
+        bins : int, optional
             default number of bins for numeric columns
         """
         
         params = {
             'id': id_column,
             'target': target_column,
-            'incolumn': in_column,
+            'incolumn': in_columns,
             'coldeftype': col_def_type,
             'coldefrole': col_def_role,
             'colpropertiestable': col_properties_table,
@@ -101,8 +103,8 @@ class NaiveBayesClassifier(Classification):
 
         self._fit(in_df=in_df, params=params)
     
-    def predict(self, in_df: IdaDataFrame, out_table: str=None, id_column: str=None, target_column: str=None,
-                out_table_prob: str=None, mestimation: str=None):
+    def predict(self, in_df: IdaDataFrame, out_table: str=None, id_column: str=None,
+        target_column: str=None, out_table_prob: str=None, mestimation: str=None):
         """
         Makes predictions based on this model. The model must exist.
 
@@ -125,8 +127,8 @@ class NaiveBayesClassifier(Classification):
             will be stored
 
         mestimation : str, optional
-            flag indicating to use m-estimation for probabilities. This kind of estimation of 
-            probabilities may be slower but can give better results for small or heavy 
+            flag indicating to use m-estimation for probabilities. This kind of estimation of
+            probabilities may be slower but can give better results for small or heavy
             unbalanced datasets.
 
         Returns:
@@ -143,4 +145,3 @@ class NaiveBayesClassifier(Classification):
             }
 
         return self._predict(in_df=in_df, params=params, out_table=out_table)
-

@@ -8,6 +8,7 @@
 #
 # The full license is in the LICENSE file, distributed with this software.
 #-----------------------------------------------------------------------------
+from typing import List
 from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
 from nzpyida.analytics.utils import map_to_props, make_temp_table_name
@@ -42,10 +43,11 @@ class KMeans(PredictiveModeling):
         self.target_column_in_output = 'CLUSTER_ID'
         self.id_column_in_output = 'ID'
 
-    def fit(self, in_df: IdaDataFrame, id_column: str, target_column: str, in_column: str=None,
-        col_def_type: str=None, col_def_role: str=None, col_properties_table: str=None, out_table: str=None,
-        distance: str='norm_euclidean', k: int=3, max_iter: int=5, rand_seed: int=12345,
-        id_based: bool=False, statistics: str=None, transform: str='L') -> IdaDataFrame:
+    def fit(self, in_df: IdaDataFrame, id_column: str, target_column: str,
+        in_columns: List[str]=None, col_def_type: str=None, col_def_role: str=None,
+        col_properties_table: str=None, out_table: str=None, distance: str='norm_euclidean',
+        k: int=3, max_iter: int=5, rand_seed: int=12345, id_based: bool=False,
+        statistics: str=None, transform: str='L') -> IdaDataFrame:
         """
         Creates a model for clustering based on provided data and store it in a database.
 
@@ -61,8 +63,8 @@ class KMeans(PredictiveModeling):
             the input table column representing a class or a value to predict,
             this column is ignored by the Clustering algorithm.
 
-        in_column : str, optional
-            the input table columns with special properties, separated by a semi-colon (;).
+        in_columns : List[str], optional
+            the list of input table columns with special properties.
             Each column is followed by one or several of the following properties:
                 its type: ':nom' (for nominal), ':cont' (for continuous).
                 Per default, all numerical types are con-tinuous, other types are nominal.
@@ -84,7 +86,8 @@ class KMeans(PredictiveModeling):
 
         col_properties_table : str, optional
             the input table where column properties for the input table columns are stored.
-            The format of this table is the output format of stored procedure nza..COLUMN_PROPERTIES().
+            The format of this table is the output format of stored procedure
+            nza..COLUMN_PROPERTIES().
             If the parameter is undefined, the input table column properties will be
             detected automatically.
             (Remark: colPropertiesTable with "COLROLE" column with value 'objweight'
@@ -96,8 +99,8 @@ class KMeans(PredictiveModeling):
             the output table where clusters are assigned to each input table record
 
         distance : str, optional
-            the distance function. Allowed values are: euclidean, norm_euclidean, manhattan, canberra,
-            maximum, mahalanobis.
+            the distance function. Allowed values are: euclidean, norm_euclidean, manhattan,
+            canberra, maximum, mahalanobis.
 
         k : int, optional
             number of centers
@@ -115,7 +118,8 @@ class KMeans(PredictiveModeling):
             flags indicating which statistics to collect.
             Allowed values are: none, columns, values:n, all.
             If statistics=none, no statistics are collected.
-            If statistics=columns, statistics on the input table columns like mean value are collec-ted.
+            If statistics=columns, statistics on the input table columns like mean value are
+            collec-ted.
             If statistics=values:n with n a positive number, statistics about the columns and
             the column values are collected. Up to <n> column value statistics are collected:
             If a nominal column contains more than <n> values, only the <n> most frequent
@@ -126,10 +130,13 @@ class KMeans(PredictiveModeling):
 
         transform : str, optional
             flag indicating if the input table columns have to be transformed.
-            Allowed values are: L (for leave as is), N (for normalization) or S (for standardization).
+            Allowed values are: L (for leave as is), N (for normalization)
+            or S (for standardization).
             If it is not specified, no transformation will be performed.
 
         """
+        if not isinstance(in_df, IdaDataFrame):
+            raise TypeError("Argument id_df should be an IdaDataFrame")
 
         auto_delete_context = None
         if not out_table:
@@ -139,7 +146,7 @@ class KMeans(PredictiveModeling):
         params = {
             'id': id_column,
             'target': target_column,
-            'incolumn': in_column,
+            'incolumn': in_columns,
             'coldeftype': col_def_type,
             'coldefrole': col_def_role,
             'colpropertiestable': col_properties_table,
@@ -160,8 +167,8 @@ class KMeans(PredictiveModeling):
 
         return IdaDataFrame(self.idadb, out_table)
 
-
-    def predict(self, in_df: IdaDataFrame, out_table: str=None, id_column: str=None) -> IdaDataFrame:
+    def predict(self, in_df: IdaDataFrame, out_table: str=None,
+        id_column: str=None) -> IdaDataFrame:
         """
         Makes predictions based on this model. The model must exist.
 

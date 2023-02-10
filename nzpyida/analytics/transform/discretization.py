@@ -12,7 +12,7 @@
 from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
 from nzpyida.analytics.utils import map_to_props, materialize_df, make_temp_table_name
-from nzpyida.analytics.utils import get_auto_delete_context
+from nzpyida.analytics.utils import get_auto_delete_context, call_proc_df_in_out
 
 
 class Discretization:
@@ -51,35 +51,15 @@ class Discretization:
         IdaDataFrame
             the data frame with discretization bins
         """
-
-        temp_view_name, need_delete = materialize_df(in_df)
-        auto_delete_context = None
-        if not out_table:
-            auto_delete_context = get_auto_delete_context('out_table')
-            out_table = make_temp_table_name()
         in_columns = ';'.join(in_df.columns)
-
         params_dict = {
-            'intable': temp_view_name,
             'incolumn': in_columns,
-            'outtabletype': 'table',
-            'outtable': out_table
+            'outtabletype': 'table'
         }
         params_dict.update(self.params)
-        params = map_to_props(params_dict)
-
-        try:
-            self.idadb.ida_query(f'call NZA..{self.proc}(\'{params}\')')
-        finally:
-            if need_delete:
-                self.idadb.drop_view(temp_view_name)
-
-        out_df = IdaDataFrame(self.idadb, out_table)
-
-        if auto_delete_context:
-            auto_delete_context.add_table_to_delete(out_table)
-
-        return out_df
+        
+        return call_proc_df_in_out(proc=self.proc, in_df=in_df, params=params_dict,
+            out_table=out_table)
 
     def apply(self, in_df: IdaDataFrame, in_bin_df: IdaDataFrame, keep_org_values: bool=False,
         out_table: str=None):
@@ -102,6 +82,11 @@ class Discretization:
         out_table : str, optional
             the output table or view to store the discretized data into
         """
+        if not isinstance(in_df, IdaDataFrame):
+            raise TypeError("Argument in_df should be an IdaDataFrame")
+
+        if not isinstance(in_bin_df, IdaDataFrame):
+            raise TypeError("Argument in_bin_df should be an IdaDataFrame")
 
         temp_view_name, need_delete = materialize_df(in_df)
         bin_view_name, bin_view_need_delete = materialize_df(in_bin_df)
