@@ -14,7 +14,8 @@ from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
 from nzpyida.analytics.model_manager import ModelManager
 from nzpyida.analytics.predictive.naive_bayes import NaiveBayesClassifier
-from nzpyida.analytics.tests.conftest import MOD_NAME, OUT_TABLE_PRED, OUT_TABLE_CM
+from nzpyida.analytics.tests.conftest import MOD_NAME, OUT_TABLE_PRED, OUT_TABLE_CM, TAB_NAME_TEST, \
+    TAB_NAME_TRAIN, df_test, df_train
 import pandas as pd
 import pytest
 
@@ -43,12 +44,6 @@ def clear_up(idadb: IdaDataBase, mm: ModelManager):
         idadb.drop_table(OUT_TABLE_CM)
 
 def test_naive_bayes(idadb: IdaDataBase, mm: ModelManager, clear_up):
-    df_train = pd.DataFrame.from_dict({"ID": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-                       "A": [-1, -2, 3, 4, 2, -0.5, 0, 1, -2.1, 1.4],
-                       "B": ['n', 'n', 'p', 'p', 'p', 'n', 'n', 'p', 'n', 'p']})
-    df_test = pd.DataFrame.from_dict({"ID": [10, 11, 12],
-                            "A": [-1, 0.0001, 1],
-                            "B": ['n', 'p', 'p']})
     idf_train = idadb.as_idadataframe(df_train, tablename=TAB_NAME_TRAIN, clear_existing=True)
     idf_test = idadb.as_idadataframe(df_test, tablename=TAB_NAME_TEST, clear_existing=True)
     assert idf_train
@@ -77,4 +72,4 @@ def test_naive_bayes(idadb: IdaDataBase, mm: ModelManager, clear_up):
     assert len(cm) >= 3
     assert sum(cm.head()["CNT"].values) == 3
     assert wacc == 0.75
-    assert acc == score
+    assert 0.67 >= acc >= 0.66

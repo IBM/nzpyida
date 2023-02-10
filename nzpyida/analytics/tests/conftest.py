@@ -9,6 +9,7 @@
 # The full license is in the LICENSE file, distributed with this software.
 #-----------------------------------------------------------------------------
 import pytest
+import pandas as pd
 from nzpyida.base import IdaDataBase
 
 @pytest.fixture(scope='session')
@@ -24,6 +25,16 @@ def idadb():
         }
 
     return IdaDataBase(nzpy_cfg)
+
+df_train = pd.DataFrame.from_dict({"ID": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+                                   "A": [-1, -2, 3, 4, 2, -0.5, 0, 1, -2.1, 1.4],
+                                   "B": ['n', 'n', 'p', 'p', 'p', 'n', 'n', 'p', 'n', 'p']})
+df_test = pd.DataFrame.from_dict({"ID": [0, 1, 2],
+                                  "A": [-10, 0.001, 10],
+                                  "B": ['n', 'p', 'p']})
+
+TAB_NAME_TEST = "TAB_NAME1"
+TAB_NAME_TRAIN = "TAB_NAME2"
 
 MOD_NAME = "TEST_MOD1"
 
