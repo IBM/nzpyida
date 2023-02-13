@@ -24,8 +24,8 @@ class Discretization:
         """
         Creates the discretization class.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         idadb : IdaDataBase
             database connector
         """
@@ -38,16 +38,16 @@ class Discretization:
         """
         Create bins limits based on the given data frame.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         in_df : IdaDataFrame
             the input data frame
 
         out_table : str, optional
             the output table with dicretization bins
 
-        Returns:
-        --------
+        Returns
+        -------
         IdaDataFrame
             the data frame with discretization bins
         """
@@ -66,8 +66,8 @@ class Discretization:
         """
         Apply discretization limits to the given data frame.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         in_df : IdaDataFrame
             the input data frame
 
@@ -129,8 +129,8 @@ class EWDisc(Discretization):
         """
         Creates the discretization class.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         idadb : IdaDataBase
             database connector
 
@@ -152,8 +152,8 @@ class EFDisc(Discretization):
         """
         Creates the discretization class.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         idadb : IdaDataBase
             database connector
 
@@ -181,8 +181,8 @@ class EMDisc(Discretization):
         """
         Creates the discretization class.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         idadb : IdaDataBase
             database connector
 

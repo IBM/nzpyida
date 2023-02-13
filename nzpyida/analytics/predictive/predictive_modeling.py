@@ -24,8 +24,8 @@ class PredictiveModeling:
         """
         Creates the predictive modeling class.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
 
         idada : IdaDataBase
             database connector
@@ -48,8 +48,8 @@ class PredictiveModeling:
         """
         Trains the model.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         in_df : IdaDataFrame
             the input data frame
 
@@ -77,8 +77,8 @@ class PredictiveModeling:
         """
         Makes predictions based on the model. The model must exist.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         in_df : IdaDataFrame
             the input data frame
 
@@ -88,8 +88,8 @@ class PredictiveModeling:
         out_table : str, optional
             the output table where the predictions will be stored
 
-        Returns:
-        --------
+        Returns
+        -------
         IdaDataFrame
             the data frame containing row identifiers and predicted target values
         """
@@ -104,8 +104,8 @@ class PredictiveModeling:
         """
         Scores the model. The model must exist.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         in_df : IdaDataFrame
             the input data frame
 
@@ -115,8 +115,8 @@ class PredictiveModeling:
         target_column : str
             the input table column representing the class
 
-        Returns:
-        --------
+        Returns
+        -------
         float
             the model score
         """

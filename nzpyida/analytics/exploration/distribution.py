@@ -24,8 +24,8 @@ def moments(in_df: IdaDataFrame, in_column: str, by_column: str=None,
     stand-ard deviation, skewness and (excess) kurtosis as well as the
     count of cases, the minimum and the maximum.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     in_df : IdaDataFrame
         the input data frame
 
@@ -39,8 +39,8 @@ def moments(in_df: IdaDataFrame, in_column: str, by_column: str=None,
     out_table : str
         the output table to write the moments into
 
-    Returns:
-    --------
+    Returns
+    -------
     IdaDataFrame
         the data frame with requested data
     """
@@ -56,8 +56,8 @@ def quantile(in_df: IdaDataFrame, in_column: str, quantiles: List[int],
     """
     Calculates quantile limit(s) for a numeric column.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     in_df : IdaDataFrame
         the input data frame
 
@@ -72,8 +72,8 @@ def quantile(in_df: IdaDataFrame, in_column: str, quantiles: List[int],
     out_table : str
         the output table to write the moments into
 
-    Returns:
-    --------
+    Returns
+    -------
     IdaDataFrame
         the data frame with requested data
     """
@@ -89,8 +89,8 @@ def outliers(in_df: IdaDataFrame, in_column: str, multiplier: float=1.5,
     """
     Detect outliers of a numeric column.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     in_df : IdaDataFrame
         the input data frame
 
@@ -103,8 +103,8 @@ def outliers(in_df: IdaDataFrame, in_column: str, multiplier: float=1.5,
     out_table : str
         the output table to write the moments into
 
-    Returns:
-    --------
+    Returns
+    -------
     IdaDataFrame
         the data frame with requested data
     """
@@ -119,8 +119,8 @@ def unitable(in_df: IdaDataFrame, in_column: str, out_table: str=None) -> IdaDat
     """
     Creates a univariate frequency table for one column of the input table.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     in_df : IdaDataFrame
         the input data frame
 
@@ -130,8 +130,8 @@ def unitable(in_df: IdaDataFrame, in_column: str, out_table: str=None) -> IdaDat
     out_table : str
         the output table to write the moments into
 
-    Returns:
-    --------
+    Returns
+    -------
     IdaDataFrame
         the data frame with requested data
     """
@@ -146,8 +146,8 @@ def bitable(in_df: IdaDataFrame, in_column: List[str], freq: bool=False, cum: bo
     """
     Creates a bivariate frequency table for two columns of the input table.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     in_df : IdaDataFrame
         the input data frame
 
@@ -166,8 +166,8 @@ def bitable(in_df: IdaDataFrame, in_column: List[str], freq: bool=False, cum: bo
     out_table : str
         the output table to write the moments into
 
-    Returns:
-    --------
+    Returns
+    -------
     IdaDataFrame
         the data frame with requested data
     """
@@ -184,10 +184,10 @@ def histogram(in_df: IdaDataFrame, in_column: str, nbreaks: int=None, right: boo
     freq: bool=False, cum: bool=False, out_table: str=None) -> IdaDataFrame:
     """
     Creates histograms. The number of bins and the bins themselves
-    can be spe-cified or are automatically calculated.
+    can be specified or are automatically calculated.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     in_df : IdaDataFrame
         the input data frame
 
@@ -228,8 +228,8 @@ def histogram(in_df: IdaDataFrame, in_column: str, nbreaks: int=None, right: boo
     out_table : str
         the output table to write the moments into
 
-    Returns:
-    --------
+    Returns
+    -------
     IdaDataFrame
         the data frame with requested data
     """

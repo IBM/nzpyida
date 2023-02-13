@@ -22,8 +22,8 @@ class DecisionTreeRegressor(Regression):
         """
         Creates the regressor class.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
 
         idada : IdaDataBase
             database connector
@@ -48,8 +48,8 @@ class DecisionTreeRegressor(Regression):
         """
         Creates a regression tree model based on provided data and store it in a database.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
 
         in_df : IdaDataFrame
             the input data frame
@@ -155,8 +155,8 @@ class DecisionTreeRegressor(Regression):
         """
         Makes predictions based on this model. The model must exist.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         in_df : IdaDataFrame
             the input data frame to predict
 
@@ -177,8 +177,8 @@ class DecisionTreeRegressor(Regression):
             a flag indicating whether the variance of the predictions should be included
             into the output table
 
-        Returns:
-        --------
+        Returns
+        -------
         IdaDataFrame
             the data frame containing row identifiers and predicted target values
         """

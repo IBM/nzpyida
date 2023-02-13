@@ -25,8 +25,8 @@ class KMeans(PredictiveModeling):
         """
         Creates the clusterer class.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
 
         idada : IdaDataBase
             database connector
@@ -51,8 +51,8 @@ class KMeans(PredictiveModeling):
         """
         Creates a model for clustering based on provided data and store it in a database.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         in_df : IdaDataFrame
             the input data frame
 
@@ -136,7 +136,7 @@ class KMeans(PredictiveModeling):
 
         """
         if not isinstance(in_df, IdaDataFrame):
-            raise TypeError("Argument id_df should be an IdaDataFrame")
+            raise TypeError("Argument in_df should be an IdaDataFrame")
 
         auto_delete_context = None
         if not out_table:
@@ -172,8 +172,8 @@ class KMeans(PredictiveModeling):
         """
         Makes predictions based on this model. The model must exist.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         in_df : IdaDataFrame
             the input data frame
 
@@ -183,8 +183,8 @@ class KMeans(PredictiveModeling):
         id_column : str, optional
             the input table column identifying a unique instance id
 
-        Returns:
-        --------
+        Returns
+        -------
         IdaDataFrame
             the data frame containing row identifiers and predicted target values
         """
@@ -199,8 +199,8 @@ class KMeans(PredictiveModeling):
         """
         Scores the model. The model must exist.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         in_df : IdaDataFrame
             the input data frame for scoring
 
@@ -210,8 +210,8 @@ class KMeans(PredictiveModeling):
         target_column : str
             the input table column representing the class
 
-        Returns:
-        --------
+        Returns
+        -------
         float
             the model score
         """

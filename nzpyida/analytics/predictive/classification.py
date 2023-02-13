@@ -25,8 +25,8 @@ class Classification(PredictiveModeling):
         """
         Creates the classifier class.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
 
         idada : IdaDataBase
             database connector
@@ -47,8 +47,8 @@ class Classification(PredictiveModeling):
         """
         Makes predictions based on this model. The model must exist.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         in_df : IdaDataFrame
             the input data frame for predictions
 
@@ -69,8 +69,8 @@ class Classification(PredictiveModeling):
         """
         Scores the model. The model must exist.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         in_df : IdaDataFrame
             the input data frame for scoring
 
@@ -80,8 +80,8 @@ class Classification(PredictiveModeling):
         target_column : str
             the input table column representing the class
 
-        Returns:
-        --------
+        Returns
+        -------
         float
             the model score
         """
@@ -98,8 +98,8 @@ class Classification(PredictiveModeling):
         Makes a predition for a test data set given by the user and returns a confusion matrix,
         together with other stats (ACC and WACC).
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         in_df : IdaDataFrame
             the input data frame for scoring
 
@@ -112,8 +112,8 @@ class Classification(PredictiveModeling):
         out_matrix_table : str, optional
             the output table where the confidence matrix will be stored
 
-        Returns:
-        --------
+        Returns
+        -------
         IdaDataFrame
             the confidence matrix data frame
 
@@ -124,7 +124,7 @@ class Classification(PredictiveModeling):
             weighted classification accuracy (WACC)
         """
         if not isinstance(in_df, IdaDataFrame):
-            raise TypeError("Argument id_df should be an IdaDataFrame")
+            raise TypeError("Argument in_df should be an IdaDataFrame")
 
         out_table = make_temp_table_name()
 

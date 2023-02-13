@@ -23,8 +23,8 @@ class DecisionTreeClassifier(Classification):
         """
         Creates the classifier class.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
 
         idada : IdaDataBase
             database connector
@@ -42,11 +42,13 @@ class DecisionTreeClassifier(Classification):
         in_columns: List[str]=None, col_def_type: str=None, col_def_role: str=None,
         col_properties_table: str=None, weights: str=None, eval_measure: str=None,
         min_improve: float=0.02, min_split: int=50, max_depth: int=10, val_table: str=None,
-        val_weights: str=None, qmeasure: str=None, statistics: str=None):
+        val_weights: str=None, qmeasure: str=None, statistics: str=None):        
         """
         Grows the decision tree and stores its model in the database.
 
-        Parameters:
+        Parameters
+        ----------
+
         in_df : IdaDataFrame
             the input data frame
 
@@ -158,8 +160,9 @@ class DecisionTreeClassifier(Classification):
         """
         Makes predictions based on this model. The model must exist.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
+
         in_df : IdaDataFrame
             the input data frame
 
@@ -180,8 +183,8 @@ class DecisionTreeClassifier(Classification):
             if specified, the probability output table where class probability predictions
             will be stored
 
-        Returns:
-        --------
+        Returns
+        -------
         IdaDataFrame
             the data frame containing row identifiers and predicted target values
         """

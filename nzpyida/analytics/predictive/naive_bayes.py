@@ -21,8 +21,8 @@ class NaiveBayesClassifier(Classification):
         """
         Creates the classifier class.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
 
         idada : IdaDataBase
             database connector
@@ -41,8 +41,8 @@ class NaiveBayesClassifier(Classification):
         """
         Builds a Naive Bayes model.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         in_df : IdaDataFrame
             the input data frame
 
@@ -108,8 +108,8 @@ class NaiveBayesClassifier(Classification):
         """
         Makes predictions based on this model. The model must exist.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         in_df : IdaDataFrame
             the input data frame
 
@@ -131,8 +131,8 @@ class NaiveBayesClassifier(Classification):
             probabilities may be slower but can give better results for small or heavy
             unbalanced datasets.
 
-        Returns:
-        --------
+        Returns
+        -------
         IdaDataFrame
             the data frame containing row identifiers and predicted target values
         """

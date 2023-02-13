@@ -17,8 +17,8 @@ def std_norm(in_df: IdaDataFrame, id_column: str, in_column: str, by_column: str
     """
     Normalize and stardardize columns of the input data frame and returns that in a new data frame.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     in_df : IdaDataFrame
         the input data frame
 
@@ -40,8 +40,8 @@ def std_norm(in_df: IdaDataFrame, id_column: str, in_column: str, by_column: str
     out_table : str, optional
         the output table with the modified data
 
-    Returns:
-    --------
+    Returns
+    -------
     IdaDataFrame
         the data frame with requested transformations
     """
@@ -59,8 +59,8 @@ def impute_data(in_df: IdaDataFrame, in_column: str=None, method: str=None,
     """
     Replaces missing values in the input data frame and returns the result in a new data frame.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     in_df : IdaDataFrame
         the input data frame
 
@@ -82,8 +82,8 @@ def impute_data(in_df: IdaDataFrame, in_column: str=None, method: str=None,
     out_table : str, optional
         the output table with the modified data
 
-    Returns:
-    --------
+    Returns
+    -------
     IdaDataFrame
         the data frame with requested transformations
     """
@@ -103,8 +103,8 @@ def random_sample(in_df: IdaDataFrame, size: int, fraction: float=None, by_colum
     Creates a random sample of a data frame a fixed size or a fixed probability and
     returns the result in a new data frame.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     in_df : IdaDataFrame
         the input data frame
 
@@ -133,8 +133,8 @@ def random_sample(in_df: IdaDataFrame, size: int, fraction: float=None, by_colum
     out_table : str
         the output table with the modified data
 
-    Returns:
-    --------
+    Returns
+    -------
     IdaDataFrame
         the data frame with requested transformations
     """

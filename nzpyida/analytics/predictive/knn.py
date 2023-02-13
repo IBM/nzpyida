@@ -23,8 +23,8 @@ class KNeighborsClassifier(Classification):
         """
         Creates the classifier class.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
 
         idada : IdaDataBase
             database connector
@@ -43,8 +43,8 @@ class KNeighborsClassifier(Classification):
         """
         Builds a K-Nearest Neighbors Classification or Regression model.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
 
         in_df : IdaDataFrame
             the input data frame
@@ -95,8 +95,8 @@ class KNeighborsClassifier(Classification):
         Applies a K-Nearest Neighbors model to generate classification or regression
         predictions for a data frame.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
 
         in_df : IdaDataFrame
             the input data frame
@@ -133,8 +133,8 @@ class KNeighborsClassifier(Classification):
                 weights.
             For classes not occurring in this table, weights of 1 are assumed.
 
-        Returns:
-        --------
+        Returns
+        -------
         IdaDataFrame
             a data frame with id and predicted class
 
@@ -158,8 +158,8 @@ class KNeighborsClassifier(Classification):
         """
         Scores the model and returns classification error ratio.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
 
         in_df : IdaDataFrame
             the input data frame used to test the model
@@ -193,8 +193,8 @@ class KNeighborsClassifier(Classification):
                 weights.
             For classes not occurring in this table, weights of 1 are assumed.
 
-        Returns:
-        --------
+        Returns
+        -------
         float
             model classification error ratio
         """

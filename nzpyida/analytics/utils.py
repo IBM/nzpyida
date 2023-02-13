@@ -20,13 +20,13 @@ def map_to_props(data: Dict[str, Any]) -> str:
     Maps the given dictionary of attributes into coma separated list of key/value
     pairs. Skips these pairs with value None.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     data : dict
         the input data
 
-    Returns:
-    --------
+    Returns
+    -------
     str
         the output string
     """
@@ -47,13 +47,13 @@ def materialize_df(df: IdaDataFrame) -> Tuple[str, bool]:
     The second items of the returned tuple shows if what is returned is a temporaty view
     (that should be dropped by the caller) or exisintg table.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     df : IdaDataFrame
         the input data frame
 
-    Returns:
-    --------
+    Returns
+    -------
     str
         the name of db object (view or table) available representing the data frame
 
@@ -73,13 +73,13 @@ def make_temp_table_name(prefix: str='DATA_FRAME_') -> str:
     """
     Generate temp table name.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     prefix : str, optional
         name prefix
 
-    Returns:
-    --------
+    Returns
+    -------
     str
         generated table name with the given prefix
     """
@@ -92,19 +92,19 @@ def get_auto_delete_context(out_table_attr_name: str) -> AutoDeleteContext:
     If nothing is assigned, raise an exception with appropriate error message.
     The 'out_table_attr_name' is included in that message.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     out_table_attr_name : str
         the name of function parameter with the output table name (used for
         a message in the exception only)
 
-    Returns:
-    --------
+    Returns
+    -------
     AutoDeleteContext
         current thread AutoDeleteContext
 
-    Raises:
-    -------
+    Raises
+    ------
     RuntimeError
         If there is no AutoDeleteContext attached to the current thread.
     """

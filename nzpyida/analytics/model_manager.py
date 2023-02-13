@@ -20,8 +20,8 @@ class ModelManager:
         """
         Creates the context.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         idadb : IdaDataBase
             the database connector
         """
@@ -32,8 +32,8 @@ class ModelManager:
         """
         Retrieve existing models (in the current database) and returns result as a data frame.
 
-        Returns:
-        --------
+        Returns
+        -------
         IdaDataFrame
             the data frame with the list of models
         """
@@ -44,13 +44,13 @@ class ModelManager:
         """
         Checks if a model with the given name exists.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         name : str
             the name of model
 
-        Returns:
-        --------
+        Returns
+        -------
         bool
             True if the model with the given name exists, otherwise False
         """
@@ -62,8 +62,8 @@ class ModelManager:
         """
         Drops the model with the given name. Does noting if there is no such madel in the database.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         name : str
             the name of model
         """

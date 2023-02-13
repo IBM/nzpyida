@@ -24,8 +24,8 @@ class Regression(PredictiveModeling):
         """
         Creates the regressor class.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
 
         idada : IdaDataBase
             database connector
@@ -43,8 +43,8 @@ class Regression(PredictiveModeling):
         """
         Makes predictions based on this model. The model must exist.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         in_df : IdaDataFrame
             the input data frame to predict
 
@@ -55,8 +55,8 @@ class Regression(PredictiveModeling):
             the input table column identifying a unique instance id
             Default: <id> column used to build the model
 
-        Returns:
-        --------
+        Returns
+        -------
         IdaDataFrame
             the data frame containing row identifiers and predicted target values
         """
@@ -71,8 +71,8 @@ class Regression(PredictiveModeling):
         """
         Scores the model. The model must exist.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         in_df : IdaDataFrame
             the input data frame for scoring
 
@@ -82,8 +82,8 @@ class Regression(PredictiveModeling):
         target_column : str
             the input table column representing the class
 
-        Returns:
-        --------
+        Returns
+        -------
         float
             the model score
         """
@@ -99,8 +99,8 @@ class Regression(PredictiveModeling):
         """
         Scores the model using MSE, MAE, RSE and RAE. The model must exist.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         in_df : IdaDataFrame
             the input data frame for scoring
 
@@ -110,8 +110,8 @@ class Regression(PredictiveModeling):
         target_column : str
             the input table column representing the class
 
-        Returns:
-        --------
+        Returns
+        -------
         dict
             the model scores in a dictionary with MSE, MAE, RSE and RAE as keys
         """

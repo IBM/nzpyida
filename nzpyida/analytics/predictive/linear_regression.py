@@ -24,8 +24,8 @@ class LinearRegression(Regression):
         """
         Creates the regressor class.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
 
         idada : IdaDataBase
             database connector
@@ -47,8 +47,8 @@ class LinearRegression(Regression):
         """
         Creates a linear regression model based on provided data and store it in a database.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
 
         in_df : IdaDataFrame
             the input data frame
