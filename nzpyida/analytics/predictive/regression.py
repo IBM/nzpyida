@@ -71,7 +71,7 @@ class Regression(PredictiveModeling):
 
         return self._predict(in_df=in_df, params=params, out_table=out_table)
 
-    def score(self, in_df: IdaDataFrame, target_column: str, 
+    def score(self, in_df: IdaDataFrame, target_column: str,
         id_column: str=None) -> float:
         """
         Scores the model. The model must exist.

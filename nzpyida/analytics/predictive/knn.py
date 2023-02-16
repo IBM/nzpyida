@@ -96,7 +96,7 @@ class KNeighborsClassifier(Classification):
 
         self._fit(in_df=in_df, params=params)
 
-    def predict(self, in_df: IdaDataFrame, out_table: str=None, target_column: str=None,
+    def predict(self, in_df: IdaDataFrame, out_table: str=None,
         id_column: str=None, distance: str='euclidean', k: int=3, stand: bool=True,
         fast: bool=True, weights: str=None) -> IdaDataFrame:
         """
@@ -111,9 +111,6 @@ class KNeighborsClassifier(Classification):
 
         out_table : str, optional
             the output table where the predictions will be stored
-
-        target_column : str, optional
-            the input table column representing the class
 
         id_column : str, optional
             the input table column identifying a unique instance id
@@ -151,7 +148,6 @@ class KNeighborsClassifier(Classification):
 
         params = {
             'id': id_column,
-            'target': target_column,
             'distance': distance,
             'k': k,
             'stand': stand,

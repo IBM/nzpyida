@@ -164,7 +164,7 @@ class DecisionTreeRegressor(Regression):
 
         self._fit(in_df=in_df, params=params)
 
-    def predict(self, in_df: IdaDataFrame, out_table: str=None, target_column: str=None,
+    def predict(self, in_df: IdaDataFrame, out_table: str=None,
         id_column: str=None, variance: bool=False):
         """
         Makes predictions based on this model. The model must exist.
@@ -176,12 +176,6 @@ class DecisionTreeRegressor(Regression):
 
         out_table : str, optional
             the output table where the predictions will be stored
-
-        target_column : str, optional
-            the input table column representing the prediction target.
-            The specified target column will not be used for prediction and is permitted
-            to contain NULL values.
-            Default: target column used to build the model.
 
         id_column : str, optional
             the input table column identifying a unique instance id
@@ -199,7 +193,6 @@ class DecisionTreeRegressor(Regression):
 
         params = {
             'id': id_column,
-            'target': target_column,
             'var': variance
             }
 

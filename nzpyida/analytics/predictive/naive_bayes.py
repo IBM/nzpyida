@@ -111,7 +111,7 @@ class NaiveBayesClassifier(Classification):
 
         self._fit(in_df=in_df, params=params)
 
-    def predict(self, in_df: IdaDataFrame, out_table: str=None, target_column: str=None,
+    def predict(self, in_df: IdaDataFrame, out_table: str=None,
         id_column: str=None, out_table_prob: str=None, mestimation: str=None):
         """
         Makes predictions based on this model. The model must exist.
@@ -123,9 +123,6 @@ class NaiveBayesClassifier(Classification):
 
         out_table : str, optional
             the output table where the predictions will be stored
-
-        target_column : str, optional
-            the input table column representing the class
 
         id_column : str, optional
             the input table column identifying a unique instance id
@@ -148,7 +145,6 @@ class NaiveBayesClassifier(Classification):
 
         params = {
             'id': id_column,
-            'target': target_column,
             'outtableProb': out_table_prob,
             'mestimation': mestimation
             }
