@@ -42,7 +42,7 @@ class NaiveBayesClassifier(Classification):
         self.fit_proc = 'NAIVEBAYES'
         self.predict_proc = 'PREDICT_NAIVEBAYES'
 
-    def fit(self, in_df: IdaDataFrame, id_column: str, target_column: str,
+    def fit(self, in_df: IdaDataFrame, target_column: str, id_column: str=None, 
         in_columns: List[str]=None, col_def_type: str=None, col_def_role: str=None,
         col_properties_table: str=None, disc: str=None, bins: int=10):
         """
@@ -53,11 +53,12 @@ class NaiveBayesClassifier(Classification):
         in_df : IdaDataFrame
             the input data frame
 
-        id_column : str
-            the input table column identifying a unique instance id
-
         target_column : str
             the input table column representing the class
+
+        id_column : str, optional
+            the input table column identifying a unique instance id - if skipped, 
+            the input data frame indexer must be set and will be used as an instance id
 
         in_columns : List[str], optional
             the input table columns with special properties, separated by a semi-colon (;).
@@ -96,7 +97,7 @@ class NaiveBayesClassifier(Classification):
         bins : int, optional
             default number of bins for numeric columns
         """
-        
+
         params = {
             'id': id_column,
             'target': target_column,
@@ -109,9 +110,9 @@ class NaiveBayesClassifier(Classification):
         }
 
         self._fit(in_df=in_df, params=params)
-    
-    def predict(self, in_df: IdaDataFrame, out_table: str=None, id_column: str=None,
-        target_column: str=None, out_table_prob: str=None, mestimation: str=None):
+
+    def predict(self, in_df: IdaDataFrame, out_table: str=None, target_column: str=None,
+        id_column: str=None, out_table_prob: str=None, mestimation: str=None):
         """
         Makes predictions based on this model. The model must exist.
 
@@ -123,11 +124,12 @@ class NaiveBayesClassifier(Classification):
         out_table : str, optional
             the output table where the predictions will be stored
 
-        id_column : str, optional
-            the input table column identifying a unique instance id
-
         target_column : str, optional
             the input table column representing the class
+
+        id_column : str, optional
+            the input table column identifying a unique instance id
+            Default: id column used to build the model
 
         out_table_prob : str, optional
             if specified, the probability output table where class probability predictions

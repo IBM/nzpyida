@@ -62,6 +62,13 @@ class PredictiveModeling:
         if not isinstance(in_df, IdaDataFrame):
             raise TypeError("Argument in_df should be an IdaDataFrame")
 
+        if not params.get('id', None):
+            if in_df.indexer:
+                params['id'] = in_df.indexer
+            else:
+                raise TypeError('Missing id column - either use id_column attribute or set '
+                    'indexer column in the input data frame')
+
         ModelManager(self.idadb).drop_model(self.model_name)
 
         temp_view_name, need_delete = materialize_df(in_df)
@@ -125,6 +132,13 @@ class PredictiveModeling:
         """
         if not isinstance(in_df, IdaDataFrame):
             raise TypeError("Argument in_df should be an IdaDataFrame")
+
+        if not predict_params.get('id', None):
+            if in_df.indexer:
+                predict_params['id'] = in_df.indexer
+            else:
+                raise TypeError('Missing id column - either use id_column attribute or set '
+                    'indexer column in the input data frame')
 
         out_table = make_temp_table_name()
 

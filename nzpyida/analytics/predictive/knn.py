@@ -44,7 +44,7 @@ class KNeighborsClassifier(Classification):
         self.fit_proc = 'KNN'
         self.predict_proc = 'PREDICT_KNN'
 
-    def fit(self, in_df: IdaDataFrame, id_column: str, target_column: str,
+    def fit(self, in_df: IdaDataFrame, target_column: str, id_column: str=None,
         in_columns: List[str]=None, col_def_type: str=None, col_def_role: str=None,
         col_properties_table: str=None):
         """
@@ -56,11 +56,12 @@ class KNeighborsClassifier(Classification):
         in_df : IdaDataFrame
             the input data frame
 
-        id_column : str
-            the input table column identifying a unique instance id
-
         target_column : str
             the input table column representing the class
+
+        id_column : str, optional
+            the input table column identifying a unique instance id - if skipped, 
+            the input data frame indexer must be set and will be used as an instance id
 
         in_columns : List[str], optional
             the list of input table columns with special properties.
@@ -95,8 +96,8 @@ class KNeighborsClassifier(Classification):
 
         self._fit(in_df=in_df, params=params)
 
-    def predict(self, in_df: IdaDataFrame, out_table: str=None, id_column: str=None,
-        target_column: str=None, distance: str='euclidean', k: int=3, stand: bool=True,
+    def predict(self, in_df: IdaDataFrame, out_table: str=None, target_column: str=None,
+        id_column: str=None, distance: str='euclidean', k: int=3, stand: bool=True,
         fast: bool=True, weights: str=None) -> IdaDataFrame:
         """
         Applies a K-Nearest Neighbors model to generate classification or regression
@@ -111,11 +112,12 @@ class KNeighborsClassifier(Classification):
         out_table : str, optional
             the output table where the predictions will be stored
 
-        id_column : str, optional
-            the input table column identifying a unique instance id
-
         target_column : str, optional
             the input table column representing the class
+
+        id_column : str, optional
+            the input table column identifying a unique instance id
+            Default: id column used to build the model
 
         distance : str, optional
             the distance function. Allowed values are: euclidean, manhatthan, canberra, maximum
@@ -159,7 +161,7 @@ class KNeighborsClassifier(Classification):
 
         return self._predict(in_df=in_df, params=params, out_table=out_table)
 
-    def score(self, in_df: IdaDataFrame, id_column: str, target_column: str,
+    def score(self, in_df: IdaDataFrame, target_column: str, id_column: str=None,
         distance: str='euclidean', k: int=3, stand: bool=True, fast: bool=True,
         weights: str=None) -> float:
         """
@@ -171,11 +173,12 @@ class KNeighborsClassifier(Classification):
         in_df : IdaDataFrame
             the input data frame used to test the model
 
-        id_column : str
-            the input table column identifying a unique instance id
-
         target_column : str
             the input table column representing the class in the input data frame
+
+        id_column : str, optional
+            the input table column identifying a unique instance id - if skipped, 
+            the input data frame indexer must be set and will be used as an instance id
 
         distance : str, optional
             the distance function. Allowed values are: euclidean, manhatthan, canberra, maximum

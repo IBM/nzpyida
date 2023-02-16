@@ -50,10 +50,9 @@ class DecisionTreeRegressor(Regression):
         self.fit_proc = 'REGTREE'
         self.predict_proc = 'PREDICT_REGTREE'
         self.target_column_in_output = "CLASS"
-        self.id_column_in_output = 'ID'
 
 
-    def fit(self, in_df: IdaDataFrame, id_column: str, target_column: str,
+    def fit(self, in_df: IdaDataFrame, target_column: str, id_column: str=None,
         in_columns: List[str]=None, col_def_type: str=None, col_def_role: str=None,
         col_properties_table: str=None, eval_measure: str=None, min_improve: float=0.1,
         min_split: int=50, max_depth: int=10, val_table: str=None, qmeasure: str=None,
@@ -68,12 +67,13 @@ class DecisionTreeRegressor(Regression):
         in_df : IdaDataFrame
             the input data frame
 
-        id_column : str, optional
-            the input table column identifying a unique instance id
-
         target_column : str, optional
             the input table column representing the prediction target, definition of multitargets
             can be processed by 'incolumn' parameter and column properties.
+
+        id_column : str, optional
+            the input table column identifying a unique instance id - if skipped, 
+            the input data frame indexer must be set and will be used as an instance id
 
         nominal_colums : str, optional
             the input table nominal columns, if any, separated by a semi-colon (;).
@@ -164,8 +164,8 @@ class DecisionTreeRegressor(Regression):
 
         self._fit(in_df=in_df, params=params)
 
-    def predict(self, in_df: IdaDataFrame, out_table: str=None, id_column: str=None, 
-        target_column: str=None, variance: bool=False):
+    def predict(self, in_df: IdaDataFrame, out_table: str=None, target_column: str=None,
+        id_column: str=None, variance: bool=False):
         """
         Makes predictions based on this model. The model must exist.
 
@@ -177,15 +177,15 @@ class DecisionTreeRegressor(Regression):
         out_table : str, optional
             the output table where the predictions will be stored
 
-        id_column : str, optional
-            the input table column identifying a unique instance id
-            Default: <id> column used to build the model
-
         target_column : str, optional
             the input table column representing the prediction target.
             The specified target column will not be used for prediction and is permitted
             to contain NULL values.
-            Default: <target> column used to build the model.
+            Default: target column used to build the model.
+
+        id_column : str, optional
+            the input table column identifying a unique instance id
+            Default: id column used to build the model
 
         variance : bool, optional
             a flag indicating whether the variance of the predictions should be included
