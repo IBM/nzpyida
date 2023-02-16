@@ -47,7 +47,7 @@ class LinearRegression(Regression):
         self.predict_proc = 'PREDICT_LINEAR_REGRESSION'
 
 
-    def fit(self, in_df: IdaDataFrame, id_column: str, target_column: str,
+    def fit(self, in_df: IdaDataFrame, target_column: str, id_column: str=None,
         in_columns: List[str]=None, nominal_colums: str=None, col_def_type: str=None,
         col_def_role: str=None, col_properties_table: str=None, use_svd_solver: bool=False,
         intercept: bool=True, calculate_diagnostics: bool=False):
@@ -60,12 +60,13 @@ class LinearRegression(Regression):
         in_df : IdaDataFrame
             the input data frame
 
-        id_column : str, optional
-            the input table column identifying a unique instance id
-
-        target_column : str, optional
+        target_column : str
             the input table column representing the prediction target, definition of multitargets
             can be processed by 'incolumn' parameter and column properties.
+
+        id_column : str, optional
+            the input table column identifying a unique instance id - if skipped, 
+            the input data frame indexer must be set and will be used as an instance id
 
         nominal_colums : str, optional
             the input table nominal columns, if any, separated by a semi-colon (;).
