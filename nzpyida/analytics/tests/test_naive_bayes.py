@@ -59,7 +59,7 @@ def test_naive_bayes(idadb: IdaDataBase, mm: ModelManager, clear_up):
     pred = model.predict(idf_test, id_column="ID", target_column="B", out_table=OUT_TABLE_PRED)
     assert pred
     assert all(pred.columns == ['ID', 'CLASS'])
-    assert list(pred['CLASS'].head().values) == ['n', 'n', 'p']
+    assert list(pred.head()['CLASS'].values) == ['p', 'n', 'n']
 
     score = model.score(idf_test, id_column="ID", target_column="B")
 

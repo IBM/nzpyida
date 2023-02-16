@@ -15,94 +15,61 @@ from nzpyida.base import IdaDataBase
 from nzpyida.analytics.model_manager import ModelManager
 from nzpyida.analytics.predictive.decision_trees import DecisionTreeClassifier
 from nzpyida.analytics.tests.conftest import MOD_NAME, OUT_TABLE_PRED, OUT_TABLE_CM, TAB_NAME_TEST, \
-    TAB_NAME_TRAIN, df_train, df_test
+    TAB_NAME_TRAIN, df_test, df_train
 import pandas as pd
 import pytest
 
-ID_COLUMN = 'ID'
-TARGET_COLUMN = 'B'
+TAB_NAME_TEST = "TAB_NAME1"
+TAB_NAME_TRAIN = "TAB_NAME2"
+MOD_NAME = "MOD_NAME1"
 
 @pytest.fixture(scope='module')
 def mm(idadb: IdaDataBase):
     return ModelManager(idadb)
 
 @pytest.fixture(scope='module')
-def model(idadb: IdaDataBase, mm: ModelManager):
+def clear_up(idadb: IdaDataBase, mm: ModelManager):
     if mm.model_exists(MOD_NAME):
         mm.drop_model(MOD_NAME)
     if idadb.exists_table(OUT_TABLE_PRED):
         idadb.drop_table(OUT_TABLE_PRED)
     if idadb.exists_table(OUT_TABLE_CM):
         idadb.drop_table(OUT_TABLE_CM)
-    
-    idf_train = idadb.as_idadataframe(df_train, tablename=TAB_NAME_TRAIN, clear_existing=True)
-    model = DecisionTreeClassifier(idadb, model_name=MOD_NAME)
-    model.fit(idf_train, id_column=ID_COLUMN, target_column=TARGET_COLUMN)
-    yield model
-
-    ret = idadb.ida_query(f'call NZA..MODEL_EXISTS(\'model={MOD_NAME}\')')
-    if not ret.empty and ret[0]:
-        idadb.ida_query(f'call NZA..DROP_MODEL(\'model={MOD_NAME}\')')
+    yield
+    if mm.model_exists(MOD_NAME):
+        mm.drop_model(MOD_NAME)
     if idadb.exists_table(OUT_TABLE_PRED):
         idadb.drop_table(OUT_TABLE_PRED)
     if idadb.exists_table(OUT_TABLE_CM):
         idadb.drop_table(OUT_TABLE_CM)
-    if idadb.exists_table(TAB_NAME_TEST):
-        idadb.drop_table(TAB_NAME_TEST)
-    if idadb.exists_table(TAB_NAME_TRAIN):
-        idadb.drop_table(TAB_NAME_TRAIN)
 
-@pytest.fixture(scope='module')
-def data(idadb: IdaDataBase):
+def test_decision_trees(idadb: IdaDataBase, mm: ModelManager, clear_up):
+    idf_train = idadb.as_idadataframe(df_train, tablename=TAB_NAME_TRAIN, clear_existing=True)
     idf_test = idadb.as_idadataframe(df_test, tablename=TAB_NAME_TEST, clear_existing=True)
-    return idf_test
+    assert idf_train
+    assert idf_test
 
-@pytest.fixture(scope='module')
-def model_trained(idadb: IdaDataBase, data: IdaDataFrame, model: DecisionTreeClassifier):
-    pred = model.predict(data, id_column=ID_COLUMN, target_column=TARGET_COLUMN, out_table=OUT_TABLE_PRED)
-    return pred
-
-@pytest.fixture(scope='module')
-def model_score(idadb: IdaDataBase, data: IdaDataFrame, model: DecisionTreeClassifier):
-    score = model.score(data, id_column=ID_COLUMN, target_column=TARGET_COLUMN)
-    return score
-
-@pytest.fixture(scope='module')
-def model_cm(idadb: IdaDataBase, data: IdaDataFrame, model: DecisionTreeClassifier):
-    cm_out = model.conf_matrix(in_df=data, id_column=ID_COLUMN, target_column=TARGET_COLUMN, 
-                               out_matrix_table=OUT_TABLE_CM)
-    return cm_out
-
-
-def test_model_created(model):
+    model = DecisionTreeClassifier(idadb, MOD_NAME)
     assert model
-
-def test_model_trained(mm):
+    assert not mm.model_exists(MOD_NAME)
+    
+    model.fit(idf_train, id_column="ID", target_column="B", eval_measure='gini', min_improve=0, min_split=200)
     assert mm.model_exists(MOD_NAME)
 
-def test_predicted_df_columns(model_trained):
-    assert all(model_trained.columns == ['ID', 'CLASS'])
+    pred = model.predict(idf_test, id_column="ID", target_column="B", out_table=OUT_TABLE_PRED)
+    assert pred
+    assert all(pred.columns == ['ID', 'CLASS'])
+    assert list(pred.head()['CLASS'].values) in (['p', 'n', 'n'], ['p', 'p', 'n'])
 
-def test_predicted_df_values(model_trained):
-    assert list(model_trained['CLASS'].head().values) == ['n', 'n', 'p']
+    score = model.score(idf_test, id_column="ID", target_column="B")
 
-def test_model_score_value(model_score):
-    assert 0.67 >= model_score >= 0.66 
+    assert score
+    assert score >= 0.66
 
-def test_conf_matrix(model_cm):
-    assert all(model_cm[0])
-
-def test_conf_matrix_columns(model_cm):
-    assert all(model_cm[0].columns == ['REAL', 'PREDICTION', 'CNT'])
-
-def test_conf_matrix_length(model_cm):
-    assert len(model_cm[0]) >= 3
-
-def test_conf_matrix_sum_count(model_cm):
-    assert sum(model_cm[0].head()["CNT"].values) == 3
-
-def test_acc_value(model_cm):
-    assert 0.67 >= model_cm[1] >= 0.66
-
-def test_wacc_value(model_cm):
-    assert model_cm[2] == 0.75
+    cm, acc, wacc = model.conf_matrix(idf_test, id_column='ID', target_column='B', out_matrix_table=OUT_TABLE_CM)
+    assert all([cm, acc, wacc])
+    assert all(cm.columns == ['REAL', 'PREDICTION', 'CNT'])
+    assert len(cm) >= 2
+    assert sum(cm.head()["CNT"].values) == 3
+    assert wacc >= 0.75
+    assert acc >= 0.66

@@ -13,38 +13,40 @@ from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
 from nzpyida.analytics.model_manager import ModelManager
 from nzpyida.analytics.predictive.decision_trees import DecisionTreeClassifier
+from nzpyida.analytics.tests.conftest import MOD_NAME, TAB_NAME_TRAIN, df_train
 
 import pytest
-
-MOD_NAME = "TEST_MOD1"
 
 @pytest.fixture(scope='module')
 def mm(idadb: IdaDataBase):
     return ModelManager(idadb)
 
 @pytest.fixture(scope='module')
-def create_delete_model(idadb: IdaDataBase):
-    df = IdaDataFrame(idadb, 'TRAINING_DATA2', indexer='IMSI')
-    DecisionTreeClassifier(idadb, model_name=MOD_NAME).fit(df.loc[:10], id_column='IMSI', target_column='IS_FRAUD')
+def clear_up(idadb: IdaDataBase, mm: ModelManager):
+    if mm.model_exists(MOD_NAME):
+        mm.drop_model(MOD_NAME)
     yield
-    ret = idadb.ida_query(f'call NZA..MODEL_EXISTS(\'model={MOD_NAME}\')')
-    if not ret.empty and ret[0]:
-        idadb.ida_query(f'call NZA..DROP_MODEL(\'model={MOD_NAME}\')')
+    if mm.model_exists(MOD_NAME):
+        mm.drop_model(MOD_NAME)
 
 
-def test_list_models(mm: ModelManager):
+def test_model_manager(idadb, clear_up):
+    mm = ModelManager(idadb)
+    assert mm
+
+    # test listing models
     models_list = mm.list_models()
     assert models_list.exists()
 
-def test_model_not_exist(mm: ModelManager):
+    # verify model does not exist
     assert not mm.model_exists(MOD_NAME)
 
-def test_model_exist(mm: ModelManager, create_delete_model):
+    # create model and check if mm.model_exits shows it
+    idf_train = idadb.as_idadataframe(df_train, tablename=TAB_NAME_TRAIN, clear_existing=True)
+    DecisionTreeClassifier(idadb, model_name=MOD_NAME).fit(idf_train, id_column='ID', target_column='B')
     assert mm.model_exists(MOD_NAME)
 
-
-def test_drop_model(mm: ModelManager, create_delete_model):
+    # test droping model
     mm.drop_model(MOD_NAME)
     models_length = len(mm.list_models())
-    assert models_length == 0 or MOD_NAME not in mm.list_models().head(models_length)[["MODELNAME"]].values
-    
+    assert MOD_NAME not in mm.list_models().head(models_length)[["MODELNAME"]].values
