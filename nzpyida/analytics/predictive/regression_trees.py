@@ -8,7 +8,20 @@
 #
 # The full license is in the LICENSE file, distributed with this software.
 #-----------------------------------------------------------------------------
+"""
+Regression trees are decision trees adapted to the regression task, which store
+numeric target attribute values instead of class labels in leaves, and use
+appropriately modified split selection and stop criteria.
 
+As with decision trees, regression tree nodes decompose the data into subsets,
+and regression tree leaves correspond to sufficiently small or sufficiently
+uniform subsets. Splits are selected to decrease the dispersion of target
+attribute values, so that they can be reasonably well predicted by their mean
+values at leaves. The resulting model is piecewise-constant, with fixed
+predicted values assigned to regions to which the domain is decomposed by
+the tree structure.
+"""
+from typing import List
 from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
 from nzpyida.analytics.predictive.regression import Regression
@@ -22,8 +35,8 @@ class DecisionTreeRegressor(Regression):
         """
         Creates the regressor class.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
 
         idada : IdaDataBase
             database connector
@@ -40,15 +53,17 @@ class DecisionTreeRegressor(Regression):
         self.id_column_in_output = 'ID'
 
 
-    def fit(self, in_df: IdaDataFrame, id_column: str, target_column: str, in_column: str=None, 
-            col_def_type: str=None, col_def_role: str=None, col_properties_table: str=None, 
-            eval_measure: str=None, min_improve: float=0.1, min_split: int=50, max_depth: int=10, 
-            val_table: str=None, qmeasure: str=None, statistics: str=None):
+    def fit(self, in_df: IdaDataFrame, id_column: str, target_column: str,
+        in_columns: List[str]=None, col_def_type: str=None, col_def_role: str=None,
+        col_properties_table: str=None, eval_measure: str=None, min_improve: float=0.1,
+        min_split: int=50, max_depth: int=10, val_table: str=None, qmeasure: str=None,
+        statistics: str=None):
         """
-        Creates a regression tree model based on provided data and store it in a database.
+        This function creates a regression tree model based on provided data and
+        store it in a database.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
 
         in_df : IdaDataFrame
             the input data frame
@@ -64,8 +79,8 @@ class DecisionTreeRegressor(Regression):
             the input table nominal columns, if any, separated by a semi-colon (;).
             Parameter 'nominalCols' is deprecated please use 'incolumn' intead.
 
-        in_column : str, optional
-            the input table columns with special properties, separated by a semi-colon (;).
+        in_columns : List[str], optional
+            the list of input table columns with special properties.
             Each column is followed by one or several of the following properties:
                 its type: ':nom' (for nominal), ':cont' (for continuous).
                 Per default, all numerical types are con-tinuous, other types are nominal.
@@ -86,7 +101,8 @@ class DecisionTreeRegressor(Regression):
 
         col_properties_table : str, optional
             the input table where column properties for the input table columns are stored.
-            The format of this table is the output format of stored procedure nza..COLUMN_PROPERTIES().
+            The format of this table is the output format of stored procedure
+            nza..COLUMN_PROPERTIES().
             If the parameter is undefined, the input table column properties will be
             detected automatically.
             (Remark: colPropertiesTable with "COLROLE" column with value 'objweight' is
@@ -133,7 +149,7 @@ class DecisionTreeRegressor(Regression):
         params = {
             'id': id_column,
             'target': target_column,
-            'incolumn': in_column,
+            'incolumn': in_columns,
             'coldeftype': col_def_type,
             'coldefrole': col_def_role,
             'colpropertiestable': col_properties_table,
@@ -148,13 +164,13 @@ class DecisionTreeRegressor(Regression):
 
         self._fit(in_df=in_df, params=params)
 
-    def predict(self, in_df: IdaDataFrame, out_table: str=None, id_column: str=None, target_column: str=None,
-                variance: bool=False):
+    def predict(self, in_df: IdaDataFrame, out_table: str=None, id_column: str=None, 
+        target_column: str=None, variance: bool=False):
         """
         Makes predictions based on this model. The model must exist.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         in_df : IdaDataFrame
             the input data frame to predict
 
@@ -175,8 +191,8 @@ class DecisionTreeRegressor(Regression):
             a flag indicating whether the variance of the predictions should be included
             into the output table
 
-        Returns:
-        --------
+        Returns
+        -------
         IdaDataFrame
             the data frame containing row identifiers and predicted target values
         """

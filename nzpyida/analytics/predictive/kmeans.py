@@ -8,6 +8,23 @@
 #
 # The full license is in the LICENSE file, distributed with this software.
 #-----------------------------------------------------------------------------
+"""
+The k-means algorithm is the most widely-used clustering algorithm that uses
+an explicit distance measure to partition the data set into clusters.
+The main concept behind the k-means algorithm is to represent each cluster
+by the vector of mean attribute values of all training instances assigned
+to that cluster, called the cluster’s center. There are direct consequences
+of such a cluster representation:
+
+- the algorithm handles continuous attributes only, although workarounds
+for discrete attributes are possible
+
+- both the cluster formation and cluster modeling processes can be performed
+in a computationally efficient way by applying the specified distance
+function to match instances against cluster centers
+"""
+
+from typing import List
 from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
 from nzpyida.analytics.utils import map_to_props, make_temp_table_name
@@ -24,8 +41,8 @@ class KMeans(PredictiveModeling):
         """
         Creates the clusterer class.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
 
         idada : IdaDataBase
             database connector
@@ -42,15 +59,28 @@ class KMeans(PredictiveModeling):
         self.target_column_in_output = 'CLUSTER_ID'
         self.id_column_in_output = 'ID'
 
-    def fit(self, in_df: IdaDataFrame, id_column: str, target_column: str, in_column: str=None,
-        col_def_type: str=None, col_def_role: str=None, col_properties_table: str=None, out_table: str=None,
-        distance: str='norm_euclidean', k: int=3, max_iter: int=5, rand_seed: int=12345,
-        id_based: bool=False, statistics: str=None, transform: str='L') -> IdaDataFrame:
+    def fit(self, in_df: IdaDataFrame, id_column: str, target_column: str,
+        in_columns: List[str]=None, col_def_type: str=None, col_def_role: str=None,
+        col_properties_table: str=None, out_table: str=None, distance: str='norm_euclidean',
+        k: int=3, max_iter: int=5, rand_seed: int=12345, id_based: bool=False,
+        statistics: str=None, transform: str='L') -> IdaDataFrame:
         """
-        Creates a model for clustering based on provided data and store it in a database.
+        Creates and trains a model for clustering based on provided data and store
+        it in a database.
 
-        Parameters:
-        -----------
+        The training algorithm operates by performing several iterations of the same
+        basic process. Each training instance is assigned to the closest cluster
+        with respect to the specified distance function, applied to the instance
+        and cluster center. All cluster centers are then re-calculated as the mean
+        attribute value vectors of the instances assigned to particular clusters.
+        The cluster centers are initialized by randomly picking k training instances,
+        where k is the desired number of clusters. The iterative process should
+        terminate when there are either no or sufficiently few changes in cluster
+        assignments. In practice, however, it is sufficient to specify the number of
+        iterations, typically a number between 3 and 36.
+
+        Parameters
+        ----------
         in_df : IdaDataFrame
             the input data frame
 
@@ -61,8 +91,8 @@ class KMeans(PredictiveModeling):
             the input table column representing a class or a value to predict,
             this column is ignored by the Clustering algorithm.
 
-        in_column : str, optional
-            the input table columns with special properties, separated by a semi-colon (;).
+        in_columns : List[str], optional
+            the list of input table columns with special properties.
             Each column is followed by one or several of the following properties:
                 its type: ':nom' (for nominal), ':cont' (for continuous).
                 Per default, all numerical types are con-tinuous, other types are nominal.
@@ -84,7 +114,8 @@ class KMeans(PredictiveModeling):
 
         col_properties_table : str, optional
             the input table where column properties for the input table columns are stored.
-            The format of this table is the output format of stored procedure nza..COLUMN_PROPERTIES().
+            The format of this table is the output format of stored procedure
+            nza..COLUMN_PROPERTIES().
             If the parameter is undefined, the input table column properties will be
             detected automatically.
             (Remark: colPropertiesTable with "COLROLE" column with value 'objweight'
@@ -96,8 +127,8 @@ class KMeans(PredictiveModeling):
             the output table where clusters are assigned to each input table record
 
         distance : str, optional
-            the distance function. Allowed values are: euclidean, norm_euclidean, manhattan, canberra,
-            maximum, mahalanobis.
+            the distance function. Allowed values are: euclidean, norm_euclidean, manhattan,
+            canberra, maximum, mahalanobis.
 
         k : int, optional
             number of centers
@@ -115,7 +146,8 @@ class KMeans(PredictiveModeling):
             flags indicating which statistics to collect.
             Allowed values are: none, columns, values:n, all.
             If statistics=none, no statistics are collected.
-            If statistics=columns, statistics on the input table columns like mean value are collec-ted.
+            If statistics=columns, statistics on the input table columns like mean value are
+            collec-ted.
             If statistics=values:n with n a positive number, statistics about the columns and
             the column values are collected. Up to <n> column value statistics are collected:
             If a nominal column contains more than <n> values, only the <n> most frequent
@@ -126,10 +158,13 @@ class KMeans(PredictiveModeling):
 
         transform : str, optional
             flag indicating if the input table columns have to be transformed.
-            Allowed values are: L (for leave as is), N (for normalization) or S (for standardization).
+            Allowed values are: L (for leave as is), N (for normalization)
+            or S (for standardization).
             If it is not specified, no transformation will be performed.
 
         """
+        if not isinstance(in_df, IdaDataFrame):
+            raise TypeError("Argument in_df should be an IdaDataFrame")
 
         auto_delete_context = None
         if not out_table:
@@ -139,7 +174,7 @@ class KMeans(PredictiveModeling):
         params = {
             'id': id_column,
             'target': target_column,
-            'incolumn': in_column,
+            'incolumn': in_columns,
             'coldeftype': col_def_type,
             'coldefrole': col_def_role,
             'colpropertiestable': col_properties_table,
@@ -160,13 +195,13 @@ class KMeans(PredictiveModeling):
 
         return IdaDataFrame(self.idadb, out_table)
 
-
-    def predict(self, in_df: IdaDataFrame, out_table: str=None, id_column: str=None) -> IdaDataFrame:
+    def predict(self, in_df: IdaDataFrame, out_table: str=None,
+        id_column: str=None) -> IdaDataFrame:
         """
         Makes predictions based on this model. The model must exist.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         in_df : IdaDataFrame
             the input data frame
 
@@ -176,8 +211,8 @@ class KMeans(PredictiveModeling):
         id_column : str, optional
             the input table column identifying a unique instance id
 
-        Returns:
-        --------
+        Returns
+        -------
         IdaDataFrame
             the data frame containing row identifiers and predicted target values
         """
@@ -192,8 +227,8 @@ class KMeans(PredictiveModeling):
         """
         Scores the model. The model must exist.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         in_df : IdaDataFrame
             the input data frame for scoring
 
@@ -203,8 +238,8 @@ class KMeans(PredictiveModeling):
         target_column : str
             the input table column representing the class
 
-        Returns:
-        --------
+        Returns
+        -------
         float
             the model score
         """

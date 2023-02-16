@@ -21,8 +21,8 @@ class AutoDeleteContext:
         """
         Creates the context.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         idadb : IdaDataBase
             the database connector
         """
@@ -36,8 +36,8 @@ class AutoDeleteContext:
         Returns an instance of AutoDeleteContext assigned to the current thread or None
         if nothing is assigned.
 
-        Returns:
-        --------
+        Returns
+        -------
         AutoDeleteContext
             the current thread AutoDeleteContext or None
         """
@@ -50,8 +50,8 @@ class AutoDeleteContext:
         """
         Register a table to be deleted when this context exits.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         table_name : str
             the table name
         """

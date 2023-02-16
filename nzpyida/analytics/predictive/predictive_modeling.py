@@ -8,10 +8,13 @@
 #
 # The full license is in the LICENSE file, distributed with this software.
 #-----------------------------------------------------------------------------
+"""
+This module contains a class that is the base for all predictive algorithms.
+"""
 from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
 from nzpyida.analytics.utils import map_to_props, materialize_df, make_temp_table_name
-from nzpyida.analytics.utils import get_auto_delete_context
+from nzpyida.analytics.utils import call_proc_df_in_out
 from nzpyida.analytics.model_manager import ModelManager
 
 
@@ -24,8 +27,8 @@ class PredictiveModeling:
         """
         Creates the predictive modeling class.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
 
         idada : IdaDataBase
             database connector
@@ -48,14 +51,16 @@ class PredictiveModeling:
         """
         Trains the model.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         in_df : IdaDataFrame
             the input data frame
 
         params : dict
             the dictionary of attributes used to build the model
         """
+        if not isinstance(in_df, IdaDataFrame):
+            raise TypeError("Argument in_df should be an IdaDataFrame")
 
         ModelManager(self.idadb).drop_model(self.model_name)
 
@@ -75,8 +80,8 @@ class PredictiveModeling:
         """
         Makes predictions based on the model. The model must exist.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         in_df : IdaDataFrame
             the input data frame
 
@@ -86,43 +91,24 @@ class PredictiveModeling:
         out_table : str, optional
             the output table where the predictions will be stored
 
-        Returns:
-        --------
+        Returns
+        -------
         IdaDataFrame
             the data frame containing row identifiers and predicted target values
         """
-
-        temp_view_name, need_delete = materialize_df(in_df)
-
-        auto_delete_context = None
-        if not out_table:
-            auto_delete_context = get_auto_delete_context('out_table')
-            out_table = make_temp_table_name()
+        if not isinstance(in_df, IdaDataFrame):
+            raise TypeError("Argument in_df should be an IdaDataFrame")
 
         params['model'] = self.model_name
-        params['intable'] = temp_view_name
-        params['outtable'] = out_table
-        params_s = map_to_props(params)
-
-        try:
-            self.idadb.ida_query(f'call NZA..{self.predict_proc}(\'{params_s}\')')
-        finally:
-            if need_delete:
-                self.idadb.drop_view(temp_view_name)
-
-        out_df = IdaDataFrame(self.idadb, out_table)
-
-        if auto_delete_context:
-            auto_delete_context.add_table_to_delete(out_table)
-
-        return out_df
+        return call_proc_df_in_out(proc=self.predict_proc, in_df=in_df, params=params,
+            out_table=out_table)
 
     def _score(self, in_df: IdaDataFrame, predict_params:dict, target_column: str) -> float:
         """
         Scores the model. The model must exist.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         in_df : IdaDataFrame
             the input data frame
 
@@ -132,11 +118,13 @@ class PredictiveModeling:
         target_column : str
             the input table column representing the class
 
-        Returns:
-        --------
+        Returns
+        -------
         float
             the model score
         """
+        if not isinstance(in_df, IdaDataFrame):
+            raise TypeError("Argument in_df should be an IdaDataFrame")
 
         out_table = make_temp_table_name()
 
@@ -153,9 +141,11 @@ class PredictiveModeling:
             params = map_to_props({
                 'pred_table': pred_view,
                 'true_table': true_view,
-                'pred_id': id_column if self.id_column_in_output is None else self.id_column_in_output,
+                'pred_id': id_column if self.id_column_in_output is None
+                    else self.id_column_in_output,
                 'true_id': id_column,
-                'pred_column': target_column if self.target_column_in_output is None else self.target_column_in_output,
+                'pred_column': target_column if self.target_column_in_output is None
+                    else self.target_column_in_output,
                 'true_column': target_column
             })
 

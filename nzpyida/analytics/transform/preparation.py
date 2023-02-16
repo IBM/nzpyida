@@ -9,46 +9,23 @@
 # The full license is in the LICENSE file, distributed with this software.
 #-----------------------------------------------------------------------------
 from nzpyida.frame import IdaDataFrame
-from nzpyida.analytics.utils import map_to_props, materialize_df, make_temp_table_name
-from nzpyida.analytics.utils import get_auto_delete_context
+from nzpyida.analytics.utils import call_proc_df_in_out
 
 
-def __prepare(proc: str, in_df: IdaDataFrame, params: dict, out_table: str=None) -> IdaDataFrame:
-    """
-    Generic function for data processing.
-    """
-
-    temp_view_name, need_delete = materialize_df(in_df)
-
-    auto_delete_context = None
-    if not out_table:
-        auto_delete_context = get_auto_delete_context('out_table')
-        out_table = make_temp_table_name()
-
-    params['intable'] = temp_view_name
-    params['outtable'] = out_table
-
-    params_s = map_to_props(params)
-
-    try:
-        in_df.ida_query(f'call NZA..{proc}(\'{params_s}\')')
-    finally:
-        if need_delete:
-            in_df._idadb.drop_view(temp_view_name)
-
-    if auto_delete_context:
-        auto_delete_context.add_table_to_delete(out_table)
-
-    return IdaDataFrame(in_df._idadb, out_table)
-
-
-def std_norm(in_df: IdaDataFrame, id_column: str, in_column: str, by: str=None,
+def std_norm(in_df: IdaDataFrame, id_column: str, in_column: str, by_column: str=None,
     out_table: str=None) -> IdaDataFrame:
     """
-    Normalize and stardardize columns of the input data frame and returns that in a new data frame.
+    Standardization and normalization transformations use the original continuous
+    attribute a to generate a new continuous attribute a ' that has a different range
+    or distribution than the original attribute. Common transformations modify the
+    range to fit the [-1,1 ] interval (normalization) or modify the distribution to
+    have a mean of 0 and a standard deviation of 1 (standardization).
 
-    Parameters:
-    -----------
+    This function normalize and stardardize columns of the input data frame and returns
+    that in a new data frame.
+
+    Parameters
+    ----------
     in_df : IdaDataFrame
         the input data frame
 
@@ -63,15 +40,15 @@ def std_norm(in_df: IdaDataFrame, id_column: str, in_column: str, by: str=None,
         by :C to make the columns be a row unit vector or by :V to divide the column
         values by the length of the longest row vector.
 
-    by : str, optional
+    by_column : str, optional
         the input table column which splits the data into groups for which the operation
         is to be performed
 
     out_table : str, optional
         the output table with the modified data
 
-    Returns:
-    --------
+    Returns
+    -------
     IdaDataFrame
         the data frame with requested transformations
     """
@@ -79,18 +56,24 @@ def std_norm(in_df: IdaDataFrame, id_column: str, in_column: str, by: str=None,
     params = {
         'id': id_column,
         'incolumn': in_column,
-        'by': by
+        'by': by_column
     }
-    return __prepare(proc='STD_NORM', in_df=in_df, params=params, out_table=out_table)
+    return call_proc_df_in_out(proc='STD_NORM', in_df=in_df, params=params, out_table=out_table)
 
 
 def impute_data(in_df: IdaDataFrame, in_column: str=None, method: str=None,
     numeric_value: float=-1, nominal_value: str='missing', out_table: str=None) -> IdaDataFrame:
     """
-    Replaces missing values in the input data frame and returns the result in a new data frame.
+    Many analytic algorithms require that the data set has no missing attribute values.
+    However, real-world data sets frequently suffer from missing attribute values.
+    Missing value imputation provides usable attribute values in place of the missing values,
+    allowing the algorithms to run.
 
-    Parameters:
-    -----------
+    This function replaces missing values in the input data frame and returns the result
+    in a new data frame.
+
+    Parameters
+    ----------
     in_df : IdaDataFrame
         the input data frame
 
@@ -112,8 +95,8 @@ def impute_data(in_df: IdaDataFrame, in_column: str=None, method: str=None,
     out_table : str, optional
         the output table with the modified data
 
-    Returns:
-    --------
+    Returns
+    -------
     IdaDataFrame
         the data frame with requested transformations
     """
@@ -124,17 +107,33 @@ def impute_data(in_df: IdaDataFrame, in_column: str=None, method: str=None,
         'numericvalue': numeric_value,
         'nominalvalue': nominal_value
     }
-    return __prepare(proc='IMPUTE_DATA', in_df=in_df, params=params, out_table=out_table)
+    return call_proc_df_in_out(proc='IMPUTE_DATA', in_df=in_df, params=params, out_table=out_table)
 
 
-def random_sample(in_df: IdaDataFrame, size: int, fraction: float=None,
-    by: str=None, out_signature: str=None, rand_seed: int=None, out_table: str=None) -> IdaDataFrame:
+def random_sample(in_df: IdaDataFrame, size: int, fraction: float=None, by_column: str=None,
+    out_signature: str=None, rand_seed: int=None, out_table: str=None) -> IdaDataFrame:
     """
-    Creates a random sample of a data frame a fixed size or a fixed probability and
-    returns the result in a new data frame.
+    Random sampling procedures are a vital component of many analytical systems. They can
+    be used to select a test sample and a training sample for a model building process
+    (machine learning). They can also be used to get a smaller sample of the training
+    set, which you may do because of learning algorithm complexity considerations.
+    In both cases, you would sample without replacement.
 
-    Parameters:
-    -----------
+    Another application of sampling is the learning methods based on bootstrapping.
+    This requires many independent samples from the same data, which are preferentially
+    applied if the available data sets are small or for other reasons where the sample
+    independence is vital. Samples with replacement are usually drawn in this case.
+    
+    In application, sampling is used for promotion campaigns, for example when you want
+    only a representative set of customers to be subjects of an action.
+    In all cases, whether for use with scientific methods or business practices, uniform
+    sampling is important.
+
+    This function creates a random sample of a data frame a fixed size or a fixed
+    probability and returns the result in a new data frame.
+
+    Parameters
+    ----------
     in_df : IdaDataFrame
         the input data frame
 
@@ -148,7 +147,7 @@ def random_sample(in_df: IdaDataFrame, size: int, fraction: float=None,
         and <size> must not be specified. Otherwise, one of both parameters <num> or <size>
         must be specified.
 
-    by : str
+    by_column : str
         the column used to stratify the input table. If indicated, stratified sampling is
         done: it ensures that each value of the column is represented in the sample in
         about the same percentage as in the original input table.
@@ -163,8 +162,8 @@ def random_sample(in_df: IdaDataFrame, size: int, fraction: float=None,
     out_table : str
         the output table with the modified data
 
-    Returns:
-    --------
+    Returns
+    -------
     IdaDataFrame
         the data frame with requested transformations
     """
@@ -172,8 +171,8 @@ def random_sample(in_df: IdaDataFrame, size: int, fraction: float=None,
     params = {
         'size': size,
         'fraction': fraction,
-        'by': by,
+        'by': by_column,
         'outsignature': out_signature,
         'randseed': rand_seed
     }
-    return __prepare(proc='RANDOM_SAMPLE', in_df=in_df, params=params, out_table=out_table)
+    return call_proc_df_in_out(proc='RANDOM_SAMPLE', in_df=in_df, params=params, out_table=out_table)

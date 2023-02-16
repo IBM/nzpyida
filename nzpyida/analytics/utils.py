@@ -20,20 +20,23 @@ def map_to_props(data: Dict[str, Any]) -> str:
     Maps the given dictionary of attributes into coma separated list of key/value
     pairs. Skips these pairs with value None.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     data : dict
         the input data
 
-    Returns:
-    --------
+    Returns
+    -------
     str
         the output string
     """
 
     ret = []
     for k, v in data.items():
-        if v is not None:
+        if isinstance(v, list):
+            if len(v):
+                ret.append(f"{k}={';'.join(map(str, v))}")
+        elif v is not None:
             ret.append(f"{k}={v}")
     return ",".join(ret)
 
@@ -44,13 +47,13 @@ def materialize_df(df: IdaDataFrame) -> Tuple[str, bool]:
     The second items of the returned tuple shows if what is returned is a temporaty view
     (that should be dropped by the caller) or exisintg table.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     df : IdaDataFrame
         the input data frame
 
-    Returns:
-    --------
+    Returns
+    -------
     str
         the name of db object (view or table) available representing the data frame
 
@@ -70,13 +73,13 @@ def make_temp_table_name(prefix: str='DATA_FRAME_') -> str:
     """
     Generate temp table name.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     prefix : str, optional
         name prefix
 
-    Returns:
-    --------
+    Returns
+    -------
     str
         generated table name with the given prefix
     """
@@ -89,19 +92,19 @@ def get_auto_delete_context(out_table_attr_name: str) -> AutoDeleteContext:
     If nothing is assigned, raise an exception with appropriate error message.
     The 'out_table_attr_name' is included in that message.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     out_table_attr_name : str
         the name of function parameter with the output table name (used for
         a message in the exception only)
 
-    Returns:
-    --------
+    Returns
+    -------
     AutoDeleteContext
         current thread AutoDeleteContext
 
-    Raises:
-    -------
+    Raises
+    ------
     RuntimeError
         If there is no AutoDeleteContext attached to the current thread.
     """
@@ -110,3 +113,37 @@ def get_auto_delete_context(out_table_attr_name: str) -> AutoDeleteContext:
         raise RuntimeError('This code needs to run inside of AutoDeleteContext context manager or '
         f'you need to set an output table name in {out_table_attr_name} function attribute')
     return AutoDeleteContext.current()
+
+def call_proc_df_in_out(proc: str, in_df: IdaDataFrame, params: dict, out_table: str=None) -> IdaDataFrame:
+    """
+    Generic function for data processing.
+    """
+    if not isinstance(in_df, IdaDataFrame):
+        raise TypeError("Argument in_df should be an IdaDataFrame")
+
+    temp_view_name, need_delete = materialize_df(in_df)
+
+    auto_delete_context = None
+    if not out_table:
+        auto_delete_context = get_auto_delete_context('out_table')
+        out_table = make_temp_table_name()
+
+    params['intable'] = temp_view_name
+    params['outtable'] = out_table
+
+    params_s = map_to_props(params)
+
+    try:
+        in_df.ida_query(f'call NZA..{proc}(\'{params_s}\')')
+    finally:
+        if need_delete:
+            in_df._idadb.drop_view(temp_view_name)
+
+    if not in_df._idadb.exists_table_or_view(out_table):
+        # stored procedure call was successful by did not produce a table
+        return None
+
+    if auto_delete_context:
+        auto_delete_context.add_table_to_delete(out_table)
+
+    return IdaDataFrame(in_df._idadb, out_table)

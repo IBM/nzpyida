@@ -8,7 +8,7 @@
 #
 # The full license is in the LICENSE file, distributed with this software.
 #-----------------------------------------------------------------------------
-
+import pytest
 from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
 from nzpyida.analytics.model_manager import ModelManager
@@ -17,11 +17,6 @@ from nzpyida.analytics.tests.conftest import MOD_NAME, TAB_NAME_TRAIN, df_train
 
 import pytest
 
-@pytest.fixture(scope='module')
-def mm(idadb: IdaDataBase):
-    return ModelManager(idadb)
-
-@pytest.fixture(scope='module')
 def clear_up(idadb: IdaDataBase, mm: ModelManager):
     if mm.model_exists(MOD_NAME):
         mm.drop_model(MOD_NAME)

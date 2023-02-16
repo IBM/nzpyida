@@ -8,6 +8,9 @@
 #
 # The full license is in the LICENSE file, distributed with this software.
 #-----------------------------------------------------------------------------
+"""
+This module contains a class that is the base for all classification algorithms.
+"""
 from typing import Tuple
 from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
@@ -25,8 +28,8 @@ class Classification(PredictiveModeling):
         """
         Creates the classifier class.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
 
         idada : IdaDataBase
             database connector
@@ -42,12 +45,13 @@ class Classification(PredictiveModeling):
         self.score_proc = 'CERROR'
         self.score_inv = True
 
-    def predict(self, in_df: IdaDataFrame, out_table: str=None, id_column: str=None) -> IdaDataFrame:
+    def predict(self, in_df: IdaDataFrame, out_table: str=None,
+        id_column: str=None) -> IdaDataFrame:
         """
         Makes predictions based on this model. The model must exist.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         in_df : IdaDataFrame
             the input data frame for predictions
 
@@ -68,8 +72,8 @@ class Classification(PredictiveModeling):
         """
         Scores the model. The model must exist.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         in_df : IdaDataFrame
             the input data frame for scoring
 
@@ -79,8 +83,8 @@ class Classification(PredictiveModeling):
         target_column : str
             the input table column representing the class
 
-        Returns:
-        --------
+        Returns
+        -------
         float
             the model score
         """
@@ -97,8 +101,8 @@ class Classification(PredictiveModeling):
         Makes a predition for a test data set given by the user and returns a confusion matrix,
         together with other stats (ACC and WACC).
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         in_df : IdaDataFrame
             the input data frame for scoring
 
@@ -111,8 +115,8 @@ class Classification(PredictiveModeling):
         out_matrix_table : str, optional
             the output table where the confidence matrix will be stored
 
-        Returns:
-        --------
+        Returns
+        -------
         IdaDataFrame
             the confidence matrix data frame
 
@@ -122,6 +126,7 @@ class Classification(PredictiveModeling):
         float
             weighted classification accuracy (WACC)
         """
+
         params = {
             'id': id_column,
             'target': target_column
@@ -130,6 +135,10 @@ class Classification(PredictiveModeling):
         
     def _conf_matrix(self, in_df: IdaDataFrame, out_matrix_table: str=None, 
                      params: dict={}) -> Tuple[IdaDataFrame, float, float]:
+
+        if not isinstance(in_df, IdaDataFrame):
+            raise TypeError("Argument in_df should be an IdaDataFrame")
+
 
         out_table = make_temp_table_name()
 

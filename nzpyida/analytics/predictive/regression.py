@@ -8,6 +8,9 @@
 #
 # The full license is in the LICENSE file, distributed with this software.
 #-----------------------------------------------------------------------------
+"""
+This module contains a class that is the base for all regression algorithms.
+"""
 from typing import Dict
 from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
@@ -24,8 +27,8 @@ class Regression(PredictiveModeling):
         """
         Creates the regressor class.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
 
         idada : IdaDataBase
             database connector
@@ -38,12 +41,13 @@ class Regression(PredictiveModeling):
         super().__init__(idadb, model_name)
         self.score_proc = 'MSE'
 
-    def predict(self, in_df: IdaDataFrame, out_table: str=None, id_column: str=None) -> IdaDataFrame:
+    def predict(self, in_df: IdaDataFrame, out_table: str=None,
+        id_column: str=None) -> IdaDataFrame:
         """
         Makes predictions based on this model. The model must exist.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         in_df : IdaDataFrame
             the input data frame to predict
 
@@ -54,8 +58,8 @@ class Regression(PredictiveModeling):
             the input table column identifying a unique instance id
             Default: <id> column used to build the model
 
-        Returns:
-        --------
+        Returns
+        -------
         IdaDataFrame
             the data frame containing row identifiers and predicted target values
         """
@@ -70,8 +74,8 @@ class Regression(PredictiveModeling):
         """
         Scores the model. The model must exist.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         in_df : IdaDataFrame
             the input data frame for scoring
 
@@ -81,8 +85,8 @@ class Regression(PredictiveModeling):
         target_column : str
             the input table column representing the class
 
-        Returns:
-        --------
+        Returns
+        -------
         float
             the model score
         """
@@ -93,12 +97,13 @@ class Regression(PredictiveModeling):
 
         return self._score(in_df=in_df, predict_params=params, target_column=target_column)
 
-    def score_all(self, in_df: IdaDataFrame, id_column: str, target_column: str) -> Dict[str, float]:
+    def score_all(self, in_df: IdaDataFrame, id_column: str,
+        target_column: str) -> Dict[str, float]:
         """
         Scores the model using MSE, MAE, RSE and RAE. The model must exist.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         in_df : IdaDataFrame
             the input data frame for scoring
 
@@ -108,11 +113,13 @@ class Regression(PredictiveModeling):
         target_column : str
             the input table column representing the class
 
-        Returns:
-        --------
+        Returns
+        -------
         dict
             the model scores in a dictionary with MSE, MAE, RSE and RAE as keys
         """
+        if not isinstance(in_df, IdaDataFrame):
+            raise TypeError("Argument in_df should be an IdaDataFrame")
 
         out_table = make_temp_table_name()
 
@@ -126,9 +133,11 @@ class Regression(PredictiveModeling):
             params = map_to_props({
                 'pred_table': pred_view,
                 'true_table': true_view,
-                'pred_id': id_column if self.id_column_in_output is None else self.id_column_in_output,
+                'pred_id': id_column if self.id_column_in_output is None
+                    else self.id_column_in_output,
                 'true_id': id_column,
-                'pred_column': target_column if self.target_column_in_output is None else self.target_column_in_output,
+                'pred_column': target_column if self.target_column_in_output is None
+                    else self.target_column_in_output,
                 'true_column': target_column
             })
 

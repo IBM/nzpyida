@@ -24,4 +24,4 @@ from .geoSeries import IdaGeoSeries
 __all__ = ['learn', 'sampledata', 'tests', 'aggregation', 
 		   'base', 'exceptions', 'filtering', 'frame', 'indexing', 
 		   'internals', 'series', 'sql', 'statistics', 'utils', 'geoFrame',
-             'geoSeries', 'wrappers']
+             'geoSeries', 'analytics']
