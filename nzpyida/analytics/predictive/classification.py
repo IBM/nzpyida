@@ -136,15 +136,15 @@ class Classification(PredictiveModeling):
         }
         return self._conf_matrix(in_df, out_matrix_table, params)
         
-    def _conf_matrix(self, in_df: IdaDataFrame, out_matrix_table: str=None, 
+    def _conf_matrix(self, in_df: IdaDataFrame, out_matrix_table: str=None,
                      params: dict={}) -> Tuple[IdaDataFrame, float, float]:
 
         if not isinstance(in_df, IdaDataFrame):
             raise TypeError("Argument in_df should be an IdaDataFrame")
 
-        if not id_column:
+        if not params.get('id'):
             if in_df.indexer:
-                id_column = in_df.indexer
+                params['id'] = in_df.indexer
             else:
                 raise TypeError('Missing id column - either use id_column attribute or set '
                     'indexer column in the input data frame')

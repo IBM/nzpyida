@@ -17,7 +17,9 @@ from nzpyida.analytics.tests.conftest import MOD_NAME, TAB_NAME_TRAIN, df_train
 
 import pytest
 
-def clear_up(idadb: IdaDataBase, mm: ModelManager):
+@pytest.fixture(scope='module')
+def clear_up(idadb: IdaDataBase):
+    mm = ModelManager(idadb)
     if mm.model_exists(MOD_NAME):
         mm.drop_model(MOD_NAME)
     yield

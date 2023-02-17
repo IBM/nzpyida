@@ -56,7 +56,7 @@ def test_decision_trees(idadb: IdaDataBase, mm: ModelManager, clear_up):
     model.fit(idf_train, id_column="ID", target_column="B", eval_measure='gini', min_improve=0, min_split=200)
     assert mm.model_exists(MOD_NAME)
 
-    pred = model.predict(idf_test, id_column="ID", target_column="B", out_table=OUT_TABLE_PRED)
+    pred = model.predict(idf_test, id_column="ID", out_table=OUT_TABLE_PRED)
     assert pred
     assert all(pred.columns == ['ID', 'CLASS'])
     assert list(pred.head()['CLASS'].values) in (['p', 'n', 'n'], ['p', 'p', 'n'])
