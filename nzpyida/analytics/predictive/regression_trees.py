@@ -50,7 +50,7 @@ class DecisionTreeRegressor(Regression):
         self.fit_proc = 'REGTREE'
         self.predict_proc = 'PREDICT_REGTREE'
         self.target_column_in_output = "CLASS"
-
+        self.has_print_proc = True
 
     def fit(self, in_df: IdaDataFrame, target_column: str, id_column: str=None,
         in_columns: List[str]=None, col_def_type: str=None, col_def_role: str=None,
@@ -67,7 +67,7 @@ class DecisionTreeRegressor(Regression):
         in_df : IdaDataFrame
             the input data frame
 
-        target_column : str, optional
+        target_column : str
             the input table column representing the prediction target, definition of multitargets
             can be processed by 'incolumn' parameter and column properties.
 
@@ -197,7 +197,3 @@ class DecisionTreeRegressor(Regression):
             }
 
         return self._predict(in_df=in_df, params=params, out_table=out_table)
-
-    def __str__(self):
-        params = map_to_props({'model': self.model_name})
-        return self.idadb.ida_query(f'call NZA..PRINT_REGTREE(\'{params}\')')[0]

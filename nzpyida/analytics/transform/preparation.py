@@ -34,7 +34,7 @@ def std_norm(in_df: IdaDataFrame, in_column: List[str], id_column: str=None,
     in_df : IdaDataFrame
         the input data frame
 
-    in_column : str
+    in_column : List[str]
         the list of input table columns to consider.
         Each column name may be followed by :L to leave it unchanged, by :S to standardize
         its values, by :N to normalize its values or by :U to make it of unit length.

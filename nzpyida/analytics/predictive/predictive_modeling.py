@@ -46,6 +46,7 @@ class PredictiveModeling:
         self.score_inv = False
         self.target_column_in_output = None
         self.id_column_in_output = None
+        self.has_print_proc = False
 
     def _fit(self, in_df: IdaDataFrame, params:dict):
         """
@@ -171,3 +172,17 @@ class PredictiveModeling:
                 self.idadb.drop_view(pred_view)
             if true_view_needs_delete:
                 self.idadb.drop_view(true_view)
+
+    def describe(self) -> str:
+        """
+        Returns model description.
+
+        Returns
+        -------
+        str
+            model description
+        """
+        if self.has_print_proc:
+            params = map_to_props({'model': self.model_name})
+            return self.idadb.ida_query(f'call NZA..PRINT_MODEL(\'{params}\')')[0]
+        return ''

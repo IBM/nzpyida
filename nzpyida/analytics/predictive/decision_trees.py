@@ -63,6 +63,7 @@ class DecisionTreeClassifier(Classification):
         super().__init__(idadb, model_name)
         self.fit_proc = 'DECTREE'
         self.predict_proc = 'PREDICT_DECTREE'
+        self.has_print_proc = True
 
     def fit(self, in_df: IdaDataFrame, target_column: str, id_column: str=None,
         in_columns: List[str]=None, col_def_type: str=None, col_def_role: str=None,
@@ -78,7 +79,7 @@ class DecisionTreeClassifier(Classification):
         in_df : IdaDataFrame
             the input data frame
 
-        target_column : str, optional
+        target_column : str
             the input table column representing the class
 
         id_column : str, optional
@@ -107,25 +108,30 @@ class DecisionTreeClassifier(Classification):
 
         col_properties_table : str, optional
             the input table where column properties for the input table columns are stored.
-            The format of this table is the output format of stored procedure nza..COLUMN_PROPERTIES().
-            If the parameter is undefined, the input table column properties will be detected automatically.
+            The format of this table is the output format of stored procedure 
+            nza..COLUMN_PROPERTIES(). If the parameter is undefined, the input table column
+            properties will be detected automatically.
             (Remark: colPropertiesTable with "COLROLE" column with value 'objweight' is unsupported,
             i.e. same as 'ignore')
             (Remark: colPropertiesTable with "COLWEIGHT" column with value '<wgt>' is unsupported,
             i.e. same as '1')
 
         weights : str, optional
-            the input table containing optional instance or class weights for the input table columns.
+            the input table containing optional instance or class weights for the input 
+            table columns.
             If the parameter is undefined, we assume that the weights are uniformly equal to 1.
             The <weights> table contains following columns:
                 weight: a numeric column containing the instance or class weight,
-                id: a column to be joined with the <id> column of <intable>, defining instance weights,
-                class: a column to be joined with the <target> column of <intable>, defining class weights.
+                id: a column to be joined with the <id> column of <intable>, defining 
+                instance weights,
+                class: a column to be joined with the <target> column of <intable>, defining 
+                class weights.
             The id or class column can be missing, at least one of them must be present.
             For instances or classes not occurring in this table, weights of 1 are assumed.
 
         eval_measure : str, optional
-            the class impurity measure used for split evaluation. Allowed values are 'entropy' and 'gini'
+            the class impurity measure used for split evaluation. 
+            Allowed values are 'entropy' and 'gini'
 
         min_improve : float, optional
             the minimum improvement of the split evaluation measure required
@@ -141,7 +147,8 @@ class DecisionTreeClassifier(Classification):
             If this parameter is undefined, no pruning will be performed.
 
         val_weights : str, optional
-            the input table containing optional instance or class weights for the validation dataset.
+            the input table containing optional instance or class weights for the 
+            validation dataset.
             It is similar to the <weights> table.
 
         qmeasure : str, optional
@@ -152,16 +159,18 @@ class DecisionTreeClassifier(Classification):
             flags indicating which statistics to collect.
             Allowed values are: none, columns, values:n, all.
             If statistics=none, no statistics are collected.
-            If statistics=columns, statistics on the input table columns like mean value are collected.
-            If statistics=values:n with n a positive number, statistics about the columns and the column
+            If statistics=columns, statistics on the input table columns like mean 
+            value are collected.
+            If statistics=values:n with n a positive number, statistics about the 
+            columns and the column
             values are collected. Up to <n> column value statistics are collected:
-                If a nominal column contains more than <n> values, only the <n> most frequent column
-                statistics are kept.
-                If a numeric column contains more than <n> values, the values will be discretized and
-                the statistics will be collected on the discretized values.
+                If a nominal column contains more than <n> values, only the <n> most 
+                frequent column statistics are kept.
+                If a numeric column contains more than <n> values, the values will be
+                discretized and the statistics will be collected on the discretized values.
             Indicating statistics=all is equal to statistics=values:100.
         """
-        
+
         params = {
             'id': id_column,
             'target': target_column,

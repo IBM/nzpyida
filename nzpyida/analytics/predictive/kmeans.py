@@ -58,6 +58,7 @@ class KMeans(PredictiveModeling):
         self.score_proc = 'MSE'
         self.target_column_in_output = 'CLUSTER_ID'
         self.id_column_in_output = 'ID'
+        self.has_print_proc = True
 
     def fit(self, in_df: IdaDataFrame, id_column: str=None,
         in_columns: List[str]=None, col_def_type: str=None, col_def_role: str=None,
@@ -255,7 +256,3 @@ class KMeans(PredictiveModeling):
         }
 
         return self._score(in_df=in_df, predict_params=params, target_column=target_column)
-
-    def __str__(self):
-        params = map_to_props({'model': self.model_name})
-        return self.idadb.ida_query(f'call NZA..PRINT_KMEANS(\'{params}\')')[0]
