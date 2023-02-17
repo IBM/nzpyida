@@ -129,6 +129,16 @@ class Classification(PredictiveModeling):
         float
             weighted classification accuracy (WACC)
         """
+
+        params = {
+            'id': id_column,
+            'target': target_column
+        }
+        return self._conf_matrix(in_df, out_matrix_table, params)
+        
+    def _conf_matrix(self, in_df: IdaDataFrame, out_matrix_table: str=None, 
+                     params: dict={}) -> Tuple[IdaDataFrame, float, float]:
+
         if not isinstance(in_df, IdaDataFrame):
             raise TypeError("Argument in_df should be an IdaDataFrame")
 
@@ -143,8 +153,7 @@ class Classification(PredictiveModeling):
 
         pred_view_needs_delete, true_view_needs_delete = False, False
         try:
-            pred_df = self.predict(in_df=in_df, out_table=out_table, id_column=id_column)
-
+            pred_df = self._predict(in_df=in_df, out_table=out_table, params=params)
             pred_view, pred_view_needs_delete = materialize_df(pred_df)
             true_view, true_view_needs_delete = materialize_df(in_df)
 
@@ -153,16 +162,16 @@ class Classification(PredictiveModeling):
                 auto_delete_context = get_auto_delete_context('out_matrix_table')
                 out_matrix_table = make_temp_table_name()
 
-            params = map_to_props({
+            params_s = map_to_props({
                 'resulttable': pred_view,
                 'intable': true_view,
                 'resultid': 'ID',
-                'id': id_column,
+                'id': params['id'],
                 'resulttarget': 'CLASS',
-                'target': target_column,
+                'target': params['target'],
                 'matrixTable': out_matrix_table
             })
-            pred_df.ida_query(f'call NZA..CONFUSION_MATRIX(\'{params}\')')
+            self.idadb.ida_query(f'call NZA..CONFUSION_MATRIX(\'{params_s}\')')
 
             if auto_delete_context:
                 auto_delete_context.add_table_to_delete(out_matrix_table)
@@ -173,8 +182,8 @@ class Classification(PredictiveModeling):
                 'matrixTable': out_matrix_table
             })
 
-            res_acc = pred_df.ida_query(f'call NZA..CMATRIX_ACC(\'{params}\')')
-            res_wacc = pred_df.ida_query(f'call NZA..CMATRIX_WACC(\'{params}\')')
+            res_acc = self.idadb.ida_query(f'call NZA..CMATRIX_ACC(\'{params}\')')
+            res_wacc = self.idadb.ida_query(f'call NZA..CMATRIX_WACC(\'{params}\')')
 
             return out_df, res_acc[0], res_wacc[0]
 

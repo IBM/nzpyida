@@ -163,7 +163,7 @@ class PredictiveModeling:
                 'true_column': target_column
             })
 
-            res = pred_df.ida_query(f'call NZA..{self.score_proc}(\'{params}\')')
+            res = self.idadb.ida_query(f'call NZA..{self.score_proc}(\'{params}\')')
             return 1-res[0] if self.score_inv else res[0]
         finally:
             self.idadb.drop_table(out_table)
