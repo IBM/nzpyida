@@ -8,12 +8,17 @@
 #
 # The full license is in the LICENSE file, distributed with this software.
 #-----------------------------------------------------------------------------
+"""
+This module contains function that can be used to prepare an input data
+frame for machine learning.
+"""
+from typing import List
 from nzpyida.frame import IdaDataFrame
 from nzpyida.analytics.utils import call_proc_df_in_out
 
 
-def std_norm(in_df: IdaDataFrame, id_column: str, in_column: str, by_column: str=None,
-    out_table: str=None) -> IdaDataFrame:
+def std_norm(in_df: IdaDataFrame, in_column: List[str], id_column: str=None,
+    by_column: str=None, out_table: str=None) -> IdaDataFrame:
     """
     Standardization and normalization transformations use the original continuous
     attribute a to generate a new continuous attribute a ' that has a different range
@@ -29,16 +34,17 @@ def std_norm(in_df: IdaDataFrame, id_column: str, in_column: str, by_column: str
     in_df : IdaDataFrame
         the input data frame
 
-    id_column : str
-        the input table column identifying a unique instance id
-
     in_column : str
-        the input table columns to consider, separated by a semi-colon (;).
+        the list of input table columns to consider.
         Each column name may be followed by :L to leave it unchanged, by :S to standardize
         its values, by :N to normalize its values or by :U to make it of unit length.
         Additionally, two columns may be indicated, separated by a slash (/), followed
         by :C to make the columns be a row unit vector or by :V to divide the column
         values by the length of the longest row vector.
+
+    id_column : str, optional
+        the input table column identifying a unique instance id - if skipped, 
+        the input data frame indexer must be set and will be used as an instance id
 
     by_column : str, optional
         the input table column which splits the data into groups for which the operation
@@ -52,6 +58,12 @@ def std_norm(in_df: IdaDataFrame, id_column: str, in_column: str, by_column: str
     IdaDataFrame
         the data frame with requested transformations
     """
+    if not id_column:
+        if in_df.indexer:
+            id_column = in_df.indexer
+        else:
+            raise TypeError('Missing id column - either use id_column attribute or set '
+                'indexer column in the input data frame')
 
     params = {
         'id': id_column,
@@ -175,4 +187,5 @@ def random_sample(in_df: IdaDataFrame, size: int, fraction: float=None, by_colum
         'outsignature': out_signature,
         'randseed': rand_seed
     }
-    return call_proc_df_in_out(proc='RANDOM_SAMPLE', in_df=in_df, params=params, out_table=out_table)
+    return call_proc_df_in_out(proc='RANDOM_SAMPLE', in_df=in_df, params=params,
+        out_table=out_table)

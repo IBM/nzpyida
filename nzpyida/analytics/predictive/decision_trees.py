@@ -64,7 +64,7 @@ class DecisionTreeClassifier(Classification):
         self.fit_proc = 'DECTREE'
         self.predict_proc = 'PREDICT_DECTREE'
 
-    def fit(self, in_df: IdaDataFrame, id_column: str, target_column: str,
+    def fit(self, in_df: IdaDataFrame, target_column: str, id_column: str=None,
         in_columns: List[str]=None, col_def_type: str=None, col_def_role: str=None,
         col_properties_table: str=None, weights: str=None, eval_measure: str=None,
         min_improve: float=0.02, min_split: int=50, max_depth: int=10, val_table: str=None,
@@ -78,11 +78,12 @@ class DecisionTreeClassifier(Classification):
         in_df : IdaDataFrame
             the input data frame
 
-        id_column : str, optional
-            the input table column identifying a unique instance id
-
         target_column : str, optional
             the input table column representing the class
+
+        id_column : str, optional
+            the input table column identifying a unique instance id - if skipped, 
+            the input data frame indexer must be set and will be used as an instance id
 
         in_columns : str, optional
             the list of input table columns with special properties.
@@ -181,8 +182,8 @@ class DecisionTreeClassifier(Classification):
 
         self._fit(in_df=in_df, params=params)
 
-    def predict(self, in_df: IdaDataFrame, out_table: str=None, id_column: str=None,
-        target_column: str=None, prob: bool=False, out_table_prob: str=None) -> IdaDataFrame:
+    def predict(self, in_df: IdaDataFrame, out_table: str=None,
+        id_column: str=None, prob: bool=False, out_table_prob: str=None) -> IdaDataFrame:
         """
         Makes predictions based on this model. The model must exist.
 
@@ -197,9 +198,7 @@ class DecisionTreeClassifier(Classification):
 
         id_column : str, optional
             the input table column identifying a unique instance id
-
-        target_column : str, optional
-            the input table column representing the class
+            Default: id column used to build the model
 
         prob : bool, optional
             the flag indicating whether the probability of the predicted class should be included
@@ -217,7 +216,6 @@ class DecisionTreeClassifier(Classification):
 
         params = {
             'id': id_column,
-            'target': target_column,
             'prob': prob,
             'outtableprob': out_table_prob
         }

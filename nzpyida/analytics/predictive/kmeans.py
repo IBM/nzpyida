@@ -59,7 +59,7 @@ class KMeans(PredictiveModeling):
         self.target_column_in_output = 'CLUSTER_ID'
         self.id_column_in_output = 'ID'
 
-    def fit(self, in_df: IdaDataFrame, id_column: str, target_column: str,
+    def fit(self, in_df: IdaDataFrame, id_column: str=None,
         in_columns: List[str]=None, col_def_type: str=None, col_def_role: str=None,
         col_properties_table: str=None, out_table: str=None, distance: str='norm_euclidean',
         k: int=3, max_iter: int=5, rand_seed: int=12345, id_based: bool=False,
@@ -84,12 +84,9 @@ class KMeans(PredictiveModeling):
         in_df : IdaDataFrame
             the input data frame
 
-        id_column : str
-            the input table column identifying a unique instance id
-
-        target_column : str
-            the input table column representing a class or a value to predict,
-            this column is ignored by the Clustering algorithm.
+        id_column : str, optional
+            the input table column identifying a unique instance id - if skipped, 
+            the input data frame indexer must be set and will be used as an instance id
 
         in_columns : List[str], optional
             the list of input table columns with special properties.
@@ -166,6 +163,13 @@ class KMeans(PredictiveModeling):
         if not isinstance(in_df, IdaDataFrame):
             raise TypeError("Argument in_df should be an IdaDataFrame")
 
+        if not id_column:
+            if in_df.indexer:
+                id_column = in_df.indexer
+            else:
+                raise TypeError('Missing id column - either use id_column attribute or set '
+                    'indexer column in the input data frame')
+
         auto_delete_context = None
         if not out_table:
             auto_delete_context = get_auto_delete_context('out_table')
@@ -173,7 +177,6 @@ class KMeans(PredictiveModeling):
 
         params = {
             'id': id_column,
-            'target': target_column,
             'incolumn': in_columns,
             'coldeftype': col_def_type,
             'coldefrole': col_def_role,
@@ -210,6 +213,7 @@ class KMeans(PredictiveModeling):
 
         id_column : str, optional
             the input table column identifying a unique instance id
+            Default: id column used to build the model
 
         Returns
         -------
@@ -223,7 +227,8 @@ class KMeans(PredictiveModeling):
 
         return self._predict(in_df=in_df, params=params, out_table=out_table)
 
-    def score(self, in_df: IdaDataFrame, id_column: str, target_column: str) -> float:
+    def score(self, in_df: IdaDataFrame, target_column: str,
+        id_column: str=None) -> float:
         """
         Scores the model. The model must exist.
 
@@ -232,11 +237,12 @@ class KMeans(PredictiveModeling):
         in_df : IdaDataFrame
             the input data frame for scoring
 
-        id_column : str
-            the input table column identifying a unique instance id
-
         target_column : str
             the input table column representing the class
+
+        id_column : str, optional
+            the input table column identifying a unique instance id - if skipped, 
+            the input data frame indexer must be set and will be used as an instance id
 
         Returns
         -------

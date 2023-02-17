@@ -40,6 +40,7 @@ class Regression(PredictiveModeling):
 
         super().__init__(idadb, model_name)
         self.score_proc = 'MSE'
+        self.id_column_in_output = 'ID'
 
     def predict(self, in_df: IdaDataFrame, out_table: str=None,
         id_column: str=None) -> IdaDataFrame:
@@ -56,7 +57,7 @@ class Regression(PredictiveModeling):
 
         id_column : str, optional
             the input table column identifying a unique instance id
-            Default: <id> column used to build the model
+            Default: id column used to build the model
 
         Returns
         -------
@@ -70,7 +71,8 @@ class Regression(PredictiveModeling):
 
         return self._predict(in_df=in_df, params=params, out_table=out_table)
 
-    def score(self, in_df: IdaDataFrame, id_column: str, target_column: str) -> float:
+    def score(self, in_df: IdaDataFrame, target_column: str,
+        id_column: str=None) -> float:
         """
         Scores the model. The model must exist.
 
@@ -79,11 +81,12 @@ class Regression(PredictiveModeling):
         in_df : IdaDataFrame
             the input data frame for scoring
 
-        id_column : str
-            the input table column identifying a unique instance id
-
         target_column : str
             the input table column representing the class
+
+        id_column : str
+            the input table column identifying a unique instance id - if skipped, 
+            the input data frame indexer must be set and will be used as an instance id
 
         Returns
         -------
@@ -97,8 +100,8 @@ class Regression(PredictiveModeling):
 
         return self._score(in_df=in_df, predict_params=params, target_column=target_column)
 
-    def score_all(self, in_df: IdaDataFrame, id_column: str,
-        target_column: str) -> Dict[str, float]:
+    def score_all(self, in_df: IdaDataFrame, target_column: str,
+        id_column: str=None) -> Dict[str, float]:
         """
         Scores the model using MSE, MAE, RSE and RAE. The model must exist.
 
@@ -107,11 +110,12 @@ class Regression(PredictiveModeling):
         in_df : IdaDataFrame
             the input data frame for scoring
 
-        id_column : str
-            the input table column identifying a unique instance id
-
         target_column : str
             the input table column representing the class
+
+        id_column : str, optional
+            the input table column identifying a unique instance id - if skipped, 
+            the input data frame indexer must be set and will be used as an instance id
 
         Returns
         -------
@@ -120,6 +124,13 @@ class Regression(PredictiveModeling):
         """
         if not isinstance(in_df, IdaDataFrame):
             raise TypeError("Argument in_df should be an IdaDataFrame")
+
+        if not id_column:
+            if in_df.indexer:
+                id_column = in_df.indexer
+            else:
+                raise TypeError('Missing id column - either use id_column attribute or set '
+                    'indexer column in the input data frame')
 
         out_table = make_temp_table_name()
 
