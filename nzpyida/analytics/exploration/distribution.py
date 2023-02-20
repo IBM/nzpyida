@@ -37,11 +37,11 @@ def moments(in_df: IdaDataFrame, in_column: str, by_column: str=None,
     in_column : str
         the numeric input table column
 
-    by_culumn : str
+    by_culumn : str, optional
         the input table column which splits the data into groups for which the
         operation is to be per-formed
 
-    out_table : str
+    out_table : str, optional
         the output table to write the moments into
 
     Returns
@@ -79,7 +79,7 @@ def quantile(in_df: IdaDataFrame, in_column: str, quantiles: List[int],
         Quantiles are values between 0 and 1 indicating the percentage of sorted
         values to be considered in each quantile.
 
-    out_table : str
+    out_table : str, optional
         the output table to write the moments into
 
     Returns
@@ -111,10 +111,10 @@ def outliers(in_df: IdaDataFrame, in_column: str, multiplier: float=1.5,
     in_column : str
         the numeric input table column
 
-    multiplier : float
+    multiplier : float, optional
         the value of the IQR multiplier
 
-    out_table : str
+    out_table : str, optional
         the output table to write the moments into
 
     Returns
@@ -144,7 +144,7 @@ def unitable(in_df: IdaDataFrame, in_column: str, out_table: str=None) -> IdaDat
     in_column : str
         the numeric input table column
 
-    out_table : str
+    out_table : str, optional
         the output table to write the moments into
 
     Returns
@@ -176,15 +176,15 @@ def bitable(in_df: IdaDataFrame, in_column: List[str], freq: bool=False, cum: bo
         the list of numeric input table columns, must be two (if there are more, they
         will be ignored)
 
-    freq : bool
+    freq : bool, optional
         flag indicating whether frequencies should be attached to the output table
 
-    cum : bool
+    cum : bool, optional
         flag indicating whether cumulative frequencies should be attached to the output 
         table (setting this flag automatically sets freq flag as frequencies have to be 
         calculated prior to cumulative frequencies)
 
-    out_table : str
+    out_table : str, optional
         the output table to write the moments into
 
     Returns
@@ -222,38 +222,38 @@ def histogram(in_df: IdaDataFrame, in_column: str, nbreaks: int=None, right: boo
     in_column : str
         the input table column to build the histogram onto
 
-    nbreaks : int
+    nbreaks : int, optional
         the number of bins for the histogram.
         If not specified, the number of bins is calculated auto-matically.
 
-    right : bool
+    right : bool, optional
         the flag indicating whether the histogram bins should be
         right-closed (true) or right-open (false)
 
-    btable : str
+    btable : str, optional
         the input table with breaks for the histogram.
         If not specified, the bins are calculated automat-ically, using the
         parameter <nbreaks> if specified.
 
-    bcolumn : str
+    bcolumn : str, optional
         the <btable> column containing the breaks for the histogram.
         This column must be specified if the parameter <btable> is specified.
 
-    density : bool
+    density : bool, optional
         flag indicating whether densities should be attached to the output table
 
-    midpoints : bool
+    midpoints : bool, optional
         flag indicating whether the midpoints of the bins should be attached to the output table
 
-    freq : bool
+    freq : bool, optional
         flag indicating whether frequencies should be attached to the output table
 
-    cum : bool
+    cum : bool, optional
         flag indicating whether cumulative frequencies should be attached to the output table 
         (setting this flag automatically sets freq flag as frequencies have to be calculated 
         prior to cumulative frequencies)
 
-    out_table : str
+    out_table : str, optional
         the output table to write the moments into
 
     Returns

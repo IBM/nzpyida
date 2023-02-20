@@ -70,7 +70,8 @@ def std_norm(in_df: IdaDataFrame, in_column: List[str], id_column: str=None,
         'incolumn': in_column,
         'by': by_column
     }
-    return call_proc_df_in_out(proc='STD_NORM', in_df=in_df, params=params, out_table=out_table)
+    return call_proc_df_in_out(proc='STD_NORM', in_df=in_df, params=params, 
+        out_table=out_table, copy_indexer=True)
 
 
 def impute_data(in_df: IdaDataFrame, in_column: str=None, method: str=None,
@@ -119,10 +120,11 @@ def impute_data(in_df: IdaDataFrame, in_column: str=None, method: str=None,
         'numericvalue': numeric_value,
         'nominalvalue': nominal_value
     }
-    return call_proc_df_in_out(proc='IMPUTE_DATA', in_df=in_df, params=params, out_table=out_table)
+    return call_proc_df_in_out(proc='IMPUTE_DATA', in_df=in_df, params=params, 
+        out_table=out_table, copy_indexer=True)
 
 
-def random_sample(in_df: IdaDataFrame, size: int, fraction: float=None, by_column: str=None,
+def random_sample(in_df: IdaDataFrame, size: int=None, fraction: float=None, by_column: str=None,
     out_signature: str=None, rand_seed: int=None, out_table: str=None) -> IdaDataFrame:
     """
     Random sampling procedures are a vital component of many analytical systems. They can
@@ -149,29 +151,29 @@ def random_sample(in_df: IdaDataFrame, size: int, fraction: float=None, by_colum
     in_df : IdaDataFrame
         the input data frame
 
-    size : int
+    size : int, optional
         the number of rows in the sample (alias of size). If specified,
         the parameter <fraction> must not be specified. Only one of both parameters <num>
         and <size> must be specified.
 
-    fraction : float
+    fraction : float, optional
         the probability of each row to be in the sample. If specified, the parameters <num>
         and <size> must not be specified. Otherwise, one of both parameters <num> or <size>
         must be specified.
 
-    by_column : str
+    by_column : str, optional
         the column used to stratify the input table. If indicated, stratified sampling is
         done: it ensures that each value of the column is represented in the sample in
         about the same percentage as in the original input table.
 
-    out_signature : str
+    out_signature : str, optional
         the input table columns to keep in the sample, separated by a semi-colon (;).
         If not specified, all columns are kept in the output table.
 
-    rand_seed : int
+    rand_seed : int, optional
         the seed of the random function
 
-    out_table : str
+    out_table : str, optional
         the output table with the modified data
 
     Returns
@@ -188,4 +190,4 @@ def random_sample(in_df: IdaDataFrame, size: int, fraction: float=None, by_colum
         'randseed': rand_seed
     }
     return call_proc_df_in_out(proc='RANDOM_SAMPLE', in_df=in_df, params=params,
-        out_table=out_table)
+        out_table=out_table, copy_indexer=True)

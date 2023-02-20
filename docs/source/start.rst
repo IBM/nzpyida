@@ -447,14 +447,17 @@ nzpyida provides a wrapper for several machine learning algorithms that are deve
 Currently, there are wrappers for the following algorithms: Decision Trees, Naive Bayes, KNN, Linear Regression, Regression Trees and K-means. 
 The following example uses K-means:
 
->>> idadf = IdaDataFrame(idadb, 'IRIS', indexer="ID")
-# In-DataBase Kmeans needs an indexer to identify each row
+>>> idadf = IdaDataFrame(idadb, 'IRIS')
+>>> idadb.add_column_id(in_df)
+# In-DataBase Kmeans needs an 'id' column identify each row
 
 >>> from nzpyida.analytics.predictive.kmeans import KMeans
 >>> kmeans = KMeans(idadb, model_name='kmeans_model') 
 
->>> kmeans.fit(idadf, k=3) # configure clustering with 3 cluters
->>> kmeans.predict(idadf)
+>>> from nzpyida.analytics.auto_delete_context import AutoDeleteContext
+>>> with AutoDeleteContext(idadb):
+>>>   kmeans.fit(idadf, k=3) # configure clustering with 3 cluters
+>>>   outdf = kmeans.predict(idadf)
 
 >>> kmeans.describe()
 KMeans clustering with 3 clusters of sizes 49, 50, 51
@@ -466,16 +469,28 @@ Cluster means:
 Within cluster sum of squares by cluster:
 [ 30.22072306  15.151       42.54618313]
 
->>> kmeans.inertia_
-87.917906189953897
+In the second example, a simple classification algorithm is shown together with input data sampling.
+The algorithm is called K-Nearest Neighbors.
 
->>> kmeans.labels_.sort("ID").head()
-   ID  CLUSTER_ID  DISTANCE
-0   0           3  0.141351
-1   1           3  0.066182
-2   2           3  0.144153
-3   3           3  0.328603
-4   4           3  0.640297
+>>> idadf = IdaDataFrame(idadb, 'IRIS')
+>>> idadb.add_column_id(in_df)
+# In-DataBase Kmeans needs an 'id' column identify each row
+
+>>> from nzpyida.analytics.transform.preparation import random_sample
+>>> from nzpyida.analytics.predictive.knn import KNeighborsClassifier
+>>> from nzpyida.analytics.auto_delete_context import AutoDeleteContext
+>>>
+>>> with AutoDeleteContext(idadb):
+>>>   # sample 50% of rows for training
+>>>   sample_df=random_sample(in_df=in_df, fraction=0.5, out_table='iris_sample')
+>>>
+>>>   # create and train the model with a data sample
+>>>   model = KNeighborsClassifier(idadb, model_name='knn_model')
+>>>   model.fit(in_df=sample_df, target_column='species')
+>>>
+>>>   # test and score the model using all the data
+>>>   print(model.score(in_df=in_df, target_column='species'))
+
 
 To learn how to use other machine learning algorithms, refer to the detailed documentation.
 

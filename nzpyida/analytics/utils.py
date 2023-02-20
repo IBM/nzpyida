@@ -108,13 +108,14 @@ def get_auto_delete_context(out_table_attr_name: str) -> AutoDeleteContext:
     RuntimeError
         If there is no AutoDeleteContext attached to the current thread.
     """
-    
+
     if AutoDeleteContext.current() is None:
         raise RuntimeError('This code needs to run inside of AutoDeleteContext context manager or '
         f'you need to set an output table name in {out_table_attr_name} function attribute')
     return AutoDeleteContext.current()
 
-def call_proc_df_in_out(proc: str, in_df: IdaDataFrame, params: dict, out_table: str=None) -> IdaDataFrame:
+def call_proc_df_in_out(proc: str, in_df: IdaDataFrame, params: dict,
+    out_table: str=None, copy_indexer=False) -> IdaDataFrame:
     """
     Generic function for data processing.
     """
@@ -146,4 +147,7 @@ def call_proc_df_in_out(proc: str, in_df: IdaDataFrame, params: dict, out_table:
     if auto_delete_context:
         auto_delete_context.add_table_to_delete(out_table)
 
-    return IdaDataFrame(in_df._idadb, out_table)
+    out_df = IdaDataFrame(in_df._idadb, out_table)
+    if copy_indexer and in_df.indexer:
+        out_df.indexer = in_df.indexer
+    return out_df
