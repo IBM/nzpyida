@@ -70,7 +70,8 @@ class AutoDeleteContext:
         if AutoDeleteContext.active_group.active_groups == 0:
             curr = AutoDeleteContext.current()
             for table_name in curr.temp_out_tables:
-                curr.idadb.drop_table(table_name)
+                if curr.idadb.exists_table(table_name):
+                    curr.idadb.drop_table(table_name)
             curr.temp_out_tables = set()
             delattr(AutoDeleteContext.active_group, 'auto_delete_context')
             
