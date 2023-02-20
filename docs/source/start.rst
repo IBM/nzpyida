@@ -441,55 +441,57 @@ Use ``IdaDataFrame.save_as`` after aggregating the columns of the IdaDataFrame s
 In nzpyida, it is not possible to directly aggreate columns from other tables. This would require a join operation. Some work has to be done in this direction later.
 
 Machine Learning
-----------------
+================
 
 nzpyida provides a wrapper for several machine learning algorithms that are developed for in-database use. These algorithms are implemented in PL/SQL and C++. 
 Currently, there are wrappers for the following algorithms: Decision Trees, Naive Bayes, KNN, Linear Regression, Regression Trees and K-means. 
+
+.. note:: To learn how to create IRIS table, read :ref:`Upload a DataFrame`
+
 The following example uses K-means:
 
 >>> idadf = IdaDataFrame(idadb, 'IRIS')
->>> idadb.add_column_id(in_df)
+>>> idadb.add_column_id(idadf)
 # In-DataBase Kmeans needs an 'id' column identify each row
 
->>> from nzpyida.analytics.predictive.kmeans import KMeans
+>>> from nzpyida.analytics import KMeans
 >>> kmeans = KMeans(idadb, model_name='kmeans_model') 
 
->>> from nzpyida.analytics.auto_delete_context import AutoDeleteContext
+>>> from nzpyida.analytics import AutoDeleteContext
 >>> with AutoDeleteContext(idadb):
 >>>   kmeans.fit(idadf, k=3) # configure clustering with 3 cluters
 >>>   outdf = kmeans.predict(idadf)
 
->>> kmeans.describe()
-KMeans clustering with 3 clusters of sizes 49, 50, 51
-Cluster means:
-   CLUSTERID  sepal_length  sepal_width  petal_length  petal_width     species
-0          1      5.879592     2.753061      4.236735     1.322449  versicolor
-1          2      6.629412     2.986275      5.549020     2.015686   virginica
-2          3      5.006000     3.428000      1.462000     0.246000      setosa
-Within cluster sum of squares by cluster:
-[ 30.22072306  15.151       42.54618313]
+>>> print(kmeans.describe())
+| CLUSTERID | NAME | SIZE | RELSIZE          | WITHINSS        | DESCRIPTION |
++-----------+------+------+------------------+-----------------+-------------+
+| 1         | 1    | 44   | 0.29333333333333 | 48.205047126212 |             |
+| 2         | 2    | 56   | 0.37333333333333 | 63.566407545082 |             |
+| 3         | 3    | 50   | 0.33333333333333 | 47.350621105571 |             |
++-----------+------+------+------------------+-----------------+-------------+
+
 
 In the second example, a simple classification algorithm is shown together with input data sampling.
 The algorithm is called K-Nearest Neighbors.
 
 >>> idadf = IdaDataFrame(idadb, 'IRIS')
->>> idadb.add_column_id(in_df)
+>>> idadb.add_column_id(idadf)
 # In-DataBase Kmeans needs an 'id' column identify each row
 
->>> from nzpyida.analytics.transform.preparation import random_sample
->>> from nzpyida.analytics.predictive.knn import KNeighborsClassifier
->>> from nzpyida.analytics.auto_delete_context import AutoDeleteContext
+>>> from nzpyida.analytics import random_sample
+>>> from nzpyida.analytics import KNeighborsClassifier
+>>> from nzpyida.analytics import AutoDeleteContext
 >>>
 >>> with AutoDeleteContext(idadb):
 >>>   # sample 50% of rows for training
->>>   sample_df=random_sample(in_df=in_df, fraction=0.5, out_table='iris_sample')
+>>>   sample_df=random_sample(in_df=idadf, fraction=0.5)
 >>>
 >>>   # create and train the model with a data sample
 >>>   model = KNeighborsClassifier(idadb, model_name='knn_model')
 >>>   model.fit(in_df=sample_df, target_column='species')
 >>>
 >>>   # test and score the model using all the data
->>>   print(model.score(in_df=in_df, target_column='species'))
+>>>   print(model.score(in_df=idadf, target_column='species'))
 
 
 To learn how to use other machine learning algorithms, refer to the detailed documentation.
@@ -498,6 +500,7 @@ To learn how to use other machine learning algorithms, refer to the detailed doc
 Database administration
 =======================
 
+.. _Upload a DataFrame:
 Upload a DataFrame
 ------------------
 
