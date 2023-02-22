@@ -33,6 +33,37 @@ df_test = pd.DataFrame.from_dict({"ID": [0, 1, 2],
                                   "A": [2, 0.001, -2],
                                   "B": ['p', 'p', 'n']})
 
+
+df_train_reg = pd.DataFrame.from_dict(
+    {
+        "ID": range(1000),
+        "A": range(1, 2001, 2),
+        "B": range(2, 2001, 2)
+    }
+)
+
+df_test_reg = pd.DataFrame.from_dict(
+    {
+        "ID": [0, 1, 2, 3, 4],
+        "A": [0, 3, 2222, -1000, 11111],
+        "B": [1, 4, 2223, -999, 11112]
+    }
+)
+
+df_train_clust = pd.DataFrame.from_dict(
+    {
+        "ID": range(99),
+        "A": list(range(33)) + list(range(100, 133)) + list(range(200, 233))
+    }
+)
+
+df_test_clust = pd.DataFrame.from_dict(
+    {
+        "ID": [0, 1, 2, 3],
+        "A": [-1, 77, 150, 250]
+    }
+)
+
 TAB_NAME_TEST = "TAB_NAME1"
 TAB_NAME_TRAIN = "TAB_NAME2"
 
