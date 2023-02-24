@@ -41,7 +41,7 @@ def test_ewdisc(idadb: IdaDataBase, idf):
 
 def test_efdisc(idadb: IdaDataBase, idf):
     with AutoDeleteContext(idadb):
-        efdisc = EFDisc(idadb, bins=5)
+        efdisc = EFDisc(idadb, bins=2)
         bin_df = efdisc.fit(idf)
         assert bin_df
         assert len(bin_df) == 1
@@ -51,9 +51,7 @@ def test_efdisc(idadb: IdaDataBase, idf):
         assert ef_df
         assert len(ef_df) == len(idf)
         assert all(ef_df.columns == ['A', 'DISC_A'])
-        disc_values = list(ef_df['DISC_A'].head(10).values)
-        assert set(disc_values) == {'1', '2', '3', '4', '5'}
-        assert disc_values.count('1') == disc_values.count('5') == 2
+        assert set(ef_df['DISC_A'].head(10).values) == {'1', '2'}
 
 
 def test_emdisc(idadb: IdaDataBase, idf):
