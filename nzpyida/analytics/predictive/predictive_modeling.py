@@ -109,7 +109,7 @@ class PredictiveModeling:
 
         params['model'] = self.model_name
         return call_proc_df_in_out(proc=self.predict_proc, in_df=in_df, params=params,
-            out_table=out_table)
+            out_table=out_table)[0]
 
     def _score(self, in_df: IdaDataFrame, predict_params:dict, target_column: str) -> float:
         """

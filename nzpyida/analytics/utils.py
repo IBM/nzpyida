@@ -10,7 +10,9 @@
 #-----------------------------------------------------------------------------
 from typing import Dict, Tuple, Any
 from time import time
+import pandas as pd
 import random
+import re
 from nzpyida.frame import IdaDataFrame
 from nzpyida.analytics.auto_delete_context import AutoDeleteContext
 
@@ -115,7 +117,7 @@ def get_auto_delete_context(out_table_attr_name: str) -> AutoDeleteContext:
     return AutoDeleteContext.current()
 
 def call_proc_df_in_out(proc: str, in_df: IdaDataFrame, params: dict,
-    out_table: str=None, copy_indexer=False) -> IdaDataFrame:
+    out_table: str=None, copy_indexer=False) -> Tuple[IdaDataFrame, str]:
     """
     Generic function for data processing.
     """
@@ -135,14 +137,14 @@ def call_proc_df_in_out(proc: str, in_df: IdaDataFrame, params: dict,
     params_s = map_to_props(params)
 
     try:
-        in_df.ida_query(f'call NZA..{proc}(\'{params_s}\')')
+        out_query = in_df.ida_query(f'call NZA..{proc}(\'{params_s}\')')
     finally:
         if need_delete:
             in_df._idadb.drop_view(temp_view_name)
 
     if not in_df._idadb.exists_table_or_view(out_table):
         # stored procedure call was successful by did not produce a table
-        return None
+        return None, out_query
 
     if auto_delete_context:
         auto_delete_context.add_table_to_delete(out_table)
@@ -150,4 +152,16 @@ def call_proc_df_in_out(proc: str, in_df: IdaDataFrame, params: dict,
     out_df = IdaDataFrame(in_df._idadb, out_table)
     if copy_indexer and in_df.indexer:
         out_df.indexer = in_df.indexer
-    return out_df
+    return out_df, out_query
+
+def out_str_to_df(out_str: str):
+    clean_str = re.sub('[^a-zA-Z0-9" ]', '', out_str)
+    clean_str_split =clean_str.split(' ')
+    out_dict = {}
+    for i in range(0, len(clean_str_split), 2):
+        try:
+            value = int(clean_str_split[i+1])
+        except ValueError:
+            value = clean_str_split[i+1]
+        out_dict[clean_str_split[i].upper()] = [value]
+    return  pd.DataFrame.from_dict(out_dict)
