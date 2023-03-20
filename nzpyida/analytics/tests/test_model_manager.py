@@ -46,4 +46,4 @@ def test_model_manager(idadb, clear_up):
     # test droping model
     mm.drop_model(MOD_NAME)
     models_length = len(mm.list_models())
-    assert MOD_NAME not in mm.list_models().head(models_length)[["MODELNAME"]].values
+    assert not mm.model_exists(MOD_NAME)

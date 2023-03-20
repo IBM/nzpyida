@@ -67,7 +67,7 @@ class Discretization:
         params_dict.update(self.params)
 
         return call_proc_df_in_out(proc=self.proc, in_df=in_df, params=params_dict,
-            out_table=out_table)
+            out_table=out_table)[0]
 
     def apply(self, in_df: IdaDataFrame, in_bin_df: IdaDataFrame, keep_org_values: bool=False,
         out_table: str=None) -> IdaDataFrame:

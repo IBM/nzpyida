@@ -22,7 +22,17 @@ def idadb():
         "database":"wrappers_tests", 
         "logLevel":0, 
         "securityLevel":1
-        }
+    }
+    
+    nzpy_cfg_fyre = {
+        "user":"admin",
+        "password":"password", 
+        "host":'9.30.57.160', 
+        "port":5480, 
+        "database":"telco", 
+        "logLevel":0, 
+        "securityLevel":1
+    }
 
     return IdaDataBase(nzpy_cfg)
 

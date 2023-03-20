@@ -54,7 +54,7 @@ def moments(in_df: IdaDataFrame, in_column: str, by_column: str=None,
         'incolumn': in_column,
         'by': by_column
     }
-    return call_proc_df_in_out(proc='MOMENTS', in_df=in_df, params=params, out_table=out_table)
+    return call_proc_df_in_out(proc='MOMENTS', in_df=in_df, params=params, out_table=out_table)[0]
 
 def quantile(in_df: IdaDataFrame, in_column: str, quantiles: List[int],
     out_table: str=None) -> IdaDataFrame:
@@ -92,7 +92,7 @@ def quantile(in_df: IdaDataFrame, in_column: str, quantiles: List[int],
         'incolumn': in_column,
         'quantiles': quantiles
     }
-    return call_proc_df_in_out(proc='QUANTILE', in_df=in_df, params=params, out_table=out_table)
+    return call_proc_df_in_out(proc='QUANTILE', in_df=in_df, params=params, out_table=out_table)[0]
 
 def outliers(in_df: IdaDataFrame, in_column: str, multiplier: float=1.5,
     out_table: str=None) -> IdaDataFrame:
@@ -127,7 +127,7 @@ def outliers(in_df: IdaDataFrame, in_column: str, multiplier: float=1.5,
         'incolumn': in_column,
         'multiplier': multiplier
     }
-    return call_proc_df_in_out(proc='OUTLIERS', in_df=in_df, params=params, out_table=out_table)
+    return call_proc_df_in_out(proc='OUTLIERS', in_df=in_df, params=params, out_table=out_table)[0]
 
 def unitable(in_df: IdaDataFrame, in_column: str, out_table: str=None) -> IdaDataFrame:
     """
@@ -156,7 +156,7 @@ def unitable(in_df: IdaDataFrame, in_column: str, out_table: str=None) -> IdaDat
     params = {
         'incolumn': in_column
     }
-    return call_proc_df_in_out(proc='UNITABLE', in_df=in_df, params=params, out_table=out_table)
+    return call_proc_df_in_out(proc='UNITABLE', in_df=in_df, params=params, out_table=out_table)[0]
 
 def bitable(in_df: IdaDataFrame, in_column: List[str], freq: bool=False, cum: bool=False,
     out_table: str=None) -> IdaDataFrame:
@@ -198,7 +198,7 @@ def bitable(in_df: IdaDataFrame, in_column: List[str], freq: bool=False, cum: bo
         'freq': freq,
         'cum': cum
     }
-    return call_proc_df_in_out(proc='BITABLE', in_df=in_df, params=params, out_table=out_table)
+    return call_proc_df_in_out(proc='BITABLE', in_df=in_df, params=params, out_table=out_table)[0]
 
 def histogram(in_df: IdaDataFrame, in_column: str, nbreaks: int=None, right: bool=True,
     btable: str=None, bcolumn: str=None, density: bool=False, midpoints: bool=False,
@@ -273,4 +273,4 @@ def histogram(in_df: IdaDataFrame, in_column: str, nbreaks: int=None, right: boo
         'freq': freq,
         'cum': cum
     }
-    return call_proc_df_in_out(proc='HIST', in_df=in_df, params=params, out_table=out_table)
+    return call_proc_df_in_out(proc='HIST', in_df=in_df, params=params, out_table=out_table)[0]

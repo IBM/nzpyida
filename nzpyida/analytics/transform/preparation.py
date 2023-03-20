@@ -71,7 +71,7 @@ def std_norm(in_df: IdaDataFrame, in_column: List[str], id_column: str=None,
         'by': by_column
     }
     return call_proc_df_in_out(proc='STD_NORM', in_df=in_df, params=params, 
-        out_table=out_table, copy_indexer=True)
+        out_table=out_table, copy_indexer=True)[0]
 
 
 def impute_data(in_df: IdaDataFrame, in_column: str=None, method: str=None,
@@ -121,7 +121,7 @@ def impute_data(in_df: IdaDataFrame, in_column: str=None, method: str=None,
         'nominalvalue': nominal_value
     }
     return call_proc_df_in_out(proc='IMPUTE_DATA', in_df=in_df, params=params, 
-        out_table=out_table, copy_indexer=True)
+        out_table=out_table, copy_indexer=True)[0]
 
 
 def random_sample(in_df: IdaDataFrame, size: int=None, fraction: float=None, by_column: str=None,
@@ -190,4 +190,4 @@ def random_sample(in_df: IdaDataFrame, size: int=None, fraction: float=None, by_
         'randseed': rand_seed
     }
     return call_proc_df_in_out(proc='RANDOM_SAMPLE', in_df=in_df, params=params,
-        out_table=out_table, copy_indexer=True)
+        out_table=out_table, copy_indexer=True)[0]
