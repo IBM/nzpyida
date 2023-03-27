@@ -325,10 +325,11 @@ class InternalState(object):
 
         query = "%s"
         for index, view in enumerate(self.views[::-1]):
+            alias = " as t{} ".format(index) if self._idadf._idadb._is_netezza_system() else ""
             if index == (len(self.views)-1):
                 view = view % self.name
             if index != 0:
-                view = "(" + view + ")"
+                view = "(" + view + ")%s" %(alias)
             query = query %(view)
         return query
 
