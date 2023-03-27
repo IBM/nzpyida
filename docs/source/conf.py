@@ -64,7 +64,7 @@ master_doc = 'index'
 # General information about the project.
 project = u'nzpyida'
 copyright = u'2016-2023, IBM Corp'
-author = u'Edouard Fouché,Avipsa Roy'
+author = u''
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -240,7 +240,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'nzpyida.tex', u'nzpyida Documentation',
-     u'Edouard Fouché,Avipsa Roy', 'manual'),
+     u'', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
