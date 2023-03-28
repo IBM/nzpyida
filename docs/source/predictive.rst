@@ -49,6 +49,14 @@ Regression Trees
    :undoc-members:
    :show-inheritance:
 
+Association Rules
+-----------------------------------------------------
+
+.. automodule:: nzpyida.analytics.predictive.association_rules
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Classification base module
 --------------------------------------------------
 
