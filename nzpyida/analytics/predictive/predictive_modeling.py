@@ -48,7 +48,7 @@ class PredictiveModeling:
         self.id_column_in_output = None
         self.has_print_proc = False
 
-    def _fit(self, in_df: IdaDataFrame, params:dict):
+    def _fit(self, in_df: IdaDataFrame, params:dict, needs_id=True):
         """
         Trains the model.
 
@@ -63,7 +63,7 @@ class PredictiveModeling:
         if not isinstance(in_df, IdaDataFrame):
             raise TypeError("Argument in_df should be an IdaDataFrame")
 
-        if not params.get('id', None):
+        if not params.get('id', None) and needs_id:
             if in_df.indexer:
                 params['id'] = in_df.indexer
             else:
