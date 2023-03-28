@@ -70,7 +70,7 @@ class ARule(PredictiveModeling):
         self.model_name = model_name
     
     def fit(self, in_df: IdaDataFrame, transaction_id_column: str='tid', item_column: str='item', by_column: str=None, 
-            level: int=1, max_set_size: int=6, support: float=5.0, support_type: str='percent',
+            level: int=1, max_set_size: int=6, support: float=None, support_type: str='percent',
             confidence: float=0.5):
         """
         This function builds an Association Rules model. The model is saved to the 
@@ -101,8 +101,8 @@ class ARule(PredictiveModeling):
             the accumulative size of the temporary parts can be much higher than the one of 
             the ori- ginal data set. The parameter lvl controls how many parts are created. 
             The higher lvl: 
-                The more computation and temporary database space is required for the splitting
-                The smaller the amount of main memory that is required for each data slice
+                - The more computation and temporary database space is required for the splitting
+                - The smaller the amount of main memory that is required for each data slice
 
             Note: To fully use the benefits of parallel computing, do not specify the value 
             of the lvl parameter too low. Additionally, the lower the value of the lvl parameter,
@@ -139,26 +139,114 @@ class ARule(PredictiveModeling):
             min - 0
             max - 1 
         """
+        if support_type == 'percent' and not support:
+            support = 5.0
         params = {
             'tid': transaction_id_column,
             'item': item_column,
             'by': by_column,
             'lvl': level,
             'maxsetsize': max_set_size,
-            'support': support if support_type=='percent' else None,
+            'support': support,
             'supporttype': support_type,
             'confidence': confidence
         }
 
         self._fit(in_df=in_df, params=params, needs_id=False)
     
-    def predict(self, in_df: IdaDataFrame, out_table: str, transaction_id_column: str='tid', item_column: str='item',
+    def predict(self, in_df: IdaDataFrame, out_table: str=None, transaction_id_column: str='tid', item_column: str='item',
                 by_column: str=None, scoring_type: str='exclusiveRecommend', name_map_column: str=None, item_name_column: str='item',
                 item_name_mapped_column: str='item_name', min_size: int=1, max_size: int=64, min_support: float=0.0, max_support: float=1.0,
                 min_confidence: float=0.0, max_confidence: float=1.0, min_lift: float=None, max_lift: float=None, 
                 min_conviction: float=0.0, max_conviction: float=None, min_affinity: float=0.0, max_affinity: float=1.0,
-                min_levarage: float=-0.25, max_leverege: float=1.0) -> IdaDataFrame:
+                min_leverage: float=-0.25, max_leverage: float=1.0) -> IdaDataFrame:
+        """
+        Makes predictions based on this model. The model must exist.
+
+        Parameters
+        ----------
+
+        in_df : IdaDataFrame
+            the input data frame
+
+        out_table : str, optional
+            the output table where the predictions will be stored
         
+        transaction_id_column : str, optional
+            the input table column identifying transactions
+        
+        items_column : str, optional
+            the input table column identifying items in transactions
+
+        by_column : str, optional
+            the input table column identifying groups of transactions if any. 
+            Association Rules min-ing is done separately on each of these groups. 
+            Leave the parameter undefined if no groups are to be considered.
+
+        scoring_type: str, optional
+            he type how the scoring algorithm should be applied to the input data. 
+            The following values are allowed: recommend, exclusiveRecommend.
+            recommend - A rule is returned if its left hand side itemset is a subset of the transaction.
+            exclusiveRecommend - A rule is returned if its left hand side itemset is a subset of 
+            the input itemset, and its right hand side itemset is not a subset of the transaction.
+        
+        name_map_column: str, optional
+            table which provides names of items and their associated mapped values 
+            in LHS_ITEMS, RHS_ITEMS columns of outtable
+
+        item_name_column, str, optional
+            the column name of namemap table where the item identifiers are
+
+        item_name_mapped_column: str, optional
+            the column name of namemap table where the item names are stored which should be used in-stead of the item identifier
+
+        min_size: int, optional
+            The minimum number of items per association rule to be applied
+
+        max_size: int, optional
+            The maximum number of items per association rule to be applied
+
+        min_support: float, optional
+            The minimum support of an association rule to be applied
+
+        max_support: float, optional
+            The maximum support of an association rule to be applied
+
+        min_confidence: float, optional
+            The minimum confidence of an association rule to be applied.
+
+        max_confidence: float, optional
+            The maximum confidence of an association rule to be applied
+
+        min_lift: float, optional
+            The minimum lift of an association rule to be applied
+
+        max_lift: float, optional
+            The maximum lift of an association rule to be applied
+
+        min_conviction: float, optional
+            The minimum conviction of an association rule to be applied
+
+        max_conviction: float, optional
+            The maximum conviction of an association rule to be applied
+
+        min_affinity: float, optional
+            The minimum affinity of an association rule to be applied
+        
+        max_affinity: float, optional
+            The maximum affinity of an association rule to be applied
+
+        min_leverage: float, optional
+            The minimum leverage of an association rule to be applied
+
+        max_leverage: float, optional
+            The maximum leverage of an association rule to be applied
+
+        Returns
+        -------
+        IdaDataFrame
+            the data frame containing output of a Association Rules model prediction
+        """
         params = {
             'tid': transaction_id_column,
             'item': item_column,
@@ -179,8 +267,8 @@ class ARule(PredictiveModeling):
             'maxconv': max_conviction,
             'minaffi': min_affinity,
             'maxaffi': max_affinity,
-            'minleve': min_levarage,
-            'maxleve': max_leverege
+            'minleve': min_leverage,
+            'maxleve': max_leverage
         }
         return self._predict(in_df=in_df, params=params, out_table=out_table)
     

@@ -35,13 +35,25 @@ def clean_up(idadb, mm):
     if idadb.exists_table(OUT_TABLE_PRED):
         idadb.drop_table(OUT_TABLE_PRED)
 
+
+
 @pytest.fixture
 def idf_train(idadb: IdaDataBase):
     if idadb.exists_table(TAB_NAME_TRAIN):
         idadb.drop_table(TAB_NAME_TRAIN)
+    purchases = [[1,2,3,4,5],
+                 [2,4,6,7,10],
+                 [3,5,8,9,10],
+                 [4,6,7,8,10],
+                 [1,2,3,7,10],
+                 [2,3,4,6,9],
+                 [5,6,7,8,10],
+                 [1,3,4,6,9],
+                 [1,2,3,8,9],
+                 [3,5,7,9,10]]
     df = pd.DataFrame.from_dict({
-        "ID": [ i//10 for i in range(1000)],
-        "PRODUCT": [choice(range(100)) for _ in range(1000)]
+        "ID": [ i//5 for i in range(50)],
+        "PRODUCT": [item for sublist in purchases for item in sublist]
 
     })
     yield idadb.as_idadataframe(df, TAB_NAME_TRAIN)
@@ -53,8 +65,8 @@ def idf_test(idadb: IdaDataBase):
     if idadb.exists_table(TAB_NAME_TEST):
         idadb.drop_table(TAB_NAME_TEST)
     df = pd.DataFrame.from_dict({
-        "TID": range(100),
-        "ITEM": [choice(range(100)) for _ in range(100)]
+        "TID": range(50),
+        "ITEM": [choice(range(10)) for _ in range(50)]
     })
     yield idadb.as_idadataframe(df, TAB_NAME_TEST)
     if idadb.exists_table(TAB_NAME_TEST):
@@ -67,17 +79,21 @@ def test_arule(idadb: IdaDataBase, mm: ModelManager, idf_test: IdaDataFrame,
     assert not mm.model_exists(MOD_NAME) 
 
     model.fit(idf_train, transaction_id_column='ID', item_column="PRODUCT", 
-              support=1, confidence=0.1)
+              support_type='absolute', support=2, confidence=0.4)
     assert mm.model_exists(MOD_NAME) 
 
-    pred = model.predict(idf_test, OUT_TABLE_PRED)
+    pred = model.predict(idf_test, OUT_TABLE_PRED, max_conviction=1.25, 
+                       max_affinity=0.6, min_lift=1.0, min_leverage=0.03)
     assert pred
     assert all(pred.columns == ['GID', 'TID', 'LHS_SID', 'RHS_SID', 'LHS_ITEMS', 'RHS_ITEMS', 'SUPPORT',
        'CONFIDENCE', 'LIFT', 'CONVICTION', 'AFFINITY', 'LEVERAGE'])
     pred_len = len(pred)
-    assert all(pred.head(pred_len)["SUPPORT"].values >=0.01)
-    assert all(pred.head(pred_len)["CONFIDENCE"].values >=0.1)
+    assert all(pred.head(pred_len)["SUPPORT"].values >= 0.2)
+    assert all(pred.head(pred_len)["CONFIDENCE"].values >= 0.4)
+    assert all(pred.head(pred_len)["CONVICTION"].values <= 1.25)
+    assert all(pred.head(pred_len)["AFFINITY"].values <= 0.6)
+    assert all(pred.head(pred_len)["LIFT"].values >= 1.0)
+    assert all(pred.head(pred_len)["LEVERAGE"].values >=0.03)
 
-    # Describing model tends to hang
-    #assert model.describe()
+    assert model.describe()
     
