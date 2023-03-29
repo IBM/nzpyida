@@ -284,7 +284,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     (master_doc, 'nzpyida', u'nzpyida Documentation',
-     author, 'nzpyida', 'Python interface to the in-database data-manipulation algorithms provided by Netezza',
+     author, 'nzpyida', 'Python interface to in-database analytics algorithms and custom ML/analytics execution inside Netezza.',
      'Miscellaneous'),
 ]
 
