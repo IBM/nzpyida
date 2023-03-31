@@ -219,10 +219,12 @@ def _ida_query_NZPY(idadb, query, silent, first_row_only, autocommit):
                     colnames = [column[0].decode() for column in cursor.description]
                 else:
                     colnames = [column[0] for column in cursor.description]
-
-                data = [firstRow]
-                data.extend(cursor.fetchall())
-                result = pd.DataFrame(data, columns= colnames)
+                if firstRow is None:
+                    result = pd.DataFrame([], columns= colnames)
+                else:
+                    data = [firstRow]
+                    data.extend(cursor.fetchall())
+                    result = pd.DataFrame(data, columns= colnames)
                 #convert to Series if only one column
                 if len(result.columns) == 1:
                     result = result[result.columns[0]]
