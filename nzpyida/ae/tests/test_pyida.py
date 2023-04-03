@@ -4,17 +4,23 @@ from nzpyida.ae import NZFunTApply, NZFunApply, NZFunGroupedApply
 from nzpyida.ae import NZInstall
 
 
-
-
 #nzpy dsn
 dsn ={
     "database":"weather",
      "port" :5480,
-     "host" : "169.63.46.17",
+     "host" : "xxxx",
      "securityLevel":0,
      "logLevel":0
 }
 
+dsn= {
+
+    "host":'xxxx',
+    #"host":'127.0.0.1',
+    "port":5480,
+    "database":"telco",
+    "logLevel":0,
+    "securityLevel":0}
 #odbc dsn
 #dsn='weather'
 
@@ -377,33 +383,15 @@ def test_tapply_weather_host_spus_train_pred():
              #print(accuracy)
 
 
+             dslices = self.getNumberOfDataSlices()
+             self.output(dslices, ds_size,accuracy)
 
-             pred_df = X_test.copy()
-
-
-             y_pred= dt.predict(X_test)
-
-             pred_df['RAINTOMORROW'] = y_pred
-             pred_df['DATASET_SIZE'] = ds_size
-             pred_df['CLASSIFIER_ACCURACY']=round(accuracy,2)
+            
 
 
 
 
-             original_columns = pred_df.columns
-
-             for column in original_columns:
-
-              if column in temp_dict:   
-                pred_df[column] = temp_dict[column].inverse_transform(pred_df[column])
-                #print(pred_df)
-
-             def print_output(x):
-                 row = [x['ID'], x['RAINTOMORROW'], x['DATASET_SIZE'], x['CLASSIFIER_ACCURACY']]
-                 self.output(row)
-
-
-             pred_df.apply(print_output, axis=1)
+             
 
 
 
@@ -412,14 +400,16 @@ def test_tapply_weather_host_spus_train_pred():
 
  """
 
-    output_signature = {'ID': 'int', 'RAINTOMORROW_PRED': 'str', 'DATASET_SIZE': 'int', 'CLASSIFIER_ACCURACY': 'float'}
+    output_signature = { "NUMBER_DATASLICES":'int','DATASET_SIZE': 'int', 'CLASSIFIER_ACCURACY': 'float', }
     nz_tapply = NZFunTApply(df=idadf, code_str=code_str_host_spus, fun_name="decision_tree_ml", parallel=True,
                             output_signature=output_signature)
     result = nz_tapply.get_result()
     print("Host +SPUs execution - slicing on a default column- ML function for the entire slices")
+    result = result.as_dataframe()
     print(result)
-    assert result.shape[0] == 35551, "number of records are not matching"
-    assert result.shape[1] == 4, "number of columns are not matching"
+    dslices= result['NUMBER_DATASLICES'][0]
+    assert result.shape[0] == dslices, "number of data slices and ae instances are not matching"
+
 
 
 def test_groupedapply_weather_host_spus():
