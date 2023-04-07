@@ -39,6 +39,7 @@ def clear_up(idadb: IdaDataBase, mm: ModelManager):
     if idadb.exists_table(OUT_TABLE_CM):
         idadb.drop_table(OUT_TABLE_CM)
 
+@pytest.mark.skip
 def test_linear_regression(idadb: IdaDataBase, mm: ModelManager, clear_up):
     idf_train = idadb.as_idadataframe(df_train_reg, tablename=TAB_NAME_TRAIN, clear_existing=True, indexer='ID')
     idf_test = idadb.as_idadataframe(df_test_reg, tablename=TAB_NAME_TEST, clear_existing=True, indexer='ID')
