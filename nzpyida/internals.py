@@ -294,16 +294,21 @@ class InternalState(object):
                 #if columns == "*":
                     #columns = "\"" + "\",\"".join(self._idadf.columns) + "\""
 
+                if self._idadf._idadb._is_netezza_system():
+                    order_by = "ORDER BY NULL"
+                    as_temp1 = ""
+                    temp1 = ""
+                else:
+                    order_by = ""
+                    as_temp1 = "AS TEMP1"
+                    temp1 = "TEMP1."
+
                 if self._idadf.indexer:
-                    query = ("SELECT " + columns + " FROM %s AS TEMP1 WHERE " +
+                    query = ("SELECT " + columns + " FROM %s " + as_temp1 + " WHERE " +
                              self._idadf.indexer + indexstring)
                 else:
-                    if self._idadf._idadb._is_netezza_system():
-                        order_by = "ORDER BY NULL"
-                    else:
-                        order_by = ""
-                    query = ("SELECT " + columns + " FROM (SELECT TEMP1.*, "+
-                            "(ROW_NUMBER() OVER(" + order_by + ")-1) AS RN FROM %s AS TEMP1) AS TEMP2 "+
+                    query = ("SELECT " + columns + " FROM (SELECT " + temp1 + "*, "+
+                            "(ROW_NUMBER() OVER(" + order_by + ")-1) AS RN FROM %s " + as_temp1 + ") AS TEMP2 "+
                             "WHERE RN " + indexstring)
 
                 self.index = None
