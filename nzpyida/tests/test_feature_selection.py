@@ -34,6 +34,7 @@ from nzpyida.feature_selection import info_gain, gain_ratio, su
 
 # Test symmetry
 
+@pytest.mark.skipif("'netezza' in config.getvalue('jdbc') or config.getvalue('hostname') != ''")
 class Test_PearsonCorrelation(object):
 
     def test_pearson_default(self, idadf):
@@ -88,7 +89,8 @@ class Test_PearsonCorrelation(object):
             assert(isinstance(result, float))
             result2 = pearson(idadf, target = columns[1], features=[columns[0]])
             assert(round(result,3) == round(result2,3)) # symmetry
-    
+
+@pytest.mark.skipif("'netezza' in config.getvalue('jdbc') or config.getvalue('hostname') != ''")  
 class Test_SpearmanRankCorrelation(object):
 
     def test_spearman_default(self, idadf):
