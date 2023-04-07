@@ -12,6 +12,8 @@
 """
 setup.py
 """
+
+# -*- coding: utf-8 -*-
 # Note: Always prefer setuptools over distutils
 from setuptools import setup, find_packages
 from codecs import open
@@ -65,7 +67,7 @@ classifiers = [
       ]
 
 setup(name='nzpyida',
-      version='0.2.2.4',
+      version='0.2.2.6',
       install_requires=['pandas','numpy','future','six','pypyodbc','pyodbc', 'lazy', 'nzpy'],
 
       extras_require={
@@ -75,7 +77,7 @@ setup(name='nzpyida',
       },
       description='Supports Custom ML/Analytics Execution Inside Netezza',
       long_description=longdesc,
-      long_description_content_type='text/markdown',
+      long_description_content_type='text/x-rst',
       author='IBM Corp.',
       author_email='vinay.kasireddy@ibm.com,toni.bollinger@de.ibm.com',
       license='BSD',
