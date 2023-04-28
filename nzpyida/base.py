@@ -2081,7 +2081,7 @@ class IdaDataBase(object):
                 # TODO: Dates as timestamp in the database
                 column_string += "\"%s\" VARCHAR(255)," % str(column).strip()
             else:
-                if dataframe.dtypes[column] in [np.int64, np.int, np.int8, np.int32]:
+                if dataframe.dtypes[column] in [np.int64, int, np.int8, np.int32]:
                     if abs(dataframe[column].max()) < 2147483647/2: # might get bigger 
                         datatype = "INT"
                     else:
