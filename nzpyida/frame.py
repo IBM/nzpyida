@@ -42,7 +42,7 @@ from collections import OrderedDict
 
 import numpy as np
 import pandas as pd
-from pandas.core.index import Index, RangeIndex
+from pandas import Index, RangeIndex
 
 from lazy import lazy
 import six
