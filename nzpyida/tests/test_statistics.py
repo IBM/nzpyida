@@ -132,10 +132,10 @@ class Test_DescriptiveStatistics(object):
             idadf.describe("string")
 
     def test_idadf_quantile_default(self, idadf, df):
-        assert str(idadf.quantile()) == str(df.quantile())
+        assert str(idadf.quantile()) == str(df.quantile(numeric_only=True))
 
     def test_idadf_quantile_custom(self, idadf, df):
-        assert all(idadf.quantile([0.2,0.4,0.6,0.8]) == df.quantile([0.2,0.4,0.6,0.8]))
+        assert all(idadf.quantile([0.2,0.4,0.6,0.8]) == df.quantile([0.2,0.4,0.6,0.8], numeric_only=True))
 
     def test_idadf_quantile_value_out_of_range(self, idadf):
         with pytest.raises(ValueError):
@@ -150,13 +150,10 @@ class Test_DescriptiveStatistics(object):
             idadf.quantile(0.5,0.7)
 
     def test_idadf_cov(self, idadf, df):
-        assert str(idadf.cov()) == str(df.cov())
+        assert str(idadf.cov()) == str(df.cov(numeric_only=True))
 
     def test_idadf_corr(self, idadf, df):
-        assert str(idadf.corr()) == str(df.corr())
-
-    def test_idadf_mad(self, idadf, df):
-        assert str(idadf.mad()) == str(df.mad())
+        assert str(idadf.corr()) == str(df.corr(numeric_only=True))
 
     # TODO : Fix min and max in python 2
     def test_idadf_min(self, idadf, df):
@@ -172,19 +169,19 @@ class Test_DescriptiveStatistics(object):
         pass
 
     def test_idadf_std(self, idadf, df):
-        assert str(idadf.std()) == str(df.std())
+        assert str(idadf.std()) == str(df.std(numeric_only=True))
 
     def test_idadf_var(self, idadf, df):
-        assert str(idadf.var()) == str(df.var())
+        assert str(idadf.var()) == str(df.var(numeric_only=True))
 
     def test_idadf_mean(self, idadf, df):
-        assert str(idadf.mean()) == str(df.mean())
+        assert str(idadf.mean()) == str(df.mean(numeric_only=True))
 
     def test_idadf_sum(self, idadf, df):
-        assert str(idadf.sum()) == str(df.sum(numeric_only = True))
+        assert str(idadf.sum()) == str(df.sum(numeric_only=True))
 
     def test_idadf_median(self, idadf, df):
-        assert str(idadf.median()) == str(df.median())
+        assert str(idadf.median()) == str(df.median(numeric_only=True))
 
     @pytest.mark.parametrize("f",
                              [IDADF.describe,
