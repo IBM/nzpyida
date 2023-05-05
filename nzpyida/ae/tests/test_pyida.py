@@ -5,22 +5,14 @@ from nzpyida.ae import NZInstall
 
 
 #nzpy dsn
-dsn ={
-    "database":"weather",
-     "port" :5480,
-     "host" : "xxxx",
-     "securityLevel":0,
-     "logLevel":0
-}
 
 dsn= {
+    'host':'9.30.57.xxx',  # NOTE: replace with your test server name or IP
+    'port':5480,
+    'database':'telco',
+    'logLevel':0,
+    'securityLevel':0}
 
-    "host":'xxxx',
-    #"host":'127.0.0.1',
-    "port":5480,
-    "database":"telco",
-    "logLevel":0,
-    "securityLevel":0}
 #odbc dsn
 #dsn='weather'
 
