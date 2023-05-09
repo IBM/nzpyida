@@ -5,7 +5,7 @@ recursive-include docs *
 include LICENSE.txt
 include MANIFEST.in
 include DEPLOY.txt
-include README.rst
+include README.md
 include setup.cfg
 include *.gitignore
 
