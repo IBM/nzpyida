@@ -38,7 +38,7 @@ server NETEZZA_HOSTNAME on port 5480 logging in as DATABASE_USER with
 password PASSWORD. The database to use on that server is DATABASE.
 
 ```
-from pyida import IdaDataBase, IdaDataFrame
+from nzpyida import IdaDataBase, IdaDataFrame
 nzpy_cfg = {
   'user': 'DATABASE_USER', 
   'password': 'PASSWORD', 
