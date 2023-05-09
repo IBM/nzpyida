@@ -22,7 +22,7 @@ from codecs import open
 # Get the long description from the relevant file
 
 
-with open('README.rst', 'r', encoding='utf-8') as f:
+with open('README.md', 'r', encoding='utf-8') as f:
     longdesc = f.read()
 
 
@@ -52,13 +52,11 @@ classifiers = [
 
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.2',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: Implementation :: CPython',
 
         'Topic :: Database',
@@ -67,7 +65,7 @@ classifiers = [
       ]
 
 setup(name='nzpyida',
-      version='0.2.2.6',
+      version='0.3.2',
       install_requires=['pandas','numpy','future','six','pypyodbc','pyodbc', 'lazy', 'nzpy'],
 
       extras_require={
@@ -77,9 +75,9 @@ setup(name='nzpyida',
       },
       description='Supports Custom ML/Analytics Execution Inside Netezza',
       long_description=longdesc,
-      long_description_content_type='text/x-rst',
+      long_description_content_type='text/markdown',
       author='IBM Corp.',
-      author_email='vinay.kasireddy@ibm.com,toni.bollinger@de.ibm.com',
+      author_email='mlabenski@ibm.com,pawel.mroz1@ibm.com',
       license='BSD',
       classifiers=classifiers,
       keywords='data analytics database development ibm netezza pandas scikitlearn scalability machine-learning knowledge discovery',
