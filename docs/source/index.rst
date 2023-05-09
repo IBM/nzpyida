@@ -20,7 +20,7 @@ The nzpyida project provides a Python interface to the in-database data-manipula
 * It accelerates Python analytics by seamlessly pushing operations written in Python into the underlying database for execution, thereby benefitting from in-database performance-enhancing features, such as columnar storage and parallel processing.
 * It can be used by Python developers with very little additional knowledge, because it copies the well-known interface of the Pandas library for data manipulation and the Scikit-learn library for the use of machine learning algorithms.
 * It is compatible with Python 3.6.
-* It can connect to Netezza databases via ODBC or JDBC.
+* It can connect to Netezza databases via nzpy, ODBC or JDBC.
 
 **nzpyida = NeteZa PYthon In Database Analytics**
 
@@ -100,19 +100,7 @@ Contributors
 ============
 
 The nzpyida is based on ibmdbpy project developed for IBM Db2 Warehouse.
-The ibmdbpy project was initiated in April 2015 at IBM Deutschland Reasearch & Development, Böblingen. 
-Here is the list of the persons who contributed to the project, in the chronological order of their contribution:
-
-- Edouard Fouché (core)
-- Michael Wurst (core)
-- William Moore (documentation)
-- Craig Blaha (documentation)
-- Rafael Rodriguez Morales (geospatial extension, core)
-- Avipsa Roy (geospatial extension)
-- Nicole Schoen (core)
-- Wieland Hoffmann (core)
-- Toni Bollinger (core)
-- Eva Feillet (geospatial extension, core)
+See https://github.com/ibmdbanalytics/ibmdbpy for details.
 
 Indexes and tables
 ==================
