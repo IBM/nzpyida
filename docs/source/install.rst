@@ -17,8 +17,8 @@ To update your nzpyida installation, issue this statement::
 
 Ensure you have INZA version 11.2.1.0 or later installed in your Netezza database.
 
-Introduction
-------------
+Building and Installing from Source
+-----------------------------------
 
 This statement builds the project from source::
 
@@ -33,16 +33,11 @@ These statements build the documentation::
 These statements run the test::
 
 	> cd tests
-	> py.test
+	> py.test --hostname HOSTNAME --dsn DB --uid USERID --pwd PASS
 
-By default, pytest assumes that a database named "BLUDB" is reachable via an ODBC connection and that its credentials are stored in your ODBC settings. This may be not the case for most users, so several options are avaiable:
+Where HOSTNAME is your Netezza server hostname or IP, DB is the database name and USERID and PASS are login credentials.
+The database must have INZA enabled, otherwise some tests will fail.
 
-	* ``--dsn`` : Data Source Name
-	* ``--uid``, ``--pwd`` : Database login and password
-	* ``--jdbc`` : jdbc url string
-	* ``--table`` : Table to use to test (default: iris)
-
-For testing, all tables from nzpyida.sampledata can be used. These include the tables iris, swiss, and titanic.
 
 Strict dependencies
 -------------------
