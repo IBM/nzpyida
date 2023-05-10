@@ -154,7 +154,6 @@ class TestSpearmanCorr:
         assert len(out_df) == 2
         assert all(out_df["RHO"].head().values == 0)
 
-@pytest.mark.skip
 class TestChisq:
     # I believe last assertsion should be stronger (... > 0.95)
     def test_strong_correlation(self, idf, clean_up):
