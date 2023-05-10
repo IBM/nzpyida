@@ -63,21 +63,6 @@ The connection is done using the JDBC URL string.
 >>> jdbc_dsn = jdbc:netezza://IP ADDRESS:PORT/DATABASE NAME"
 >>> idadb = IdaDataBase(jdbc_dsn, uid="USRENAME", pwd="PASSWORD")
 
-Autocommit
-----------
-
-By default, the connection is opened in autocommit mode, which means all operations are committed automatically.
-This behavior can be changed by setting the ``autocommit`` option to ``False`` or by using the ``set_autocommit`` function.
-
->>> idadb = IdaDataBase("MYDB", autocommit=False)
-
-Alternatively
-
->>> from nzpyida.utils import set_autocommit
->>> set_autocommit(False)
-
->>> idadb = IdaDataBase("MYDB", autocommit=False)
-
 Conventions
 -----------
 
@@ -102,6 +87,17 @@ Note: It is possible to reopen the connection of IdaDataBase by using ``IdaDataB
 
 Manipulate database objects
 ===========================
+
+Loading a sample table
+----------------------
+
+To load a sample table named IRIS that is used in examples in this guide, run the following code:
+
+>>> from nzpyida.sampledata.iris import iris
+>>> idadb.as_idadataframe(iris, 'IRIS')
+
+To learn more about data loading, read :ref:`Upload a DataFrame`.
+
 
 Open an IdaDataFrame
 --------------------
@@ -232,13 +228,13 @@ Name: sepal_length, dtype: float64
 
 This selects all even rows in the ``sepal_length`` column:
 
->>> idadf_new = idadf.loc[::2][['ID', 'sepal_length']]
+>>> idadf_new = idadf.loc[::2][['sepal_length']]
 
 Given that an ID column is provided to the data set and declared as an indexer, the selection operates on its ID column. In that case, an ID column has been added to the data set. This column contains unique integers to identify the rows. In the example below we add an ID column and set it as indexer. The default name for this new column is "ID".
 
 >>> idadf = IdaDataFrame(idadb, "IRIS")
 >>> idadb.add_column_id(idadf)
->>> idadb.set_indexer('ID')
+>>> idadb.indexer = 'ID'
 >>> idadf_new = idadf.loc[::2][['ID', 'sepal_length']]
 >>> idadf_new.head(10)
    ID  sepal_length
@@ -341,6 +337,7 @@ Select all rows for which the 'sepal_length' value is smaller than 5:
 Select all samples belonging to the 'versicolor' species:
 
 >>> idadf_new = idadf[idadf['species'] == 'versicolor']
+>>> idadf_new.head()
    ID  sepal_length  sepal_width  petal_length  petal_width     species
 0  89           6.7          3.0           5.0          1.7  versicolor
 1  56           5.8          2.7           4.1          1.0  versicolor
@@ -488,10 +485,10 @@ The algorithm is called K-Nearest Neighbors.
 >>>
 >>>   # create and train the model with a data sample
 >>>   model = KNeighborsClassifier(idadb, model_name='knn_model')
->>>   model.fit(in_df=sample_df, target_column='species')
+>>>   model.fit(in_df=sample_df, target_column='"species"')
 >>>
 >>>   # test and score the model using all the data
->>>   print(model.score(in_df=idadf, target_column='species'))
+>>>   print(model.score(in_df=idadf, target_column='"species"'))
 
 
 To learn how to use other machine learning algorithms, refer to the detailed documentation.

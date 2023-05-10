@@ -71,7 +71,7 @@ author = u''
 # built documents.
 #
 # The short X.Y version.
-version = u'0.x.x'
+version = u'0.3'
 # The full version, including alpha/beta/rc tags.
 release = u'0.x.x beta'
 
