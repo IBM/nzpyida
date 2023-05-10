@@ -11,4 +11,3 @@ include *.gitignore
 
 
 prune docs/build
-recursive-excluse *.jar
