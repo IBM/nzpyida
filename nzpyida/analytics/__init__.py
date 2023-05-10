@@ -13,6 +13,10 @@ from .predictive.kmeans import KMeans
 from .predictive.knn import KNeighborsClassifier
 from .predictive.linear_regression import LinearRegression
 from .predictive.naive_bayes import NaiveBayesClassifier
+from .predictive.association_rules import ARule
+from .predictive.bisecting_kmeans import BisectingKMeans
+from .predictive.regression_trees import DecisionTreeRegressor
+from .predictive.two_step_clustering import TwoStepClustering
 from .exploration.distribution import bitable, moments, histogram, outliers
 from .exploration.distribution import quantile, unitable
 from .transform.discretization import EFDisc, EMDisc, EWDisc
@@ -20,3 +24,7 @@ from .transform.discretization import ef_disc, em_disc, ew_disc
 from .transform.preparation import std_norm, impute_data, random_sample
 from .model_manager import ModelManager
 from .auto_delete_context import AutoDeleteContext
+from .exploration.relation_identification import corr, cov, covariance_matrix, \
+spearman_corr, mutual_info, chisq, t_me_test, t_ls_test, t_pmd_test, t_umd_test, \
+mww_test, wilcoxon_test, canonical_corr, anova_crd_test, anova_rbd_test, \
+manova_one_way_test, manova_two_way_test

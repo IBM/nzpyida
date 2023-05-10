@@ -70,6 +70,6 @@ def test_knn(idadb: IdaDataBase, mm: ModelManager, clear_up):
     assert all([cm, acc, wacc])
     assert all(cm.columns == ['REAL', 'PREDICTION', 'CNT'])
     assert len(cm) >= 3
-    assert sum(cm.head()["CNT"].values) == 3
+    assert sum(cm.as_dataframe()["CNT"].values) == 3
     assert wacc == 0.75
     assert 0.67 >= acc >= 0.66

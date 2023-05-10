@@ -59,7 +59,7 @@ def test_naive_bayes(idadb: IdaDataBase, mm: ModelManager, clear_up):
     pred = model.predict(idf_test, id_column="ID", out_table=OUT_TABLE_PRED)
     assert pred
     assert all(pred.columns == ['ID', 'CLASS'])
-    assert list(pred.head()['CLASS'].values) == ['p', 'n', 'n']
+    assert list(pred.as_dataframe()['CLASS'].values) == ['p', 'n', 'n']
 
     score = model.score(idf_test, id_column="ID", target_column="B")
 
@@ -70,6 +70,6 @@ def test_naive_bayes(idadb: IdaDataBase, mm: ModelManager, clear_up):
     assert all([cm, acc, wacc])
     assert all(cm.columns == ['REAL', 'PREDICTION', 'CNT'])
     assert len(cm) >= 3
-    assert sum(cm.head()["CNT"].values) == 3
+    assert sum(cm.as_dataframe()["CNT"].values) == 3
     assert wacc == 0.75
     assert 0.67 >= acc >= 0.66

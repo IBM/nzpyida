@@ -59,7 +59,7 @@ def test_bisecting_kmeans(idadb: IdaDataBase, mm: ModelManager, clear_up):
     pred = model.predict(idf_test, level=5, out_table=OUT_TABLE_PRED)
     assert pred
     assert all(pred.columns == ['ID', 'CLUSTER_ID', 'DISTANCE'])
-    assert all(list(pred.head()['CLUSTER_ID'].values))
+    assert all(list(pred.as_dataframe()['CLUSTER_ID'].values))
 
     score = model.score(idf_test, target_column="A")
 
