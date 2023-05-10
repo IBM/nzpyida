@@ -15,25 +15,14 @@ from nzpyida.base import IdaDataBase
 @pytest.fixture(scope='session')
 def idadb():
     nzpy_cfg = {
-        "user":"admin",
-        "password":"password", 
-        "host":'127.0.0.1', 
+        "user":"username",
+        "password":"*****", 
+        "host":'hostname', 
         "port":5480, 
-        "database":"wrappers_tests", 
+        "database":"database_name", 
         "logLevel":0, 
         "securityLevel":1
     }
-    
-    nzpy_cfg_fyre = {
-        "user":"admin",
-        "password":"password", 
-        "host":'9.30.57.160', 
-        "port":5480, 
-        "database":"telco", 
-        "logLevel":0, 
-        "securityLevel":1
-    }
-
     return IdaDataBase(nzpy_cfg)
 
 df_train = pd.DataFrame.from_dict({"ID": range(1000),

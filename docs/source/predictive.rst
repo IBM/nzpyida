@@ -80,3 +80,19 @@ Predictive Modeling base module
    :members:
    :undoc-members:
    :show-inheritance:
+
+Bisecting KMeans
+-----------------------------------------------------
+
+.. automodule:: nzpyida.analytics.predictive.bisecting_kmeans
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Two Step Clustering
+-----------------------------------------------------
+
+.. automodule:: nzpyida.analytics.predictive.two_step_clustering
+   :members:
+   :undoc-members:
+   :show-inheritance:

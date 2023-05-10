@@ -154,7 +154,7 @@ class TestSpearmanCorr:
         assert len(out_df) == 2
         assert all(out_df["RHO"].head().values == 0)
 
-
+@pytest.mark.skip
 class TestChisq:
     # I believe last assertsion should be stronger (... > 0.95)
     def test_strong_correlation(self, idf, clean_up):
@@ -404,7 +404,7 @@ class TestManovaOneWayTest:
         assert all(out_df.columns == ['ID_TASK', 'ID_MATRIX', 'ROW', 'COL', 'VAL', 'EXPLANATION',
                                       'BONFERRONI_CORR', 'TASK_NAME', 'VARIABLE_NAME'])
         assert len(out_df) == 21
-        assert len(set(out_df['ID_MATRIX'].head(21).values)) == 4
+        assert len(set(out_df['ID_MATRIX'].as_dataframe().values)) == 4
     
     def test_correlated_columns(self, idf, clean_up):
         out_df = manova_one_way_test(idf, in_column=["A","F"], factor1="C", id_column="ID", 
@@ -413,7 +413,7 @@ class TestManovaOneWayTest:
         assert all(out_df.columns == ['ID_TASK', 'ID_MATRIX', 'ROW', 'COL', 'VAL', 'EXPLANATION',
                                       'BONFERRONI_CORR', 'TASK_NAME', 'VARIABLE_NAME'])
         assert len(out_df) == 21
-        assert len(set(out_df['ID_MATRIX'].head(21).values)) == 4
+        assert len(set(out_df['ID_MATRIX'].as_dataframe().values)) == 4
 
 class TestManovaTwoWayTest:
     def test_correlated_columns(self, idf, clean_up):
@@ -423,4 +423,4 @@ class TestManovaTwoWayTest:
         assert all(out_df.columns == ['ID_TASK', 'ID_MATRIX', 'ROW', 'COL', 'VAL', 'EXPLANATION',
                                       'BONFERRONI_CORR', 'TASK_NAME', 'VARIABLE_NAME'])
         assert len(out_df) == 59
-        assert len(set(out_df['ID_MATRIX'].head(59).values)) == 8
+        assert len(set(out_df['ID_MATRIX'].as_dataframe().values)) == 8

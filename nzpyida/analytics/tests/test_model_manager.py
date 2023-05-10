@@ -69,7 +69,9 @@ def test_model_manager(idadb, clear_up):
                    copyright="Copyright (c) 2023. IBM Corp. All rights reserved.", category="DecTree")
     
     assert mm.model_exists(MOD_NAME)
-    lm = mm.list_models().head()
+
+    lm_ida = mm.list_models()
+    lm = lm_ida.as_dataframe()
     lm = lm[lm["MODELNAME"]==MOD_NAME]
     assert len(lm) == 1
     assert lm["OWNER"].iloc[0] == "INZAUSER"
