@@ -1935,6 +1935,9 @@ class IdaDataFrame(object):
 
         """
         # TODO: to test !
+
+        with_data = '' if self._idadb._is_netezza_system() else ' WITH DATA'
+
         if tablename == self.tablename:
             if clear_existing is False:
                 raise ValueError("Cannot overwrite current IdaDataFrame if "+
@@ -1946,7 +1949,7 @@ class IdaDataFrame(object):
             if not display_yes:
                 return
             tempname = self._idadb._get_valid_tablename()
-            self._prepare_and_execute("CREATE TABLE %s AS (SELECT * FROM %s) WITH DATA"%(tempname, tablename))
+            self._prepare_and_execute("CREATE TABLE %s AS (SELECT * FROM %s)%s"%(tempname, tablename, with_data))
             try:
                 self._idadb.drop_table(tablename)
             except:
@@ -1974,7 +1977,7 @@ class IdaDataFrame(object):
 
         name = self.internal_state.current_state
 
-        self._prepare_and_execute("CREATE TABLE %s AS (SELECT * FROM %s) WITH DATA"%(tablename, name))
+        self._prepare_and_execute("CREATE TABLE %s AS (SELECT * FROM %s)%s"%(tablename, name, with_data))
 
         # Reset the cache
         self._idadb._reset_attributes("cache_show_tables")
@@ -2495,7 +2498,8 @@ class IdaDataFrame(object):
             self._prepare_and_execute("CREATE VIEW " + viewname + " AS "+ query)
             # Initiate the modified table under a random name
             tablename = idadb._get_valid_tablename(prefix="DATA_FRAME_")
-            idadb._prepare_and_execute("CREATE TABLE %s AS (SELECT * FROM %s) WITH DATA"%(tablename,viewname))
+            with_data = '' if self._idadb._is_netezza_system() else ' WITH DATA'
+            idadb._prepare_and_execute("CREATE TABLE %s AS (SELECT * FROM %s)%s"%(tablename,viewname,with_data))
             print('A new table with filtered rows is available under the name %s.' %tablename)
             print('The newly created IdaDataFrame refers to this new table.')
             # Drop the view 
