@@ -96,3 +96,11 @@ Two Step Clustering
    :members:
    :undoc-members:
    :show-inheritance:
+
+Time Series Forecasting
+-----------------------------------------------------
+
+.. automodule:: nzpyida.analytics.predictive.timeseries
+   :members:
+   :undoc-members:
+   :show-inheritance:
