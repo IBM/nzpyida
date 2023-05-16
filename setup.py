@@ -56,6 +56,8 @@ classifiers = [
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
         'Programming Language :: Python :: Implementation :: CPython',
 
         'Topic :: Database',
@@ -64,7 +66,7 @@ classifiers = [
       ]
 
 setup(name='nzpyida',
-      version='0.3.3',
+      version='0.3.4',
       install_requires=['pandas','numpy','future','six','pypyodbc','pyodbc', 'lazy', 'nzpy'],
 
       extras_require={
