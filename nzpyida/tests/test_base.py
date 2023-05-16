@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #-----------------------------------------------------------------------------
-# Copyright (c) 2015, IBM Corp.
+# Copyright (c) 2015-2023, IBM Corp.
 # All rights reserved.
 #
 # Distributed under the terms of the BSD Simplified License.
@@ -22,7 +22,7 @@ standard_library.install_aliases()
 import pandas
 import pytest
 import six
-from nzpyida.learn import KMeans
+from nzpyida.analytics import DecisionTreeClassifier
 from flaky import flaky
 
 class Test_DataBaseExploration(object):
@@ -91,20 +91,20 @@ class Test_DataBaseExploration(object):
 
     def test_idadb_exists_model_positive(self, idadb, idadf_tmp):
         idadb.add_column_id(idadf_tmp, destructive=True)
-        # Create a simple KMEANS model
-        kmeans = KMeans(n_clusters=3, modelname="MODEL_58979457385")
-        kmeans.fit(idadf_tmp)
+        # Create a simple DecisionTreeClassifier model
+        model = DecisionTreeClassifier(idadb=idadb, model_name="MODEL_58979457385")
+        model.fit(idadf_tmp, target_column='"species"')
         assert(idadb.exists_model("MODEL_58979457385") == 1)
         try :
-            idadb.drop_model(kmeans.modelname)
+            idadb.drop_model(model.model_name)
         except : pass
 
     @pytest.mark.skipif("'netezza' in config.getvalue('jdbc') or config.getvalue('hostname') != ''")
     def test_idadb_exists_model_with_schema_positive(self, idadb, idadf_tmp):
         idadb.add_column_id(idadf_tmp, destructive=True)
-        # Create a simple KMEANS model
-        kmeans = KMeans(n_clusters=3, modelname="MYSCHEMA.MODEL_45738558979")
-        kmeans.fit(idadf_tmp)
+        # Create a simple DecisionTreeClassifier model
+        kmeans = DecisionTreeClassifier(idadb=idadb, model_name="MYSCHEMA.MODEL_45738558979")
+        kmeans.fit(idadf_tmp, target_column='"species"')
         assert(idadb.exists_model("MYSCHEMA.MODEL_45738558979") == 1)
         try :
             idadb.drop_model(kmeans.modelname)
@@ -113,9 +113,9 @@ class Test_DataBaseExploration(object):
     @pytest.mark.skipif("'netezza' in config.getvalue('jdbc') or config.getvalue('hostname') != ''")
     def test_idadb_exists_model_with_schema_positive_mixed_case(self, idadb, idadf_tmp):
         idadb.add_column_id(idadf_tmp, destructive=True)
-        # Create a simple KMEANS model
-        kmeans = KMeans(n_clusters=3, modelname="mySchema.Model_85584573979")
-        kmeans.fit(idadf_tmp)
+        # Create a simple DecisionTreeClassifier model
+        kmeans = DecisionTreeClassifier(idadb=idadb, model_name="mySchema.Model_85584573979")
+        kmeans.fit(idadf_tmp, target_column='"species"')
         assert(idadb.exists_model("mySchema.Model_85584573979") == 1)
         assert(idadb.exists_model("MYSCHEMA.MODEL_85584573979") == 1)
         assert(idadb.exists_model("myschema.model_85584573979") == 1)
@@ -171,11 +171,11 @@ class Test_DataBaseExploration(object):
 
     def test_idadb_is_model_positive(self, idadb, idadf_tmp):
         idadb.add_column_id(idadf_tmp, destructive = True)
-        # Create a simple KMEANS model
-        kmeans = KMeans(n_clusters = 3)
-        kmeans.fit(idadf_tmp)
-        assert(idadb.is_model(kmeans.modelname) == 1)
-        try : idadb.drop_model(kmeans.modelname)
+        # Create a simple DecisionTreeClassifier model
+        kmeans = DecisionTreeClassifier(idadb=idadb, model_name="Model_85584573777")
+        kmeans.fit(idadf_tmp, target_column='"species"')
+        assert(idadb.is_model(kmeans.model_name) == 1)
+        try : idadb.drop_model(kmeans.model_name)
         except : pass
 
     def test_idadb_is_model_negative(self, idadb, idadf, idaview):

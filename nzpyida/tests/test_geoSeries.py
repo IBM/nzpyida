@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #-----------------------------------------------------------------------------
-# Copyright (c) 2015, IBM Corp.
+# Copyright (c) 2015-2023, IBM Corp.
 # All rights reserved.
 #
 # Distributed under the terms of the BSD Simplified License.
@@ -24,8 +24,8 @@ import pytest
 import six
 
 from nzpyida import IdaSeries
-from nzpyida import IdaGeoSeries
-from nzpyida.exceptions import IdaGeoDataFrameError
+#from nzpyida import IdaGeoSeries
+#from nzpyida.exceptions import IdaGeoDataFrameError
 
 @pytest.mark.skipif("'netezza' in config.getvalue('jdbc') or config.getvalue('hostname') != ''")
 class Test_IdaGeoSeries(object):
