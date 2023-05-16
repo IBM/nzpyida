@@ -57,6 +57,30 @@ Association Rules
    :undoc-members:
    :show-inheritance:
 
+Bisecting KMeans
+-----------------------------------------------------
+
+.. automodule:: nzpyida.analytics.predictive.bisecting_kmeans
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Two Step Clustering
+-----------------------------------------------------
+
+.. automodule:: nzpyida.analytics.predictive.two_step_clustering
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Time Series Forecasting
+-----------------------------------------------------
+
+.. automodule:: nzpyida.analytics.predictive.timeseries
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Classification base module
 --------------------------------------------------
 
@@ -77,22 +101,6 @@ Predictive Modeling base module
 --------------------------------------------------------
 
 .. automodule:: nzpyida.analytics.predictive.predictive_modeling
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Bisecting KMeans
------------------------------------------------------
-
-.. automodule:: nzpyida.analytics.predictive.bisecting_kmeans
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Two Step Clustering
------------------------------------------------------
-
-.. automodule:: nzpyida.analytics.predictive.two_step_clustering
    :members:
    :undoc-members:
    :show-inheritance:
