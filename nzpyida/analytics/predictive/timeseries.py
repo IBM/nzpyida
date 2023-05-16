@@ -16,7 +16,7 @@ not really needed any more (except for understanding the predicted values).
 If specified, a table <outtable> is additionally created with the following columns: 
 <by>, <time>, forecast, standarderror. The table contains the forecast values for 
 future time points of the time series identified by <by>. For each prediction, 
-the standarderror value indicates a confidence inter-val around the forecast value.
+the standarderror value indicates a confidence interval around the forecast value.
 
 If specified, a table <seasadjtable> is additionally created with the following columns: 
 <by>, <time>, adjusted. The values in column <target> of the input table are seasonally 
