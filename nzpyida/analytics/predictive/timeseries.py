@@ -10,8 +10,8 @@
 #-----------------------------------------------------------------------------
 """
 A time series model is built by analyzing series of timed numeric values, and is 
-applied immedi-ately for predicting future values. The model itself is stored but 
-not really needed any more (ex-cept for understanding the predicted values).
+applied immediately for predicting future values. The model itself is stored but 
+not really needed any more (except for understanding the predicted values).
 
 If specified, a table <outtable> is additionally created with the following columns: 
 <by>, <time>, forecast, standarderror. The table contains the forecast values for 
@@ -77,7 +77,7 @@ class TimeSeries(PredictiveModeling):
         
         algorithm : str
             the time series algorithm to use. Allowed values are: ExponentialSmoothing, 
-            ARIMA, Seasonal-TrendDecomposition, SpectralAnalysis
+            ARIMA, SeasonalTrendDecomposition, SpectralAnalysis
 
         interpolation_method : str
             the interpolation method. Allowed values are: linear, cubicspline, exponentialspline
