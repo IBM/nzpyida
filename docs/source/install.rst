@@ -4,16 +4,16 @@ Install
 Installing
 ----------
 
-Install nzpyida from pip by issuing this statement::
+Install nzpyida from pip3 by issuing this statement::
 
-	> pip install nzpyida
+	> pip3 install nzpyida
 
 Updating
 --------
 
 To update your nzpyida installation, issue this statement::
 
-	> pip install nzpyida --update --no-deps
+	> pip3 install nzpyida --update --no-deps
 
 Ensure you have INZA version 11.2.1.0 or later installed in your Netezza database.
 
