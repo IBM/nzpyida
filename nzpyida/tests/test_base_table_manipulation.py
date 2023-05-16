@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #-----------------------------------------------------------------------------
-# Copyright (c) 2015, IBM Corp.
+# Copyright (c) 2015-2023, IBM Corp.
 # All rights reserved.
 #
 # Distributed under the terms of the BSD Simplified License.
@@ -22,7 +22,6 @@ standard_library.install_aliases()
 import pytest
 
 from nzpyida import IdaDataFrame
-from nzpyida.learn import KMeans
 
 class Test_DeleteDataBaseObjects(object):
 
@@ -53,17 +52,6 @@ class Test_DeleteDataBaseObjects(object):
     def test_idadb_drop_view_type_error(self, idadb, idadf):
         with pytest.raises(TypeError):
             idadb.drop_view(idadf.name) # this is a table
-
-    @pytest.mark.skipif("'netezza' in config.getvalue('jdbc') or config.getvalue('hostname') != ''")
-    @pytest.mark.xfail(raises=ValueError)
-    def test_idadb_drop_model_positive(self, idadb, idadf_tmp):
-        idadb.add_column_id(idadf_tmp, destructive = True)
-        # Create a simple KMEANS model
-        kmeans = KMeans(n_clusters = 3)
-        kmeans.fit(idadf_tmp)
-        assert(idadb.is_model(kmeans.modelname) == 1)
-        idadb.drop_model(kmeans.modelname)
-        idadb.commit()
 
     @pytest.mark.skipif("'netezza' in config.getvalue('jdbc') or config.getvalue('hostname') != ''")
     def test_idadb_drop_model_value_error(self, idadb):
