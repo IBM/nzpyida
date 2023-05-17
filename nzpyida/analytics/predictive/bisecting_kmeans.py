@@ -21,6 +21,26 @@ a different number of dataslices. This is due to the behavior of the random numb
 generator, which generates random sequences depending on the number of dataslices 
 and data distribution. The algorithm returns the same model when you use the same machine, 
 the same input data distribution, and the same random seed.
+
+The cluster formation process of the divisive clustering algorithm begins with a single cluster 
+containing all training instances, then the first invocation of k-means divides it into two 
+subclusters by creating two descendant nodes of the clustering tree. Subsequent invocations 
+divide these clusters into more subclusters, and so on, until a stop criterion is satisfied. 
+Stop criterion can be specified by the maximum clustering tree depth or by the minimum required 
+umber of instances for further partitioning. The resulting hierarchical clustering tree can be 
+used to classify instances by propagating them down from the root node, and choosing at each 
+level the best matching sub-cluster with respect to the instance’s distance from sub-cluster centers.
+
+The internal k-means process of the divisive clustering algorithm operates using the ordinary 
+k-means algorithm (with the modified initial centroid generation), discussed in the K-Means 
+Clustering section, using a fixed value of k=2 and working with the subset of data from the 
+parent cluster. The initial centroid generation consists two steps: random generation n>>k 
+candidates and then selection of outermost pair of candidates. The cluster center representation 
+and distance measures remain the same. The numbering scheme for clusters in a clustering tree is 
+the same as decision trees: the root node is number 1, and the descendants of node number 'i' have 
+numbers '2i' and '2i+1' 
+
+Additionally, leaves, which are clusters with no subclusters, are designated by negative numbers.
 """
 
 from typing import List

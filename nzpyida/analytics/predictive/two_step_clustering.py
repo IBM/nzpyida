@@ -9,18 +9,24 @@
 # The full license is in the LICENSE file, distributed with this software.
 #-----------------------------------------------------------------------------
 """
-The divisive clustering algorithm is a computationally efficient, top-down approach 
-to creating hierarchical clustering models. Conceptually, it can be thought of as 
-a wrapper around the k -means algorithm (with a specialized method for initial centroid setting), 
-running the algorithm several times to divide clusters into subclusters. 
-The internal k-means algorithm assumes a fixed k =2 value.
+TwoStep clustering is a data mining algorithm for large data sets. It is faster than 
+traditional methods because it typically scans a data set only once before it saves 
+the data to a clustering feature (CF) tree. TwoStep clustering can make clustering 
+decisions without repeated data scans, whereas other clustering methods scan all 
+data points, which requires multiple iterations. Non- uniform points are not gathered, 
+so each iteration requires a reinspection of each data point, regardless of the 
+significance of the data point. Because TwoStep clustering treats dense areas 
+as a single unit and ignores pattern outliers, it provides high-quality clustering 
+results without exceeding memory constraints.
 
-The divisive clustering algorithm may return different results for the same data set 
-and the same random generator seed when you use different input data distribution or 
-a different number of dataslices. This is due to the behavior of the random number 
-generator, which generates random sequences depending on the number of dataslices 
-and data distribution. The algorithm returns the same model when you use the same machine, 
-the same input data distribution, and the same random seed.
+The TwoStep algorithm has the following advantages:
+- It automatically determines the optimal number of clusters. You do not have to 
+manually create a different clustering model for each number of clusters.
+- It detects input columns that are not useful for the clustering process. 
+These columns are automatically set to supplementary. Statistics are gathered 
+for these columns but they do not influence the clustering algorithm.
+- The configuration of the CF tree can be granular, so that you can balance between 
+memory usage and model quality, according to the environment and needs.
 """
 
 from typing import List

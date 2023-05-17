@@ -9,18 +9,21 @@
 # The full license is in the LICENSE file, distributed with this software.
 #-----------------------------------------------------------------------------
 """
-A time series model is built by analyzing series of timed numeric values, and is 
-applied immediately for predicting future values. The model itself is stored but 
-not really needed any more (except for understanding the predicted values).
 
-If specified, a table <outtable> is additionally created with the following columns: 
-<by>, <time>, forecast, standarderror. The table contains the forecast values for 
-future time points of the time series identified by <by>. For each prediction, 
-the standarderror value indicates a confidence interval around the forecast value.
+Many types of business-relevant or scientific data have values that change over time. 
+Some typical examples are:
+- Daily sales figures for a store
+- Energy consumption readings from household electric meters 
+- Price per gallon at a local gas station
+It is often useful to analyze the behavior of such changes, both to describe the development 
+over time, specifically for a particular trend and seasonality, as well as to predict unknown 
+values of the series, usually for the future. A typical area of application is supply chain
+management, where future needs may be predicted based on past trends.
 
-If specified, a table <seasadjtable> is additionally created with the following columns: 
-<by>, <time>, adjusted. The values in column <target> of the input table are seasonally 
-adjusted and then copied into this table, with the values of columns <by> and <time>
+A time series is a sequence of numerical data values, measured at successive, but not necessarily 
+equidistant—points in time. Examples are daily stock prices, monthly unemployment counts, 
+or annual changes in global temperature. The two main goals of time series analysis are to 
+understand the underlying patterns which are represented by the observed data and to make forecasts.
 """
 from typing import List
 from nzpyida.frame import IdaDataFrame

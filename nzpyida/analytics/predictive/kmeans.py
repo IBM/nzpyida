@@ -159,6 +159,14 @@ class KMeans(PredictiveModeling):
             Allowed values are: L (for leave as is), N (for normalization)
             or S (for standardization).
             If it is not specified, no transformation will be performed.
+        
+        Returns
+        -------
+        IdaDataFrame
+            output table with following columns: id, cluster_id, distance. The id column matches 
+            the <id_column>  of the input table. Each input table record is associated with a cluster, 
+            where the distance from the record to the cluster center is the smallest. The cluster ID 
+            and the distance to the cluster center are given in the columns cluster_id and distance
 
         """
         if not isinstance(in_df, IdaDataFrame):
