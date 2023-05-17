@@ -24,8 +24,6 @@ standard_library.install_aliases()
 import pandas
 import pytest
 
-from nzpyida.feature_selection import pearson
-from nzpyida.feature_selection import spearman
 from nzpyida.feature_selection import ttest
 from nzpyida.feature_selection import chisquared
 from nzpyida.feature_selection import gini, gini_pairwise
