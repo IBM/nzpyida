@@ -12,18 +12,63 @@ import pytest
 import pandas as pd
 from nzpyida.base import IdaDataBase
 
-@pytest.fixture(scope='session')
-def idadb():
-    nzpy_cfg = {
-        "user":"username",
-        "password":"*****", 
-        "host":'hostname', 
-        "port":5480, 
-        "database":"database_name", 
-        "logLevel":0, 
-        "securityLevel":1
-    }
-    return IdaDataBase(nzpy_cfg)
+def pytest_addoption(parser):
+    """
+    Definition of admissible options for the pytest command line
+    """
+    parser.addoption("--table", default="iris",
+        help="Name of the table to test the dataset")
+    parser.addoption("--dsn", default="BLUDB",
+        help="Data Source Name")
+    parser.addoption("--uid", default='',
+        help="User ID")
+    parser.addoption("--pwd", default='',
+        help="Password")
+    parser.addoption("--jdbc", default='',
+        help="jdbc url string for JDBC connection")
+    parser.addoption("--hostname", default='',
+        help="hostname for nzpy connection")
+
+@pytest.fixture(scope="session")
+def idadb(request):
+    """
+    DataBase connection fixture, to be used for the whole testing session.
+    Hold the main IdaDataBase object. Shall not be closed except by a
+    pytest finalizer.
+    """
+    def fin():
+        try:
+            idadb.close()
+        except:
+            pass
+    request.addfinalizer(fin)
+
+    hostname = request.config.getoption('--hostname')
+    jdbc = request.config.getoption('--jdbc')
+
+    if hostname != '':
+        try:
+            idadb = IdaDataBase(
+                dsn={'database': request.config.getoption('--dsn'), 'host': hostname, 'port': 5480},
+                uid=request.config.getoption('--uid'),
+                pwd=request.config.getoption('--pwd'),
+                autocommit=False)
+        except:
+            raise
+    elif jdbc != '':
+        try:
+            idadb = IdaDataBase(dsn=jdbc, autocommit=False)
+        except:
+            raise
+    else:
+        try:
+            idadb = IdaDataBase(dsn=request.config.getoption('--dsn'),
+                                        uid=request.config.getoption('--uid'),
+                                        pwd=request.config.getoption('--pwd'),
+                                        autocommit=False)
+        except:
+            raise
+    return idadb
 
 df_train = pd.DataFrame.from_dict({"ID": range(1000),
                                    "A": [-1, -2, 3, 4, 2, -0.5, 0, 1, -2.1, 1.4]*100,
