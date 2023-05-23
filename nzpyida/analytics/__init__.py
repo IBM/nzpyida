@@ -18,9 +18,6 @@ from .predictive.bisecting_kmeans import BisectingKMeans
 from .predictive.regression_trees import DecisionTreeRegressor
 from .predictive.two_step_clustering import TwoStepClustering
 from .predictive.timeseries import TimeSeries
-from .predictive.glm import BernoulliRegressor, BinomialRegressor, \
-    NegativeBinomialRegressor, GaussianRegressor, GammaRegressor, \
-    PoissonRegressor, WaldRegressor
 from .exploration.distribution import bitable, moments, histogram, outliers
 from .exploration.distribution import quantile, unitable
 from .transform.discretization import EFDisc, EMDisc, EWDisc
