@@ -42,8 +42,9 @@ class AutoDeleteContext:
             the current thread AutoDeleteContext or None
         """
 
-        if getattr(AutoDeleteContext.active_group, 'auto_delete_context', False):
-            return AutoDeleteContext.active_group.auto_delete_context
+        if getattr(AutoDeleteContext.active_group, 'auto_delete_context_st', False) and \
+            AutoDeleteContext.active_group.auto_delete_context_st:
+            return AutoDeleteContext.active_group.auto_delete_context_st[-1]
         return None
 
     def add_table_to_delete(self, table_name: str):
@@ -58,20 +59,16 @@ class AutoDeleteContext:
         self.temp_out_tables.add(table_name)
 
     def __enter__(self):
-        if getattr(AutoDeleteContext.active_group, 'auto_delete_context', False):
-            AutoDeleteContext.active_group.active_groups += 1
-            return AutoDeleteContext.active_group.auto_delete_context
-        AutoDeleteContext.active_group.auto_delete_context = self
-        AutoDeleteContext.active_group.active_groups = 1
+        if not getattr(AutoDeleteContext.active_group, 'auto_delete_context_st', False):
+            AutoDeleteContext.active_group.auto_delete_context_st = []
+        AutoDeleteContext.active_group.auto_delete_context_st.append(self)
         return self
 
     def __exit__(self, ex_type, value, traceback):
-        AutoDeleteContext.active_group.active_groups -= 1
-        if AutoDeleteContext.active_group.active_groups == 0:
-            curr = AutoDeleteContext.current()
-            for table_name in curr.temp_out_tables:
-                if curr.idadb.exists_table(table_name):
-                    curr.idadb.drop_table(table_name)
-            curr.temp_out_tables = set()
-            delattr(AutoDeleteContext.active_group, 'auto_delete_context')
+        for table_name in self.temp_out_tables:
+            if self.idadb.exists_table(table_name):
+                self.idadb.drop_table(table_name)
+        self.temp_out_tables = set()
+        AutoDeleteContext.active_group.auto_delete_context_st.pop()
+
             
