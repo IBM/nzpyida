@@ -82,6 +82,7 @@ df_train_reg = pd.DataFrame.from_dict(
     {
         "ID": range(1000),
         "A": range(1, 2001, 2),
+        "T": [1000] * 1000,
         "B": range(2, 2001, 2)
     }
 )
@@ -90,6 +91,7 @@ df_test_reg = pd.DataFrame.from_dict(
     {
         "ID": [0, 1, 2, 3, 4],
         "A": [0, 3, 2222, -1000, 11111],
+        "T": [1000] * 5,
         "B": [1, 4, 2223, -999, 11112]
     }
 )
