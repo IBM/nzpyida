@@ -66,7 +66,7 @@ classifiers = [
       ]
 
 setup(name='nzpyida',
-      version='0.3.4',
+      version='0.3.5',
       install_requires=['pandas','numpy','future','six','pypyodbc','pyodbc', 'lazy', 'nzpy'],
 
       extras_require={
@@ -84,5 +84,10 @@ setup(name='nzpyida',
       keywords='data analytics database development ibm netezza pandas scikitlearn scalability machine-learning knowledge discovery',
       packages=find_packages(exclude=['docs', 'tests*']),
       package_data={
-        'nzpyida.sampledata': ['*.txt']}
+        'nzpyida.sampledata': ['*.txt']},
+      url="https://github.com/ibm/nzpyida",
+      project_urls={
+        "Documentation": "https://nzpyida.readthedocs.io/en/latest/",
+        "Source": "https://github.com/IBM/nzpyida",
+        "Tracker": "https://github.com/IBM/nzpyida/issues"},
      )
