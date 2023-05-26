@@ -14,9 +14,11 @@ This module contains a class that is the base for all classification algorithms.
 from typing import Tuple
 from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
-from nzpyida.analytics.utils import map_to_props, materialize_df, make_temp_table_name
+from nzpyida.analytics.utils import map_to_props, materialize_df, make_temp_table_name, \
+call_proc_df_in_out
 from nzpyida.analytics.utils import get_auto_delete_context
 from nzpyida.analytics.predictive.predictive_modeling import PredictiveModeling
+from nzpyida.analytics.model_manager import ModelManager
 
 
 class Classification(PredictiveModeling):
@@ -44,6 +46,7 @@ class Classification(PredictiveModeling):
         self.id_column_in_output = 'ID'
         self.score_proc = 'CERROR'
         self.score_inv = True
+        self.type = None
 
     def predict(self, in_df: IdaDataFrame, out_table: str=None,
         id_column: str=None) -> IdaDataFrame:
@@ -193,3 +196,52 @@ class Classification(PredictiveModeling):
                 self.idadb.drop_view(pred_view)
             if true_view_needs_delete:
                 self.idadb.drop_view(true_view)
+    
+    def cross_validation(self, in_df: IdaDataFrame, id_column: str=None, target_column: str=None,
+                         out_table: str=None, folds: int=10, rand_seed: float=None):
+        """
+        Performs a cross validation on <in_df> data for given model. Numer of batches 
+        and size of train/test split isdetermined by parameter <folds>
+
+        Parameters
+        ----------
+        in_df : IdaDataFrame
+            the input data frame for scoring
+
+        id_column : str, optional
+            the input table column identifying a unique instance id - if skipped, 
+            the input data frame indexer must be set and will be used as an instance id
+
+        target_column : str
+            the input table column representing the class
+
+        out_table : str, optional
+            the output table where the predicted values will be stored
+
+        Returns
+        -------
+        IdaDataFrame
+            the data frame with predicted values for all <in_df>
+
+        float
+            classification accuracy (ACC) for all batches 
+        """
+        params = {
+            'modelType': self.fit_proc,
+            'model': self.model_name,
+            'intable': in_df,
+            'id': id_column,
+            'target': target_column,
+            'outtable': out_table,
+            'folds': folds,
+        }
+        if isinstance(rand_seed, int):
+            params['seed'] = rand_seed
+        
+        ModelManager(self.idadb).drop_model(self.model_name)
+        
+        ret_df, ret_acc = call_proc_df_in_out(proc="CROSS_VALIDATION", in_df=in_df, params=params,
+                                   out_table=out_table)
+        
+        return ret_df, ret_acc[0]
+

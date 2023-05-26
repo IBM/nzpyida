@@ -1,24 +1,25 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (c) 2023, IBM Corp.
 # All rights reserved.
 #
 # Distributed under the terms of the BSD Simplified License.
 #
 # The full license is in the LICENSE file, distributed with this software.
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 """
 This module contains function that can be used to prepare an input data
 frame for machine learning.
 """
 from typing import List
 from nzpyida.frame import IdaDataFrame
-from nzpyida.analytics.utils import call_proc_df_in_out
+from nzpyida.analytics.utils import materialize_df, make_temp_table_name, \
+    get_auto_delete_context, call_proc_df_in_out, map_to_props
 
 
-def std_norm(in_df: IdaDataFrame, in_column: List[str], id_column: str=None,
-    by_column: str=None, out_table: str=None) -> IdaDataFrame:
+def std_norm(in_df: IdaDataFrame, in_column: List[str], id_column: str = None,
+             by_column: str = None, out_table: str = None) -> IdaDataFrame:
     """
     Standardization and normalization transformations use the original continuous
     attribute a to generate a new continuous attribute a ' that has a different range
@@ -63,19 +64,19 @@ def std_norm(in_df: IdaDataFrame, in_column: List[str], id_column: str=None,
             id_column = in_df.indexer
         else:
             raise TypeError('Missing id column - either use id_column attribute or set '
-                'indexer column in the input data frame')
+                            'indexer column in the input data frame')
 
     params = {
         'id': id_column,
         'incolumn': in_column,
         'by': by_column
     }
-    return call_proc_df_in_out(proc='STD_NORM', in_df=in_df, params=params, 
-        out_table=out_table, copy_indexer=True)[0]
+    return call_proc_df_in_out(proc='STD_NORM', in_df=in_df, params=params,
+                               out_table=out_table, copy_indexer=True)[0]
 
 
-def impute_data(in_df: IdaDataFrame, in_column: str=None, method: str=None,
-    numeric_value: float=-1, nominal_value: str='missing', out_table: str=None) -> IdaDataFrame:
+def impute_data(in_df: IdaDataFrame, in_column: str = None, method: str = None,
+                numeric_value: float = -1, nominal_value: str = 'missing', out_table: str = None) -> IdaDataFrame:
     """
     Many analytic algorithms require that the data set has no missing attribute values.
     However, real-world data sets frequently suffer from missing attribute values.
@@ -120,12 +121,12 @@ def impute_data(in_df: IdaDataFrame, in_column: str=None, method: str=None,
         'numericvalue': numeric_value,
         'nominalvalue': nominal_value
     }
-    return call_proc_df_in_out(proc='IMPUTE_DATA', in_df=in_df, params=params, 
-        out_table=out_table, copy_indexer=True)[0]
+    return call_proc_df_in_out(proc='IMPUTE_DATA', in_df=in_df, params=params,
+                               out_table=out_table, copy_indexer=True)[0]
 
 
-def random_sample(in_df: IdaDataFrame, size: int=None, fraction: float=None, by_column: str=None,
-    out_signature: str=None, rand_seed: int=None, out_table: str=None) -> IdaDataFrame:
+def random_sample(in_df: IdaDataFrame, size: int = None, fraction: float = None, by_column: str = None,
+                  out_signature: str = None, rand_seed: int = None, out_table: str = None) -> IdaDataFrame:
     """
     Random sampling procedures are a vital component of many analytical systems. They can
     be used to select a test sample and a training sample for a model building process
@@ -137,7 +138,7 @@ def random_sample(in_df: IdaDataFrame, size: int=None, fraction: float=None, by_
     This requires many independent samples from the same data, which are preferentially
     applied if the available data sets are small or for other reasons where the sample
     independence is vital. Samples with replacement are usually drawn in this case.
-    
+
     In application, sampling is used for promotion campaigns, for example when you want
     only a representative set of customers to be subjects of an action.
     In all cases, whether for use with scientific methods or business practices, uniform
@@ -190,4 +191,97 @@ def random_sample(in_df: IdaDataFrame, size: int=None, fraction: float=None, by_
         'randseed': rand_seed
     }
     return call_proc_df_in_out(proc='RANDOM_SAMPLE', in_df=in_df, params=params,
-        out_table=out_table, copy_indexer=True)[0]
+                               out_table=out_table, copy_indexer=True)[0]
+
+
+def train_test_split(in_df: IdaDataFrame, out_table_train: str=None, out_table_test: str=None,
+                     id_column: str = None, fraction: float = 0.5, rand_seed: float = None,
+                     out_table_type: str = 'table'):
+    """
+    Parameters
+    ----------
+    in_df : IdaDataFrame
+        the input data frame
+
+    out_table_train : str, optional
+        the name of output dataframe that will contain the given fraction of the input records
+
+    out_table_test : str, optional
+        the name of output dataframe that will contain the rest (1-<fraction>) of the input records
+
+    id_column: str, optional
+        the input dataframe column identifying a unique instance id
+
+    fraction : float, optional
+        the fraction of the data to that goes to the training dataframe
+
+    rand_seed : int, optional
+        the seed of the random function
+
+    out_table_type : str, optional
+        the type of the output tables. It can be 'table' or 'temporary'
+
+    Returns
+    -------
+    IdaDataFrame
+        the data frame with train data
+    
+    IdaDataFrame
+        the data frame with test data
+    """
+    
+    if not isinstance(in_df, IdaDataFrame):
+        raise TypeError("Argument in_df should be an IdaDataFrame")
+    
+    if not id_column:
+        if not in_df.indexer:
+            raise ValueError("If dataframe has no indexer 'id_column' has to be provided")
+        else:
+            id_column = in_df.indexer
+    temp_view_name, need_delete = materialize_df(in_df)
+    
+    auto_delete_context = None
+    if not out_table_train:
+        auto_delete_context = get_auto_delete_context('out_table_train')
+        out_table_train = make_temp_table_name()
+
+    if not out_table_test:
+        auto_delete_context = get_auto_delete_context('out_table_test')
+        out_table_test = make_temp_table_name()
+
+    params = {
+        'intable': temp_view_name,
+        'traintable': out_table_train,
+        'testtable': out_table_test,
+        'id': id_column,
+        'fraction': fraction,
+        'outtabletype': out_table_type,
+    }
+
+    if isinstance(rand_seed, float):
+        params['seed'] = rand_seed
+
+    params_s = map_to_props(params)
+
+    try:
+        in_df.ida_query(f'call NZA..SPLIT_DATA(\'{params_s}\')')
+    finally:
+        if need_delete:
+            in_df._idadb.drop_view(temp_view_name)
+
+    if not in_df._idadb.exists_table_or_view(out_table_train) or \
+       not in_df._idadb.exists_table_or_view(out_table_test):
+        # stored procedure call was successful by did not produce a table
+        return None, None
+
+    if auto_delete_context:
+        auto_delete_context.add_table_to_delete(out_table_train)
+        auto_delete_context.add_table_to_delete(out_table_test)
+
+    out_df_train = IdaDataFrame(in_df._idadb, out_table_train)
+    out_df_test = IdaDataFrame(in_df._idadb, out_table_test)
+    
+    if in_df.indexer:
+        out_df_train.indexer = in_df.indexer
+        out_df_test.indexer = in_df.indexer
+    return out_df_train, out_df_test
