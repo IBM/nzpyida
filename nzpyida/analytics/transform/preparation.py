@@ -12,7 +12,7 @@
 This module contains function that can be used to prepare an input data
 frame for machine learning.
 """
-from typing import List
+from typing import List, Tuple
 from nzpyida.frame import IdaDataFrame
 from nzpyida.analytics.utils import materialize_df, make_temp_table_name, \
     get_auto_delete_context, call_proc_df_in_out, map_to_props
@@ -196,7 +196,7 @@ def random_sample(in_df: IdaDataFrame, size: int = None, fraction: float = None,
 
 def train_test_split(in_df: IdaDataFrame, out_table_train: str=None, out_table_test: str=None,
                      id_column: str = None, fraction: float = 0.5, rand_seed: float = None,
-                     out_table_type: str = 'table'):
+                     out_table_type: str = 'table') -> Tuple[IdaDataFrame]:
     """
     Parameters
     ----------

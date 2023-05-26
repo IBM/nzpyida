@@ -197,8 +197,9 @@ class Classification(PredictiveModeling):
             if true_view_needs_delete:
                 self.idadb.drop_view(true_view)
     
-    def cross_validation(self, in_df: IdaDataFrame, id_column: str=None, target_column: str=None,
-                         out_table: str=None, folds: int=10, rand_seed: float=None):
+    def cross_validation(self, in_df: IdaDataFrame, id_column: str=None, 
+                         target_column: str=None, out_table: str=None, folds: int=10, 
+                         rand_seed: float=None) -> Tuple[IdaDataFrame, float]:
         """
         Performs a cross validation on <in_df> data for given model. Numer of batches 
         and size of train/test split isdetermined by parameter <folds>
