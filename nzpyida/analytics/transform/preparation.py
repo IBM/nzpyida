@@ -196,7 +196,7 @@ def random_sample(in_df: IdaDataFrame, size: int = None, fraction: float = None,
 
 def train_test_split(in_df: IdaDataFrame, out_table_train: str=None, out_table_test: str=None,
                      id_column: str = None, fraction: float = 0.5, rand_seed: float = None,
-                     out_table_type: str = 'table') -> Tuple[IdaDataFrame]:
+                     out_table_type: str = 'table') -> Tuple[IdaDataFrame, IdaDataFrame]:
     """
     Parameters
     ----------
