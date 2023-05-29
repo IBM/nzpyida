@@ -25,7 +25,7 @@ from .exploration.distribution import bitable, moments, histogram, outliers
 from .exploration.distribution import quantile, unitable
 from .transform.discretization import EFDisc, EMDisc, EWDisc
 from .transform.discretization import ef_disc, em_disc, ew_disc
-from .transform.preparation import std_norm, impute_data, random_sample
+from .transform.preparation import std_norm, impute_data, random_sample, train_test_split
 from .model_manager import ModelManager
 from .auto_delete_context import AutoDeleteContext
 from .exploration.relation_identification import corr, cov, covariance_matrix, \
