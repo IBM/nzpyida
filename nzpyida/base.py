@@ -222,7 +222,8 @@ class IdaDataBase(object):
                   self._database_system = 'netezza'
                   # for Netezza the internal connection is always in autocommit mode
                   # to allow explicit commits
-                  dsn += ';autocommit=false'
+                  if not autocommit:
+                    dsn += ';autocommit=false'
                   url_1stparam_del = ';'
               elif dsn.startswith('jdbc:db2:'):
                   self._database_system = 'db2'
@@ -307,6 +308,7 @@ class IdaDataBase(object):
             self._connection_string ={'user':user,'password':password,'host':host,
                 'port':port, 'database':database, 'securityLevel':securityLevel,'logLevel':logLevel}
             self._database_system = 'netezza'
+            self._con.autocommit = autocommit
 
         if self._con_type == 'odbc' :
 
@@ -323,7 +325,7 @@ class IdaDataBase(object):
 
             import pyodbc
             try:
-                self._con = pyodbc.connect(self._connection_string)
+                self._con = pyodbc.connect(self._connection_string, autocommit=autocommit)
                 self._con.setdecoding(pyodbc.SQL_CHAR, encoding='utf-8')
                 self._con.setdecoding(pyodbc.SQL_WCHAR, encoding='utf-8')
                 self._con.setencoding(encoding='utf-8')
