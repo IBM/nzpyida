@@ -195,8 +195,8 @@ def random_sample(in_df: IdaDataFrame, size: int = None, fraction: float = None,
 
 
 def train_test_split(in_df: IdaDataFrame, out_table_train: str=None, out_table_test: str=None,
-                     id_column: str = None, fraction: float = 0.5, rand_seed: float = None,
-                     out_table_type: str = 'table') -> Tuple[IdaDataFrame, IdaDataFrame]:
+                     id_column: str = None, fraction: float = 0.5, 
+                     rand_seed: float = None) -> Tuple[IdaDataFrame, IdaDataFrame]:
     """
     Parameters
     ----------
@@ -217,9 +217,6 @@ def train_test_split(in_df: IdaDataFrame, out_table_train: str=None, out_table_t
 
     rand_seed : int, optional
         the seed of the random function
-
-    out_table_type : str, optional
-        the type of the output tables. It can be 'table' or 'temporary'
 
     Returns
     -------
@@ -254,8 +251,7 @@ def train_test_split(in_df: IdaDataFrame, out_table_train: str=None, out_table_t
         'traintable': out_table_train,
         'testtable': out_table_test,
         'id': id_column,
-        'fraction': fraction,
-        'outtabletype': out_table_type,
+        'fraction': fraction
     }
 
     if isinstance(rand_seed, float):
