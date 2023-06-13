@@ -55,7 +55,9 @@ class TestCurrentAutoDeleteContext:
     def test_nested_contexts(self, idadb):
         with AutoDeleteContext(idadb) as adc1:
             with AutoDeleteContext(idadb) as adc2:
-                assert adc1 == adc2
+                assert adc1 != adc2
+                assert adc2 == AutoDeleteContext.current()
+            assert adc1 == AutoDeleteContext.current()
 
 
 class TestAddTableToDelete:

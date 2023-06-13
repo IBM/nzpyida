@@ -89,6 +89,14 @@ Tree Bayesian Networks
    :undoc-members:
    :show-inheritance:
 
+Generalized Linear Models
+-----------------------------------------------------
+
+.. automodule:: nzpyida.analytics.predictive.glm
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Classification base module
 --------------------------------------------------
 

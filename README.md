@@ -94,3 +94,10 @@ returned:
 
 The nzpyida is based on ibmdbpy project developed for IBM Db2 Warehouse.
 See https://github.com/ibmdbanalytics/ibmdbpy for details.
+
+# How to contribute
+You want to contribute? That's great! There are many things you can do.
+
+If you are a member of the ibmdbanalytics group, you can create branchs and merge them to master. Otherwise, you can fork the project and do a pull request. You are very welcome to contribute to the code and to the documentation.
+
+There are many ways to contribute. If you find bugs and have improvement ideas or need some new specific features, please open a ticket! We do care about it.
