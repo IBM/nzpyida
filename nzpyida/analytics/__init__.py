@@ -18,6 +18,9 @@ from .predictive.bisecting_kmeans import BisectingKMeans
 from .predictive.regression_trees import DecisionTreeRegressor
 from .predictive.two_step_clustering import TwoStepClustering
 from .predictive.timeseries import TimeSeries
+from .predictive.bayesian_networks import TreeBayesNetwork, BinaryTreeBayesNetwork, \
+MultiTreeBayesNetwork, TreeBayesNetwork1G, TreeBayesNetwork1G2P, TreeBayesNetwork2G, \
+TreeAgumentedNetwork
 from .predictive.glm import BernoulliRegressor, BinomialRegressor, \
     NegativeBinomialRegressor, GaussianRegressor, GammaRegressor, \
     PoissonRegressor, WaldRegressor

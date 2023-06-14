@@ -81,6 +81,14 @@ Time Series Forecasting
    :undoc-members:
    :show-inheritance:
 
+Tree Bayesian Networks
+-----------------------------------------------------
+
+.. automodule:: nzpyida.analytics.predictive.bayesian_networks
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Generalized Linear Models
 -----------------------------------------------------
 
