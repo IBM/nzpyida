@@ -235,6 +235,12 @@ def train_test_split(in_df: IdaDataFrame, out_table_train: str=None, out_table_t
             raise ValueError("If dataframe has no indexer 'id_column' has to be provided")
         else:
             id_column = in_df.indexer
+
+    if in_df._idadb.exists_table_or_view(out_table_train):
+            in_df._idadb.drop_table(out_table_train)
+    if in_df._idadb.exists_table_or_view(out_table_test):
+            in_df._idadb.drop_table(out_table_test)
+
     temp_view_name, need_delete = materialize_df(in_df)
     
     auto_delete_context = None

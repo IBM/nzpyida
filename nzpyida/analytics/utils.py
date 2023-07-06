@@ -124,6 +124,9 @@ def call_proc_df_in_out(proc: str, in_df: IdaDataFrame, params: dict,
     if not isinstance(in_df, IdaDataFrame):
         raise TypeError("Argument in_df should be an IdaDataFrame")
 
+    if in_df._idadb.exists_table_or_view(out_table):
+            in_df._idadb.drop_table(out_table)
+
     temp_view_name, need_delete = materialize_df(in_df)
 
     auto_delete_context = None
