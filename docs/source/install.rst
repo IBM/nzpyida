@@ -13,7 +13,7 @@ Updating
 
 To update your nzpyida installation, issue this statement::
 
-	> pip3 install nzpyida --update --no-deps
+	> pip3 install nzpyida --upgrade --no-deps
 
 Ensure you have INZA version 11.2.1.0 or later installed in your Netezza database.
 
