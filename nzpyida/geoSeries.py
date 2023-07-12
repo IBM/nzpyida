@@ -36,11 +36,11 @@ from nzpyida.exceptions import IdaGeoDataFrameError
 class IdaGeoSeries(nzpyida.IdaSeries):
     """
     An IdaSeries whose column must have geometry type.
-    It has geospatial methods based on Db2 Warehouse Spatial Extender (DB2GSE).
+    It has geospatial methods based on Netezza Performance Server Analytics.
     
     Note on sample data used for the examples:
 
-        * Sample tables available out of the box in Db2 Warehouse:
+        * Sample tables available out of the box in Netezza:
 
           GEO_TORNADO, GEO_COUNTY
 
@@ -54,7 +54,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
     IdaGeoDataSeries objects are not supported on Netezza.
 
     An IdaGeoSeries doesn't have an indexer attribute because geometries are
-    unorderable in DB2 Spatial Extender.
+    unorderable in Netezza Performance Server Analytics.
 
     Examples
     --------
@@ -80,18 +80,22 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         Notes
         -----
-        Even though geometry types are unorderable in DB2GSE, the IdaGeoSeries
+        Even though geometry types are unorderable in NPS, the IdaGeoSeries
         might have as indexer another column of the table whose column the
         IdaGeoSeries refers to.
         """
 
-        if (idadb.__class__.__name__ == "IdaDataBase") & idadb._is_netezza_system():
-                    raise IdaGeoDataFrameError("IdaGeoDataSeries objects are not supported on Netezza.")
-
         super(IdaGeoSeries, self).__init__(idadb, tablename, indexer, column)
-        if self.dtypes.TYPENAME[self.column].find('ST_') != 0:
+        self.column_data_type = self.dtypes.TYPENAME[self.column]
+        if not self.column_data_type.startswith('ST_') and self.column_data_type != 'CHARACTER VARYING':
             raise TypeError("Specified column doesn't have geometry type. "
                             "Cannot create IdaGeoSeries object")
+        if self.column_data_type == 'CHARACTER VARYING':
+            type_of_first_item = self.geometry_type().head().iloc[0]
+            if not type_of_first_item.startswith("ST_"):
+                raise TypeError("Specified column doesn't have geometry type. "
+                            "Cannot create IdaGeoSeries object")
+            self.column_data_type = type_of_first_item
 
     @classmethod
     def from_IdaSeries(cls, idaseries):
@@ -105,21 +109,16 @@ class IdaGeoSeries(nzpyida.IdaSeries):
             # Mind that the given IdaSeries might have non-destructive
             # columns that were added by the user. That's why __init__ is not
             # used for this purpose.
-            if idaseries.dtypes.TYPENAME[idaseries.column].find('ST_') != 0:
-                raise TypeError(
-                    "The column of the IdaSeries doesn't have geometry type. "
-                    "Cannot create IdaGeoSeries object")
-            else:
-                idageoseries = idaseries
-                idageoseries.__class__ = IdaGeoSeries
-                return idageoseries
+            idageoseries = idaseries
+            idageoseries.__class__ = IdaGeoSeries
+            return idageoseries
 
 #==============================================================================
-### Methods whose behavior is not defined for geometry types in DB2GSE.
+### Methods whose behavior is not defined for geometry types in NPS.
 #==============================================================================
 
     # TODO: Override all the methods of IdaSeries (and those of its parent,
-    # i.e. IdaDataFrame, which are not defined in DB2GSE for geometry columnns,
+    # i.e. IdaDataFrame, which are not defined in NPS for geometry columnns,
     # like min(), max(), etc.)
 
     def min(self):
@@ -168,7 +167,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_GENERALIZE() function.
+        Netezza Performance Server Analytics ST_GENERALIZE() function.
 
         Examples
         --------
@@ -191,8 +190,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
             raise ValueError("threshold must be greater than or equal to 0")
         additional_args = [threshold]
         return self._unary_operation_handler(
-            db2gse_function = 'DB2GSE.ST_GENERALIZE',
-            valid_types = ['ST_GEOMETRY'],
+            function_name = 'inza..ST_GENERALIZE',
             additional_args = additional_args)
 
     def buffer(self, distance, unit = None):
@@ -242,7 +240,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_BUFFER() function.
+        Netezza Performance Server Analytics ST_BUFFER() function.
 
         Examples
         --------
@@ -266,8 +264,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
             unit = self._check_linear_unit(unit)  # Can raise exceptions
             additional_args.append(unit)
         return self._unary_operation_handler(
-            db2gse_function = 'DB2GSE.ST_BUFFER',
-            valid_types = ['ST_GEOMETRY'],
+            function_name = 'inza..ST_BUFFER',
             additional_args = additional_args)
 
     def centroid(self):
@@ -292,7 +289,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_CENTROID() function.
+        Netezza Performance Server Analytics ST_CENTROID() function.
 
         Examples
         --------
@@ -308,8 +305,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         Clay         POINT (-96.5066339619 46.8908550036)
         """
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_CENTROID',
-                valid_types = ['ST_GEOMETRY'])
+                function_name = 'inza..ST_CENTROID')
 
     def convex_hull(self):
         """
@@ -337,7 +333,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_CONVEXHULL() function.
+        Netezza Performance Server Analytics ST_CONVEXHULL() function.
 
         Examples
         --------
@@ -353,8 +349,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         4 	5 	MULTIPOLYGON (((-91.2589262966 36.2578866492, ... 	POLYGON ((-91.4074433538 36.4871686853, -91.24...
         """
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_CONVEXHULL',
-                valid_types = ['ST_GEOMETRY'])
+                function_name = 'inza..ST_CONVEXHULL')
 
     def boundary(self):
         """
@@ -390,7 +385,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_BOUNDARY() function.
+        ST_BOUNDARY() function.
 
         Examples
         --------
@@ -406,8 +401,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         Jones        LINESTRING (-77.0903250894 34.8027619185, -77..
         """
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_BOUNDARY',
-                valid_types = ['ST_GEOMETRY'])
+                function_name = 'inza..ST_BOUNDARY')
 
     def envelope(self):
         """
@@ -436,7 +430,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_ENVELOPE() function.
+        Netezza Performance Server Analytics ST_ENVELOPE() function.
 
         Examples
         --------
@@ -452,8 +446,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         5          MULTILINESTRING ((-90.6800062393 37.60..   POLYGON ((-90.6800062393 37.60..
         """
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_ENVELOPE',
-                valid_types = ['ST_GEOMETRY'])
+                function_name = 'inza..ST_ENVELOPE')
 
     def exterior_ring(self):
         """
@@ -478,7 +471,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_EXTERIORRING() function.
+        Netezza Performance Server Analytics ST_EXTERIORRING() function.
 
         Examples
         --------
@@ -490,7 +483,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         """
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_EXTERIORRING',
+                function_name = 'inza..ST_EXTERIORRING',
                 valid_types = ['ST_POLYGON'])
 
     def mbr(self):
@@ -514,7 +507,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_MBR() function.
+        Netezza Performance Server Analytics ST_MBR() function.
 
         Examples
         --------
@@ -531,8 +524,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         """
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_MBR',
-                valid_types = ['ST_GEOMETRY'])
+                function_name = 'inza..ST_MBR')
 
     def end_point(self):
         """
@@ -554,11 +546,11 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_ENDPOINT() function.
+        Netezza Performance Server Analytics ST_ENDPOINT() function.
 
         Examples
         --------
-        Sample to create in Db2, geometry column with data type ST_LineString
+        Sample to create in Netezza, geometry column with data type ST_LineString
         Use this sample data for testing:
 
         >>> sample_lines = IdaGeoDataFrame(idadb, "SAMPLE_LINES", indexer = "ID", geometry  = "LOC")
@@ -570,7 +562,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         
         """
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_ENDPOINT',
+                function_name = 'inza..ST_ENDPOINT',
                 valid_types = ['ST_LINESTRING'])
 
     def mid_point(self):
@@ -599,11 +591,11 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_MIDPOINT() function.
+        Netezza Performance Server Analytics ST_MIDPOINT() function.
 
         Examples
         --------
-        Sample to create in Db2, geometry column with data type ST_LineString
+        Sample to create in Netezza, geometry column with data type ST_LineString
         Use this sample data for testing:
         
         >>> sample_lines = IdaGeoDataFrame(idadb, "SAMPLE_LINES", indexer = "ID", geometry  = "LOC")
@@ -614,7 +606,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         1 	1111 	LINESTRING (90.000000 90.000000, 100.000000 10... 	POINT (95.000000 95.000000)        
         """
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_MIDPOINT',
+                function_name = 'inza..ST_MIDPOINT',
                 valid_types = ['ST_LINESTRING'])
 
     def start_point(self):
@@ -637,21 +629,21 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_STARTPOINT() function.
+        Netezza Performance Server Analytics ST_STARTPOINT() function.
 
         Examples
         --------
-        Sample to create in Db2, geometry column with data type ST_LineString
+        Sample to create in Netezza, geometry column with data type ST_LineString
         
         >>> sample_lines = IdaGeoDataFrame(idadb, "SAMPLE_LINES", indexer = "ID", geometry  = "LOC")
         >>> sample_lines.start_point().head()
         
         0    POINT (850.000000 250.000000)
         1    POINT (90.000000 90.000000)
-        Name: DB2GSE.ST_STARTPOINT(GEOMETRY), dtype: object        
+               
         """
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_STARTPOINT',
+                function_name = 'inza..ST_STARTPOINT',
                 valid_types = ['ST_LINESTRING'])
 
     def srid(self):
@@ -670,7 +662,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_SRID() function.
+        Netezza Performance Server Analytics ST_SRID() function.
 
         Examples
         --------
@@ -680,12 +672,10 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         1    1005
         2    1005
         3    1005
-        4    1005
-        Name: DB2GSE.ST_SRID(SHAPE), dtype: int64        
+        4    1005       
         """
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_SRID',
-                valid_types = ['ST_GEOMETRY'])
+                function_name = 'inza..ST_SRID')
 
     def srs_name(self):
         """
@@ -701,7 +691,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_SRSNAME() function.
+        Netezza Performance Server Analytics ST_SRSNAME() function.
 
         Examples
         --------
@@ -717,8 +707,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         5 	       MULTILINESTRING ((-90.6800062393 37.6000069289...    SAMPLE_GCS_WGS_1984
         """
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_SRSNAME',
-                valid_types = ['ST_GEOMETRY'])
+                function_name = 'inza..ST_SRSNAME')
 
     def geometry_type(self):
         """
@@ -735,7 +724,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_GEOMETRYTYPE() function.
+        Netezza Performance Server Analytics ST_GEOMETRYTYPE() function.
 
         Examples
         --------
@@ -745,7 +734,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         0    "DB2GSE  "."ST_MULTIPOLYGON"
         1    "DB2GSE  "."ST_MULTIPOLYGON"
         2    "DB2GSE  "."ST_MULTIPOLYGON"
-        Name: DB2GSE.ST_GEOMETRYTYPE(SHAPE), dtype: object
+
         
         See boundary method
         
@@ -753,19 +742,16 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         0    "DB2GSE  "."ST_LINESTRING"
         1    "DB2GSE  "."ST_LINESTRING"
         2    "DB2GSE  "."ST_LINESTRING"
-        Name: DB2GSE.ST_GEOMETRYTYPE(DB2GSE.ST_BOUNDARY(SHAPE)), dtype: object
 
         See centroid method
         
         >>> counties["centroid"].geometry_type().head(3) 
         0    "DB2GSE  "."ST_POINT"
         1    "DB2GSE  "."ST_POINT"
-        2    "DB2GSE  "."ST_POINT"
-        Name: DB2GSE.ST_GEOMETRYTYPE(DB2GSE.ST_CENTROID(SHAPE)), dtype: object        
+        2    "DB2GSE  "."ST_POINT"      
         """
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_GEOMETRYTYPE',
-                valid_types = ['ST_GEOMETRY'])
+                function_name = 'inza..ST_GEOMETRYTYPE')
 
     def area(self, unit = None):
         """
@@ -819,7 +805,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_AREA() function.
+        Netezza Performance Server Analytics ST_AREA() function.
 
         Examples
         --------
@@ -839,8 +825,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
             unit = self._check_linear_unit(unit)  # Can raise exceptions
             additional_args.append(unit)
         return self._unary_operation_handler(
-            db2gse_function = 'DB2GSE.ST_AREA',
-            valid_types = ['ST_GEOMETRY'],
+            function_name = 'inza..ST_AREA',
             additional_args = additional_args)
 
     def dimension(self):
@@ -864,7 +849,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_DIMENSION() function.
+        Netezza Performance Server Analytics ST_DIMENSION() function.
 
         Examples
         --------
@@ -891,8 +876,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         4 	POINT (-91.0781652597 36.3077916744) 	0
         """
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_DIMENSION',
-                valid_types = ['ST_GEOMETRY'])
+                function_name = 'inza..ST_DIMENSION')
 
     def length(self, unit = None):
         """
@@ -942,7 +926,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_LENGTH() function.
+        Netezza Performance Server Analytics ST_LENGTH() function.
 
         Examples
         --------
@@ -962,7 +946,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
             unit = self._check_linear_unit(unit)  # Can raise exceptions
             additional_args.append(unit)
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_LENGTH',
+                function_name = 'inza..ST_LENGTH',
                 valid_types = ['ST_LINESTRING', 'ST_MULTILINESTRING'],
                 additional_args = additional_args)
 
@@ -1014,7 +998,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_PERIMETER() function.
+        Netezza Performance Server Analytics ST_PERIMETER() function.
 
         Examples
         --------
@@ -1033,7 +1017,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
             unit = self._check_linear_unit(unit)  # Can raise exceptions
             additional_args.append(unit)
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_PERIMETER',
+                function_name = 'inza..ST_PERIMETER',
                 valid_types = ['ST_POLYGON', 'ST_MULTIPOLYGON'],
                 additional_args = additional_args)
 
@@ -1054,7 +1038,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_NUMGEOMETRIES() function.
+        Netezza Performance Server Analytics ST_NUMGEOMETRIES() function.
 
         Examples
         --------
@@ -1068,9 +1052,8 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         2    1
         3    1
         4    1
-        Name: DB2GSE.ST_NUMGEOMETRIES(SHAPE), dtype: int64
         
-        Use sample data created in Db2 with SQL script, data type ST_MultiLineString
+        Use sample data created in Netezza with SQL script, data type ST_MultiLineString
         
         >>> sample_mlines = IdaGeoDataFrame(idadb, "SAMPLE_MLINES", indexer = "ID", geometry = "GEOMETRY")
         >>> print(sample_mlines.geometry.dtypes)
@@ -1078,11 +1061,10 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         GEOMETRY  ST_MULTILINESTRING
         
         >>> sample_mlines.num_geometries().head()
-        0    3
-        Name: DB2GSE.ST_NUMGEOMETRIES(GEOMETRY), dtype: int64        
+        0    3       
         """
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_NUMGEOMETRIES',
+                function_name = 'inza..ST_NUMGEOMETRIES',
                 valid_types = ['ST_MULTIPOINT', 'ST_MULTIPOLYGON',
                                'ST_MULTILINESTRING'])
 
@@ -1103,7 +1085,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_NUMINTERIORRING() function.
+        Netezza Performance Server Analytics ST_NUMINTERIORRING() function.
 
         Examples
         --------
@@ -1116,7 +1098,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         1 	POLYGON ((110.000000 120.000000, 130.000000 12... 	1        
         """
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_NUMINTERIORRING',
+                function_name = 'inza..ST_NUMINTERIORRING',
                 valid_types = ['ST_POLYGON'])
 
     def num_line_strings(self):
@@ -1137,19 +1119,18 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_NUMLINESTRINGS() function.
+        Netezza Performance Server Analytics ST_NUMLINESTRINGS() function.
 
         Examples
         --------
-        Use sample data created in Db2 with SQL script, data type ST_MultiLineString
+        Use sample data createt with SQL script, data type ST_MultiLineString
         
         >>> sample_mlines = IdaGeoDataFrame(idadb, "SAMPLE_MLINES", indexer = "ID", geometry = "GEOMETRY")       
         >>> sample_mlines.num_line_strings().head()
         0    3
-        Name: DB2GSE.ST_NUMLINESTRINGS(GEOMETRY), dtype: int64
         """
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_NUMLINESTRINGS',
+                function_name = 'inza..ST_NUMLINESTRINGS',
                 valid_types = ['ST_MULTILINESTRING'])
 
     def num_points(self):
@@ -1169,7 +1150,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_NUMPOINTS() function.
+        Netezza Performance Server Analytics ST_NUMPOINTS() function.
 
         Examples
         --------
@@ -1180,8 +1161,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         >>> sample_geometries[["GEOMETRY", "num_points"]].head()
         """
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_NUMPOINTS',
-                valid_types = ['ST_GEOMETRY'])
+                function_name = 'inza..ST_NUMPOINTS')
 
     def num_polygons(self):
         """
@@ -1200,7 +1180,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_NUMPOLYGONS() function.
+        Netezza Performance Server Analytics ST_NUMPOLYGONS() function.
 
         Examples
         --------
@@ -1217,8 +1197,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         Name: NUM_POLY, dtype: int64
         """
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_NUMPOLYGONS',
-                valid_types = ['ST_MULTIPOLYGON'])
+                function_name = 'inza..ST_NUMPOLYGONS')
 
     def coord_dim(self):
         """
@@ -1242,7 +1221,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_COORDDIM() function.
+        DNetezza Performance Server Analytics ST_COORDDIM() function.
 
         Examples
         --------
@@ -1253,7 +1232,6 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         2    2
         3    2
         4    2
-        Name: DB2GSE.ST_COORDDIM(DB2GSE.ST_CENTROID(SHAPE)), dtype: int64
         # use sample table SAMPLE_POINTS, obtained with SQL script
         >>> sample_points = IdaGeoDataFrame(idadb, "SAMPLE_POINTS", indexer = "ID", geometry = "LOC")        
         >>> sample_points['coord_dim'] = sample_points.coord_dim()
@@ -1266,8 +1244,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         4 	5 	POINT Z(12.000000 35.000000 12) 	 3
         """
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_COORDDIM',
-                valid_types = ['ST_GEOMETRY'])
+                function_name = 'inza..ST_COORDDIM')
 
     def is_3d(self):
         """
@@ -1286,7 +1263,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_IS3D() function.
+        Netezza Performance Server Analytics ST_IS3D() function.
 
         Examples
         --------
@@ -1303,8 +1280,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         4 	POINT Z(12.000000 35.000000 12) 	 1        
         """
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_IS3D',
-                valid_types = ['ST_GEOMETRY'])
+                function_name = 'inza..ST_IS3D')
 
     def is_measured(self):
         """
@@ -1323,7 +1299,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_ISMEASURED() function.
+        Netezza Performance Server Analytics ST_ISMEASURED() function.
 
         Examples
         --------
@@ -1341,8 +1317,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         """
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_ISMEASURED',
-                valid_types = ['ST_GEOMETRY'])
+                function_name = 'inza..ST_ISMEASURED')
 
     def is_valid(self):
         """
@@ -1364,7 +1339,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_ISVALID() function.
+        Netezza Performance Server Analytics ST_ISVALID() function.
 
         Examples
         --------
@@ -1376,12 +1351,10 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         1    1
         2    1
         3    1
-        4    1
-        Name: DB2GSE.ST_ISVALID(LOC), dtype: int64        
+        4    1        
         """
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_ISVALID',
-                valid_types = ['ST_GEOMETRY'])
+                function_name = 'inza..ST_ISVALID')
 
     def max_m(self):
         """
@@ -1401,7 +1374,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_MAXM() function.
+        Netezza Performance Server Analytics ST_MAXM() function.
 
         Examples
         --------
@@ -1420,8 +1393,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         4 	5 	LINESTRING (33.000000 2.000000, 34.000000 3.00... 	35.0 	6.0 	None 	None
         """
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_MAXM',
-                valid_types = ['ST_GEOMETRY'])
+                function_name = 'inza..ST_MAXM')
 
     def max_x(self):
         """
@@ -1440,7 +1412,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_MAXX() function.
+        Netezza Performance Server Analytics ST_MAXX() function.
 
         Examples
         --------
@@ -1459,8 +1431,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         4 	5 	LINESTRING (33.000000 2.000000, 34.000000 3.00... 	35.0 	6.0 	None 	None
         """
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_MAXX',
-                valid_types = ['ST_GEOMETRY'])
+                function_name = 'inza..ST_MAXX')
 
     def max_y(self):
         """
@@ -1479,7 +1450,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_MAXY() function.
+        Netezza Performance Server Analytics ST_MAXY() function.
 
         Examples
         --------
@@ -1498,8 +1469,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         4 	5 	LINESTRING (33.000000 2.000000, 34.000000 3.00... 	35.0 	6.0 	None 	None
         """
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_MAXY',
-                valid_types = ['ST_GEOMETRY'])
+                function_name = 'inza..ST_MAXY')
 
     def max_z(self):
         """
@@ -1519,7 +1489,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_MAXZ() function.
+        Netezza Performance Server Analytics ST_MAXZ() function.
 
         Examples
         --------
@@ -1538,8 +1508,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         4 	5 	LINESTRING (33.000000 2.000000, 34.000000 3.00... 	35.0 	6.0 	None 	None
         """
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_MAXZ',
-                valid_types = ['ST_GEOMETRY'])
+                function_name = 'inza..ST_MAXZ')
 
     def min_m(self):
         """
@@ -1559,7 +1528,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_MINM() function.
+        Netezza Performance Server Analytics ST_MINM() function.
 
         Examples
         --------
@@ -1580,8 +1549,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         4 	5 	LINESTRING (33.000000 2.000000, 34.000000 3.00... 	33.0 	2.0 	None 	None
         """
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_MINM',
-                valid_types = ['ST_GEOMETRY'])
+                function_name = 'inza..ST_MINM')
 
     def min_x(self):
         """
@@ -1600,7 +1568,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_MINX() function.
+        Netezza Performance Server Analytics ST_MINX() function.
 
         Examples
         --------
@@ -1612,11 +1580,9 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         2    -85.401789
         3    -83.794279
         4    -79.856688
-        Name: DB2GSE.ST_MINX(SHAPE), dtype: float64
         """
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_MINX',
-                valid_types = ['ST_GEOMETRY'])
+                function_name = 'inza..ST_MINX')
 
     def min_y(self):
         """
@@ -1635,7 +1601,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_MINY() function.
+        Netezza Performance Server Analytics ST_MINY() function.
 
         Examples
         --------
@@ -1647,12 +1613,9 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         2    37.630910
         3    35.562878
         4    37.005883
-        Name: DB2GSE.ST_MINY(SHAPE), dtype: float64
-
         """
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_MINY',
-                valid_types = ['ST_GEOMETRY'])
+                function_name = 'inza..ST_MINY')
 
     def min_z(self):
         """
@@ -1672,7 +1635,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_MINZ() function.
+        Netezza Performance Server Analytics ST_MINZ() function.
 
         Examples
         --------
@@ -1693,8 +1656,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         4 	5 	LINESTRING (33.000000 2.000000, 34.000000 3.00... 	33.0 	2.0 	None 	None
         """
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_MINZ',
-                valid_types = ['ST_GEOMETRY'])
+                function_name = 'inza..ST_MINZ')
 
     def m(self):
         """
@@ -1713,7 +1675,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_M() function.
+        Netezza Performance Server Analytics ST_M() function.
 
         Examples
         --------
@@ -1734,7 +1696,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         4 	5 	POINT Z(12.000000 35.000000 12) 	12.0 	35.0 	12.0 	NaN
         """
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_M',
+                function_name = 'inza..ST_M',
                 valid_types = ['ST_POINT'])
 
     def x(self):
@@ -1754,7 +1716,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_X() function.
+        Netezza Performance Server Analytics ST_X() function.
 
         Examples
         --------
@@ -1776,7 +1738,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         """
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_X',
+                function_name = 'inza..ST_X',
                 valid_types = ['ST_POINT'])
 
     def y(self):
@@ -1796,7 +1758,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_Y() function.
+        Netezza Performance Server Analytics ST_Y() function.
 
         Examples
         --------
@@ -1818,7 +1780,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         """
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_Y',
+                function_name = 'inza..ST_Y',
                 valid_types = ['ST_POINT'])
 
     def z(self):
@@ -1838,7 +1800,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_Z() function.
+        Netezza Performance Server Analytics ST_Z() function.
 
         Examples
         --------
@@ -1860,7 +1822,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         """
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_Z',
+                function_name = 'inza..ST_Z',
                 valid_types = ['ST_POINT'])
 
     def is_closed(self):
@@ -1886,7 +1848,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_ISCLOSED() function.
+        Netezza Performance Server Analytics ST_ISCLOSED() function.
 
         Examples
         --------
@@ -1896,10 +1858,9 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         >>> sample_lines.is_closed().head()
         0    0
         1    0
-        Name: DB2GSE.ST_ISCLOSED(GEOMETRY), dtype: int64
         """
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_ISCLOSED',
+                function_name = 'inza..ST_ISCLOSED',
                 valid_types = ['ST_LINESTRING', 'ST_MULTILINESTRING'])
 
     def is_empty(self):
@@ -1918,7 +1879,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_ISEMPTY() function.
+        Netezza Performance Server Analytics ST_ISEMPTY() function.
 
         Examples
         --------
@@ -1928,12 +1889,10 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         >>> counties["boundary"].is_empty().head(3)
         0    0
         1    0
-        2    0
-        Name: DB2GSE.ST_ISEMPTY(DB2GSE.ST_BOUNDARY(SHAPE)), dtype: int64        
+        2    0     
         """
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_ISEMPTY',
-                valid_types = ['ST_GEOMETRY'])
+                function_name = 'inza..ST_ISEMPTY')
 
     def is_simple(self):
         """
@@ -1959,7 +1918,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         References
         ----------
-        DB2 Spatial Extender ST_ISSIMPLE() function.
+        Netezza Performance Server Analytics ST_ISSIMPLE() function.
 
         Examples
         --------
@@ -1977,8 +1936,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         (37, 25)
         """
         return self._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_ISSIMPLE',
-                valid_types = ['ST_GEOMETRY'])
+                function_name = 'inza..ST_ISSIMPLE')
 
 
 #==============================================================================
@@ -2043,8 +2001,8 @@ class IdaGeoSeries(nzpyida.IdaSeries):
                 unit = '\''+unit+'\''
                 return unit
 
-    def _unary_operation_handler(self, db2gse_function,
-                                 valid_types,
+    def _unary_operation_handler(self, function_name,
+                                 valid_types = None,
                                  additional_args = None):
         """
         Returns the resulting column of an unary geospatial method as an
@@ -2052,12 +2010,12 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         Parameters
         ----------
-        db2gse_function : str
-            Name of the corresponding DB2GSE function.
+        function_name : str
+            Name of the corresponding function.
         valid_types : list of str
             Valid input typenames.
         additional_args : list of str, optional
-            Additional arguments for the DB2GSE function.
+            Additional arguments for the function.
 
         Returns
         -------
@@ -2066,8 +2024,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         IdaSeries
             If the resulting column doesn't have geometry type.
         """
-        if not (self.dtypes.TYPENAME[0] in valid_types or 
-                valid_types[0] == 'ST_GEOMETRY'):
+        if valid_types and not (self.column_data_type in valid_types):
             raise TypeError("Column " + self.column +
                             " has incompatible type.")
 
@@ -2075,29 +2032,29 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         # Then modify its attribute column
         idaseries = self._clone()
 
-        # Get the first argument for the DB2GSE function, i.e. a column.
+        # Get the first argument for the function, i.e. a column.
         # Because it might be a non-destructive column that was added by the
         # user, the column definition is considered, instead of its alias
         # in the Ida object.
-        column_for_db2gse = self.internal_state.columndict[self.column]
+        column_name = self.internal_state.columndict[self.column]
 
-        arguments_for_db2gse_function = [column_for_db2gse]
+        arguments_for_function = [column_name]
 
         if additional_args is not None:
             for arg in additional_args:
-                arguments_for_db2gse_function.append(arg)
+                arguments_for_function.append(arg)
 
         result_column = (
-            db2gse_function +
+            function_name +
             '(' +
-            ','.join(map(str, arguments_for_db2gse_function)) +
+            ','.join(map(str, arguments_for_function)) +
             ')'
             )
 
         new_columndict = OrderedDict()
         # result_column_key must not include double quotes because it is used as as Python key and as
         # an SQL alias for the result column expression like in
-        # SELECT DB2GSE.ST_AREA("SHAPE",'KILOMETER') AS "DB2GSE.ST_AREA(SHAPE,'KILOMETER')" FROM SAMPLES.GEO_COUNTY
+        # SELECT inza..ST_AREA("SHAPE",'KILOMETER') AS "inza..ST_AREA(SHAPE,'KILOMETER')" FROM SAMPLES.GEO_COUNTY
         result_column_key = result_column.replace('"', '')
         new_columndict[result_column_key] = result_column
 

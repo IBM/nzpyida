@@ -150,8 +150,8 @@ class IdaGeoDataFrame(IdaDataFrame):
         # TODO: Add support for receiving either a string or an IdaGeoSeries as 
         # geometry parameter.        
 
-        if (idadb.__class__.__name__ == "IdaDataBase") & idadb._is_netezza_system():
-            raise IdaGeoDataFrameError("IdaGeoDataFrame objects are not supported on Netezza.")
+        #if (idadb.__class__.__name__ == "IdaDataBase") & idadb._is_netezza_system():
+        #    raise IdaGeoDataFrameError("IdaGeoDataFrame objects are not supported on Netezza.")
 
         if geometry is not None and not isinstance(geometry, six.string_types):
             raise TypeError("geometry must be a string")
@@ -327,11 +327,11 @@ class IdaGeoDataFrame(IdaDataFrame):
                 "'" + column_name + "' cannot be set as geometry column: "
                 "not a column in the IdaGeoDataFrame."
             )
-        elif self.dtypes.TYPENAME[column_name].find('ST_') != 0:
-            raise TypeError(
-                "'" + column_name + "' cannot be set as geometry column: "
-                "column doesn't have geometry type."
-            )
+        #elif self.dtypes.TYPENAME[column_name].find('ST_') != 0:
+        #    raise TypeError(
+        #        "'" + column_name + "' cannot be set as geometry column: "
+        #        "column doesn't have geometry type."
+        #    )
         else:
             self._geometry_colname = column_name
 
@@ -367,7 +367,7 @@ class IdaGeoDataFrame(IdaDataFrame):
 
         References
         ----------
-        DB2 Spatial Extender ST_CROSSES() function.
+        Netezza Performance Server Analytics ST_CROSSES() function.
 
         Examples
         --------
@@ -384,7 +384,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._binary_operation_handler(
             ida2,
-            db2gse_function='DB2GSE.ST_EQUALS',
+            function_name='inza..ST_EQUALS',
             valid_types_ida1=['ST_GEOMETRY'],
             valid_types_ida2=['ST_GEOMETRY'])
 
@@ -425,7 +425,7 @@ class IdaGeoDataFrame(IdaDataFrame):
 
         References
         ----------
-        DB2 Spatial Extender ST_DISTANCE() function.
+        Netezza Performance Server Analytics ST_DISTANCE() function.
 
         Examples
         --------
@@ -447,7 +447,7 @@ class IdaGeoDataFrame(IdaDataFrame):
             add_args.append(unit)
         return self._binary_operation_handler(
             ida2,
-            db2gse_function='DB2GSE.ST_DISTANCE',
+            function_name='inza..ST_DISTANCE',
             valid_types_ida1=['ST_GEOMETRY'],
             valid_types_ida2=['ST_GEOMETRY'],
             additional_args = add_args)
@@ -480,7 +480,7 @@ class IdaGeoDataFrame(IdaDataFrame):
 
         References
         ----------
-        DB2 Spatial Extender ST_CROSSES() function.
+        Netezza Performance Server Analytics ST_CROSSES() function.
 
         See also
         --------
@@ -501,7 +501,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._binary_operation_handler(
             ida2,
-            db2gse_function='DB2GSE.ST_CROSSES',
+            function_name='inza..ST_CROSSES',
             valid_types_ida1=['ST_GEOMETRY'],
             valid_types_ida2=['ST_GEOMETRY'])
 
@@ -533,7 +533,7 @@ class IdaGeoDataFrame(IdaDataFrame):
 
         References
         ----------
-        DB2 Spatial Extender ST_INTERSECTS() function.
+        Netezza Performance Server Analytics ST_INTERSECTS() function.
 
         Examples
         --------
@@ -550,7 +550,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._binary_operation_handler(
             ida2,
-            db2gse_function='DB2GSE.ST_INTERSECTS',
+            function_name='inza..ST_INTERSECTS',
             valid_types_ida1=['ST_GEOMETRY'],
             valid_types_ida2=['ST_GEOMETRY'])
 
@@ -583,7 +583,7 @@ class IdaGeoDataFrame(IdaDataFrame):
 
         References
         ----------
-        DB2 Spatial Extender ST_OVERLAPS() function.
+        Netezza Performance Server Analytics ST_OVERLAPS() function.
 
         Examples
         --------
@@ -600,7 +600,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._binary_operation_handler(
             ida2,
-            db2gse_function='DB2GSE.ST_OVERLAPS',
+            function_name='inza..ST_OVERLAPS',
             valid_types_ida1=['ST_GEOMETRY'],
             valid_types_ida2=['ST_GEOMETRY'])
 
@@ -632,7 +632,7 @@ class IdaGeoDataFrame(IdaDataFrame):
 
         References
         ----------
-        DB2 Spatial Extender ST_TOUCHES() function.
+        Netezza Performance Server Analytics ST_TOUCHES() function.
 
         Examples
         --------
@@ -649,7 +649,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._binary_operation_handler(
             ida2,
-            db2gse_function='DB2GSE.ST_TOUCHES',
+            function_name='inza..ST_TOUCHES',
             valid_types_ida1=['ST_GEOMETRY'],
             valid_types_ida2=['ST_GEOMETRY'])
 
@@ -681,7 +681,7 @@ class IdaGeoDataFrame(IdaDataFrame):
 
         References
         ----------
-        DB2 Spatial Extender ST_DISJOINT() function.
+        Netezza Performance Server Analytics ST_DISJOINT() function.
 
         Examples
         --------
@@ -698,7 +698,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._binary_operation_handler(
             ida2,
-            db2gse_function='DB2GSE.ST_DISJOINT',
+            function_name='inza..ST_DISJOINT',
             valid_types_ida1=['ST_GEOMETRY'],
             valid_types_ida2=['ST_GEOMETRY'])
 
@@ -729,7 +729,7 @@ class IdaGeoDataFrame(IdaDataFrame):
 
         References
         ----------
-        DB2 Spatial Extender ST_CONTAINS() function.
+        Netezza Performance Server Analytics ST_CONTAINS() function.
 
         Examples
         --------
@@ -750,7 +750,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._binary_operation_handler(
             ida2,
-            db2gse_function='DB2GSE.ST_CONTAINS',
+            function_name='inza..ST_CONTAINS',
             valid_types_ida1=['ST_GEOMETRY'],
             valid_types_ida2=['ST_GEOMETRY'])
 
@@ -781,7 +781,7 @@ class IdaGeoDataFrame(IdaDataFrame):
 
         References
         ----------
-        DB2 Spatial Extender ST_WITHIN() function.
+        Netezza Performance Server Analytics ST_WITHIN() function.
 
         Examples
         --------
@@ -802,7 +802,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._binary_operation_handler(
             ida2,
-            db2gse_function='DB2GSE.ST_WITHIN',
+            function_name='inza..ST_WITHIN',
             valid_types_ida1=['ST_GEOMETRY'],
             valid_types_ida2=['ST_GEOMETRY'])
 
@@ -833,7 +833,7 @@ class IdaGeoDataFrame(IdaDataFrame):
 
         References
         ----------
-        DB2 Spatial Extender ST_MBRIntersects() function.
+        Netezza Performance Server Analytics ST_MBRIntersects() function.
 
         Examples
         --------
@@ -850,7 +850,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._binary_operation_handler(
             ida2,
-            db2gse_function='DB2GSE.ST_MBRINTERSECTS',
+            function_name='inza..ST_MBRINTERSECTS',
             valid_types_ida1=['ST_GEOMETRY'],
             valid_types_ida2=['ST_GEOMETRY'])
 
@@ -880,7 +880,7 @@ class IdaGeoDataFrame(IdaDataFrame):
 
         References
         ----------
-        DB2 Spatial Extender ST_Difference() function.
+        Netezza Performance Server Analytics ST_Difference() function.
 
         Examples
         --------
@@ -897,7 +897,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._binary_operation_handler(
             ida2,
-            db2gse_function='DB2GSE.ST_DIFFERENCE',
+            function_name='inza..ST_DIFFERENCE',
             valid_types_ida1=['ST_GEOMETRY'],
             valid_types_ida2=['ST_GEOMETRY'])
 
@@ -927,7 +927,7 @@ class IdaGeoDataFrame(IdaDataFrame):
 
         References
         ----------
-        DB2 Spatial Extender ST_Intersection() function.
+        Netezza Performance Server Analytics ST_Intersection() function.
 
         Examples
         --------
@@ -944,7 +944,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._binary_operation_handler(
             ida2,
-            db2gse_function='DB2GSE.ST_INTERSECTION',
+            function_name='inza..ST_INTERSECTION',
             valid_types_ida1=['ST_GEOMETRY'],
             valid_types_ida2=['ST_GEOMETRY'])
 
@@ -974,7 +974,7 @@ class IdaGeoDataFrame(IdaDataFrame):
 
         References
         ----------
-        DB2 Spatial Extender ST_Union() function.
+        Netezza Performance Server Analytics ST_Union() function.
 
         Examples
         --------
@@ -991,11 +991,11 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._binary_operation_handler(
             ida2,
-            db2gse_function='DB2GSE.ST_UNION',
+            function_name='inza..ST_UNION',
             valid_types_ida1=['ST_GEOMETRY'],
             valid_types_ida2=['ST_GEOMETRY'])
 
-    def _binary_operation_handler(self, ida2, db2gse_function,
+    def _binary_operation_handler(self, ida2, function_name,
                                           valid_types_ida1, valid_types_ida2,
                                           additional_args=None):
 
@@ -1011,56 +1011,59 @@ class IdaGeoDataFrame(IdaDataFrame):
 
         Parameters
         ----------
-        db2gse_function : str
-                Name of the corresponding DB2GSE function.
+        function_name : str
+                Name of the corresponding function.
         valid_types_ida1 : list of str
                 Valid input typenames for the first IdaGeoSeries.
         valid_types_ida2 : list of str
                 Valid input typenames for the second IdaGeoSeries.
         additional_args : list of str, optional
-                Additional arguments for the DB2GSE function.
+                Additional arguments for the function.
 
         Returns
         -------
         IdaGeoDataFrame
         """
         ida1 = self
+
+        valid_types_ida1.append('CHARACTER VARYING')
+        valid_types_ida2.append('CHARACTER VARYING')
         
         # Check if allowed data type
-        if not (ida1.dtypes.TYPENAME[0] in valid_types_ida1 or
-                        valid_types_ida1[0] == 'ST_GEOMETRY'):
-            raise TypeError("Column " + ida1.column +
-                            " has incompatible type.")
-        if not (ida2.dtypes.TYPENAME[0] in valid_types_ida2 or
-                        valid_types_ida2[0] == 'ST_GEOMETRY'):
-            raise TypeError("Column " + ida2.column +
+        if valid_types_ida1 and not (ida1.dtypes.TYPENAME[ida1.geometry.column] 
+                                     in valid_types_ida1):
+            raise TypeError("Column " + ida1.geometry.column +
+                            " has incompatible type: ")
+        if valid_types_ida2 and not (ida2.dtypes.TYPENAME[ida2.geometry.column] 
+                                     in valid_types_ida2):
+            raise TypeError("Column " + ida2.geometry.column +
                             " has incompatible type.")
 
         # Get the definitions of the columns, which will be the arguments for
-        # the DB2GSE function
-        column1_for_db2gse = 'IDA1.\"%s\"' %(ida1.geometry.column)
-        column2_for_db2gse = 'IDA2.\"%s\"' %(ida2.geometry.column)
-        arguments_for_db2gse_function = [column1_for_db2gse, column2_for_db2gse]
+        # the function
+        column1 = 'IDA1.\"%s\"' %(ida1.geometry.column)
+        column2 = 'IDA2.\"%s\"' %(ida2.geometry.column)
+        arguments_for_function = [column1, column2]
         if additional_args is not None:
             for arg in additional_args:
-                arguments_for_db2gse_function.append(arg)
+                arguments_for_function.append(arg)
 
         # SELECT statement
         select_columns=[]
         if hasattr(ida1, '_indexer') and ida1._indexer is not None:
             select_columns.append('IDA1.\"%s\" AS \"INDEXERIDA1\"' %(ida1.indexer))
         else:
-            message = (ida1+"has no indexer defined. Please assign index column with set_indexer and retry.")
+            message = (ida1.tablename + "has no indexer defined. Please assign index column with set_indexer and retry.")
             raise IdaGeoDataFrameError(message)
         if hasattr(ida2, '_indexer') and ida2._indexer is not None:
             select_columns.append('IDA2.\"%s\" AS \"INDEXERIDA2\"' %(ida2.indexer))
         else:
-            message = (ida2+"has no indexer defined. Please assign index column with set_indexer and retry.")
+            message = (ida2.tablename + "has no indexer defined. Please assign index column with set_indexer and retry.")
             raise IdaGeoDataFrameError(message)
         result_column = (
-            db2gse_function+
+            function_name+
             '('+
-            ','.join(map(str, arguments_for_db2gse_function))+
+            ','.join(map(str, arguments_for_function))+
             ')'
         )
         select_columns.append('%s AS \"RESULT\"' %(result_column))
