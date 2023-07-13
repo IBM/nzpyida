@@ -86,16 +86,10 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         """
 
         super(IdaGeoSeries, self).__init__(idadb, tablename, indexer, column)
-        self.column_data_type = self.dtypes.TYPENAME[self.column]
-        if not self.column_data_type.startswith('ST_') and self.column_data_type != 'CHARACTER VARYING':
-            raise TypeError("Specified column doesn't have geometry type. "
-                            "Cannot create IdaGeoSeries object")
-        if self.column_data_type == 'CHARACTER VARYING':
-            type_of_first_item = self.geometry_type().head().iloc[0]
-            if not type_of_first_item.startswith("ST_"):
-                raise TypeError("Specified column doesn't have geometry type. "
-                            "Cannot create IdaGeoSeries object")
-            self.column_data_type = type_of_first_item
+        self.column_data_type = self.geometry_type().head().iloc[0]
+        if not self.column_data_type.startswith("ST_"):
+            raise TypeError("Specified column doesn't have geometry type. " + 
+                        "Cannot create IdaGeoSeries object")
 
     @classmethod
     def from_IdaSeries(cls, idaseries):
@@ -111,6 +105,11 @@ class IdaGeoSeries(nzpyida.IdaSeries):
             # used for this purpose.
             idageoseries = idaseries
             idageoseries.__class__ = IdaGeoSeries
+
+            idageoseries.column_data_type = idageoseries.geometry_type().head().iloc[0]
+            if not idageoseries.column_data_type.startswith("ST_"):
+                raise TypeError("Specified column doesn't have geometry type. " + 
+                                "Cannot create IdaGeoSeries object")
             return idageoseries
 
 #==============================================================================
@@ -191,7 +190,8 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         additional_args = [threshold]
         return self._unary_operation_handler(
             function_name = 'inza..ST_GENERALIZE',
-            additional_args = additional_args)
+            additional_args = additional_args,
+            return_geo_series=True)
 
     def buffer(self, distance, unit = None):
         """
@@ -265,7 +265,8 @@ class IdaGeoSeries(nzpyida.IdaSeries):
             additional_args.append(unit)
         return self._unary_operation_handler(
             function_name = 'inza..ST_BUFFER',
-            additional_args = additional_args)
+            additional_args = additional_args,
+            return_geo_series=True)
 
     def centroid(self):
         """
@@ -305,7 +306,8 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         Clay         POINT (-96.5066339619 46.8908550036)
         """
         return self._unary_operation_handler(
-                function_name = 'inza..ST_CENTROID')
+                function_name = 'inza..ST_CENTROID',
+                return_geo_series=True)
 
     def convex_hull(self):
         """
@@ -349,7 +351,8 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         4 	5 	MULTIPOLYGON (((-91.2589262966 36.2578866492, ... 	POLYGON ((-91.4074433538 36.4871686853, -91.24...
         """
         return self._unary_operation_handler(
-                function_name = 'inza..ST_CONVEXHULL')
+                function_name = 'inza..ST_CONVEXHULL',
+                return_geo_series=True)
 
     def boundary(self):
         """
@@ -401,7 +404,8 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         Jones        LINESTRING (-77.0903250894 34.8027619185, -77..
         """
         return self._unary_operation_handler(
-                function_name = 'inza..ST_BOUNDARY')
+                function_name = 'inza..ST_BOUNDARY',
+                return_geo_series=True)
 
     def envelope(self):
         """
@@ -446,7 +450,8 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         5          MULTILINESTRING ((-90.6800062393 37.60..   POLYGON ((-90.6800062393 37.60..
         """
         return self._unary_operation_handler(
-                function_name = 'inza..ST_ENVELOPE')
+                function_name = 'inza..ST_ENVELOPE',
+                return_geo_series=True)
 
     def exterior_ring(self):
         """
@@ -484,7 +489,8 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         """
         return self._unary_operation_handler(
                 function_name = 'inza..ST_EXTERIORRING',
-                valid_types = ['ST_POLYGON'])
+                valid_types = ['ST_POLYGON'],
+                return_geo_series=True)
 
     def mbr(self):
         """
@@ -524,7 +530,8 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
         """
         return self._unary_operation_handler(
-                function_name = 'inza..ST_MBR')
+                function_name = 'inza..ST_MBR',
+                return_geo_series=True)
 
     def end_point(self):
         """
@@ -563,7 +570,8 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         """
         return self._unary_operation_handler(
                 function_name = 'inza..ST_ENDPOINT',
-                valid_types = ['ST_LINESTRING'])
+                valid_types = ['ST_LINESTRING'],
+                return_geo_series=True)
 
     def mid_point(self):
         """
@@ -607,7 +615,8 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         """
         return self._unary_operation_handler(
                 function_name = 'inza..ST_MIDPOINT',
-                valid_types = ['ST_LINESTRING'])
+                valid_types = ['ST_LINESTRING'],
+                return_geo_series=True)
 
     def start_point(self):
         """
@@ -644,7 +653,8 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         """
         return self._unary_operation_handler(
                 function_name = 'inza..ST_STARTPOINT',
-                valid_types = ['ST_LINESTRING'])
+                valid_types = ['ST_LINESTRING'],
+                return_geo_series=True)
 
     def srid(self):
         """
@@ -1940,24 +1950,6 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
 
 #==============================================================================
-### Public utilities for geospatial methods
-#==============================================================================
-
-    @lazy
-    def linear_units(self):
-        """
-        Returns
-        -------
-        list of str
-            The list of all allowed linear units that can be passed as option to geospatial methods.
-        """
-            
-        units = self.ida_query(
-            'SELECT UNIT_NAME FROM DB2GSE.ST_UNITS_OF_MEASURE WHERE '
-            'UNIT_TYPE= \'LINEAR\' ORDER BY LENGTH(UNIT_NAME), UNIT_NAME')
-        return units
-
-#==============================================================================
 ### Private utilities for geospatial methods
 #==============================================================================
 
@@ -2003,7 +1995,8 @@ class IdaGeoSeries(nzpyida.IdaSeries):
 
     def _unary_operation_handler(self, function_name,
                                  valid_types = None,
-                                 additional_args = None):
+                                 additional_args = None,
+                                 return_geo_series=False):
         """
         Returns the resulting column of an unary geospatial method as an
         IdaGeoSeries if it has geometry type, as an IdaSeries otherwise.
@@ -2016,13 +2009,15 @@ class IdaGeoSeries(nzpyida.IdaSeries):
             Valid input typenames.
         additional_args : list of str, optional
             Additional arguments for the function.
+        return_geo_series : bool, optional
+            Flag whether expected output series contains spatial data
 
         Returns
         -------
         IdaGeoSeries
-            If the resulting column has geometry type.
+            If the return_geo_series argument is True.
         IdaSeries
-            If the resulting column doesn't have geometry type.
+            If the return_geo_series argument is False.
         """
         if valid_types and not (self.column_data_type in valid_types):
             raise TypeError("Column " + self.column +
@@ -2072,7 +2067,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         except:
             pass
         
-        if idaseries.dtypes.TYPENAME[result_column_key].find('ST_') == 0:
+        if return_geo_series:
             return IdaGeoSeries.from_IdaSeries(idaseries)
         else:
             return idaseries

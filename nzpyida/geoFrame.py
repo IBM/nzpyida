@@ -146,12 +146,7 @@ class IdaGeoDataFrame(IdaDataFrame):
             This attribute must be set through the set_geometry() method.
         geometry : IdaGeoSeries
             The column referenced by _geometry_colname attribute.
-        """
-        # TODO: Add support for receiving either a string or an IdaGeoSeries as 
-        # geometry parameter.        
-
-        #if (idadb.__class__.__name__ == "IdaDataBase") & idadb._is_netezza_system():
-        #    raise IdaGeoDataFrameError("IdaGeoDataFrame objects are not supported on Netezza.")
+        """      
 
         if geometry is not None and not isinstance(geometry, six.string_types):
             raise TypeError("geometry must be a string")
@@ -327,13 +322,15 @@ class IdaGeoDataFrame(IdaDataFrame):
                 "'" + column_name + "' cannot be set as geometry column: "
                 "not a column in the IdaGeoDataFrame."
             )
-        #elif self.dtypes.TYPENAME[column_name].find('ST_') != 0:
-        #    raise TypeError(
-        #        "'" + column_name + "' cannot be set as geometry column: "
-        #        "column doesn't have geometry type."
-        #    )
-        else:
-            self._geometry_colname = column_name
+        
+        idaseries = IdaGeoSeries.from_IdaSeries(self[column_name])
+        self.geo_column_data_type = idaseries.geometry_type().head().iloc[0]
+        if not self.geo_column_data_type.startswith("ST_"):
+            raise TypeError("Specified column doesn't have geometry type. " + 
+                            "Cannot create IdaGeoSeries object")
+        del idaseries
+        
+        self._geometry_colname = column_name
 
     # ==============================================================================
     ### Binary geospatial methods
@@ -384,9 +381,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._binary_operation_handler(
             ida2,
-            function_name='inza..ST_EQUALS',
-            valid_types_ida1=['ST_GEOMETRY'],
-            valid_types_ida2=['ST_GEOMETRY'])
+            function_name='inza..ST_EQUALS')
 
     def distance(self, ida2, unit=None):
         """
@@ -448,8 +443,6 @@ class IdaGeoDataFrame(IdaDataFrame):
         return self._binary_operation_handler(
             ida2,
             function_name='inza..ST_DISTANCE',
-            valid_types_ida1=['ST_GEOMETRY'],
-            valid_types_ida2=['ST_GEOMETRY'],
             additional_args = add_args)
 
     def crosses(self, ida2):
@@ -501,9 +494,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._binary_operation_handler(
             ida2,
-            function_name='inza..ST_CROSSES',
-            valid_types_ida1=['ST_GEOMETRY'],
-            valid_types_ida2=['ST_GEOMETRY'])
+            function_name='inza..ST_CROSSES')
 
     def intersects(self, ida2):
         """
@@ -550,9 +541,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._binary_operation_handler(
             ida2,
-            function_name='inza..ST_INTERSECTS',
-            valid_types_ida1=['ST_GEOMETRY'],
-            valid_types_ida2=['ST_GEOMETRY'])
+            function_name='inza..ST_INTERSECTS')
 
     def overlaps(self, ida2):
         """
@@ -600,9 +589,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._binary_operation_handler(
             ida2,
-            function_name='inza..ST_OVERLAPS',
-            valid_types_ida1=['ST_GEOMETRY'],
-            valid_types_ida2=['ST_GEOMETRY'])
+            function_name='inza..ST_OVERLAPS')
 
     def touches(self, ida2):
         """
@@ -649,9 +636,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._binary_operation_handler(
             ida2,
-            function_name='inza..ST_TOUCHES',
-            valid_types_ida1=['ST_GEOMETRY'],
-            valid_types_ida2=['ST_GEOMETRY'])
+            function_name='inza..ST_TOUCHES')
 
     def disjoint(self, ida2):
         """
@@ -698,9 +683,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._binary_operation_handler(
             ida2,
-            function_name='inza..ST_DISJOINT',
-            valid_types_ida1=['ST_GEOMETRY'],
-            valid_types_ida2=['ST_GEOMETRY'])
+            function_name='inza..ST_DISJOINT')
 
     def contains(self, ida2):
         """
@@ -750,9 +733,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._binary_operation_handler(
             ida2,
-            function_name='inza..ST_CONTAINS',
-            valid_types_ida1=['ST_GEOMETRY'],
-            valid_types_ida2=['ST_GEOMETRY'])
+            function_name='inza..ST_CONTAINS')
 
     def within(self, ida2):
         """
@@ -802,9 +783,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._binary_operation_handler(
             ida2,
-            function_name='inza..ST_WITHIN',
-            valid_types_ida1=['ST_GEOMETRY'],
-            valid_types_ida2=['ST_GEOMETRY'])
+            function_name='inza..ST_WITHIN')
 
     def mbr_intersects(self, ida2):
         """
@@ -850,9 +829,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._binary_operation_handler(
             ida2,
-            function_name='inza..ST_MBRINTERSECTS',
-            valid_types_ida1=['ST_GEOMETRY'],
-            valid_types_ida2=['ST_GEOMETRY'])
+            function_name='inza..ST_MBRINTERSECTS')
 
     def difference(self, ida2):
         """
@@ -897,9 +874,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._binary_operation_handler(
             ida2,
-            function_name='inza..ST_DIFFERENCE',
-            valid_types_ida1=['ST_GEOMETRY'],
-            valid_types_ida2=['ST_GEOMETRY'])
+            function_name='inza..ST_DIFFERENCE')
 
     def intersection(self, ida2):
         """
@@ -944,9 +919,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._binary_operation_handler(
             ida2,
-            function_name='inza..ST_INTERSECTION',
-            valid_types_ida1=['ST_GEOMETRY'],
-            valid_types_ida2=['ST_GEOMETRY'])
+            function_name='inza..ST_INTERSECTION')
 
     def union(self, ida2):
         """
@@ -991,12 +964,10 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._binary_operation_handler(
             ida2,
-            function_name='inza..ST_UNION',
-            valid_types_ida1=['ST_GEOMETRY'],
-            valid_types_ida2=['ST_GEOMETRY'])
+            function_name='inza..ST_UNION')
 
     def _binary_operation_handler(self, ida2, function_name,
-                                          valid_types_ida1, valid_types_ida2,
+                                          valid_types_ida1=None, valid_types_ida2=None,
                                           additional_args=None):
 
 
@@ -1025,17 +996,12 @@ class IdaGeoDataFrame(IdaDataFrame):
         IdaGeoDataFrame
         """
         ida1 = self
-
-        valid_types_ida1.append('CHARACTER VARYING')
-        valid_types_ida2.append('CHARACTER VARYING')
         
         # Check if allowed data type
-        if valid_types_ida1 and not (ida1.dtypes.TYPENAME[ida1.geometry.column] 
-                                     in valid_types_ida1):
+        if valid_types_ida1 and not ida1.geo_column_data_type in valid_types_ida1:
             raise TypeError("Column " + ida1.geometry.column +
                             " has incompatible type: ")
-        if valid_types_ida2 and not (ida2.dtypes.TYPENAME[ida2.geometry.column] 
-                                     in valid_types_ida2):
+        if valid_types_ida2 and not ida2.geo_column_data_type in valid_types_ida2:
             raise TypeError("Column " + ida2.geometry.column +
                             " has incompatible type.")
 
