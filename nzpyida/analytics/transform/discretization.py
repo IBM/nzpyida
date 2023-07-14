@@ -59,7 +59,7 @@ class Discretization:
         IdaDataFrame
             the data frame with discretization bins
         """
-        in_columns = ';'.join(in_df.columns)
+        in_columns = ';'.join(['"' + x + '"' for x in in_df.columns])
         params_dict = {
             'incolumn': in_columns,
             'outtabletype': 'table'
