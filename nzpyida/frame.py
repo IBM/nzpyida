@@ -1077,7 +1077,8 @@ class IdaDataFrame(object):
 
             if data.shape[0] != 0:
                 if isinstance(self, nzpyida.IdaSeries):
-                    data = data[self.column]
+                    if not isinstance(data, pd.Series):
+                        data = data[self.column]
                 elif not 'SELECT ' in name:
                     columns = self.columns
                     data.columns = columns
