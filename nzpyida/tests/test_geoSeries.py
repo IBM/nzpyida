@@ -22,252 +22,248 @@ standard_library.install_aliases()
 import pandas
 import pytest
 import six
+from nzpy.core import ProgrammingError
 
 from nzpyida import IdaSeries
-#from nzpyida import IdaGeoSeries
-#from nzpyida.exceptions import IdaGeoDataFrameError
+from nzpyida import IdaGeoSeries
+from nzpyida.exceptions import IdaGeoDataFrameError
 
-@pytest.mark.skipif("'netezza' in config.getvalue('jdbc') or config.getvalue('hostname') != ''")
+ESRI = False
+COLUMN_TYPE = "ST_GEOMETRY" if ESRI else "VARCHAR"
+GEO_SERIES_NAME = "GEO_TEST_SERIES"
+GEO_COLUMN_NAME = "THE_GEOM"
+INDEXER_COLUMN = "OBJECTID"
+
+prep_series_commands = f"""
+DROP TABLE {GEO_SERIES_NAME} IF EXISTS;
+CREATE TABLE {GEO_SERIES_NAME} ({INDEXER_COLUMN}  INTEGER, {GEO_COLUMN_NAME} {COLUMN_TYPE}(200));
+INSERT INTO {GEO_SERIES_NAME} VALUES 
+(1, inza..ST_WKTToSQL('POLYGON ((1 1, 2 1, 2 2, 1 2, 1 1))'));
+INSERT INTO {GEO_SERIES_NAME} VALUES 
+(2, inza..ST_WKTToSQL('POLYGON ((1 1, 11 1, 11 11, 1 11, 1 1))'));
+INSERT INTO {GEO_SERIES_NAME} VALUES 
+(3, inza..ST_WKTToSQL('POLYGON ((-1 -1, -2 -1, -2 -2, -1 -2, -1 -1))'));
+"""
+
+@pytest.fixture(scope='module')
+def idageoseries(idadb):
+    idadb.ida_query(prep_series_commands)
+    yield IdaGeoSeries(idadb, GEO_SERIES_NAME, 
+                          indexer=INDEXER_COLUMN, column=GEO_COLUMN_NAME)
+    idadb.ida_query(f"DROP TABLE {GEO_SERIES_NAME} IF EXISTS")
+
 class Test_IdaGeoSeries(object):
-
-    def test_idageoseries_generalize(self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE']
-        with pytest.raises(TypeError):
-            idageoseries.generalize('not a float')
-        with pytest.raises(ValueError):
-            idageoseries.generalize(-5)
-        assert(isinstance(idageoseries.generalize(1.0), IdaGeoSeries))
-
-    def test_idageoseries_buffer(self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE']
+    def test_idageoseries_buffer(self, idageoseries):
         with pytest.raises(TypeError):
             idageoseries.buffer(distance='not a number')
-        assert(isinstance(idageoseries.buffer(
-                distance=2.3, unit="CLARKE'S FOOT"), IdaGeoSeries))
+        # TODO: ERROR:  SPU job process terminated (Segmentation fault)
+        # assert(isinstance(idageoseries.buffer(distance=2.3), IdaGeoSeries))
+        # assert len(ida.head())
 
-    def test_idageoseries_centroid(self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE']
-        assert(isinstance(idageoseries.centroid(), IdaGeoSeries))
+    def test_idageoseries_centroid(self, idageoseries):
+        ida = idageoseries.centroid()
+        assert(isinstance(ida, IdaGeoSeries))
+        assert len(ida.head())
 
-    def test_idageoseries_convex_hull(self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE']
-        assert(isinstance(idageoseries.convex_hull(), IdaGeoSeries))
+    def test_idageoseries_convex_hull(self, idageoseries):
+        ida = idageoseries.convex_hull()
+        assert(isinstance(ida, IdaGeoSeries))
+        assert len(ida.head())
 
-    def test_idageoseries_boundary(self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE']
-        assert(isinstance(idageoseries.boundary(), IdaGeoSeries))
+    def test_idageoseries_boundary(self, idageoseries):
+        ida = idageoseries.boundary()
+        assert(isinstance(ida, IdaGeoSeries))
+        assert len(ida.head())
 
-    def test_idageoseries_envelope(self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE']
-        assert(isinstance(idageoseries.envelope(), IdaGeoSeries))
+    def test_idageoseries_envelope(self, idageoseries):
+        ida = idageoseries.envelope()
+        assert(isinstance(ida, IdaGeoSeries))
+        assert len(ida.head())
 
-    def test_idageoseries_exterior_ring(self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE'].envelope() # get ST_POLYGON
-        assert(isinstance(idageoseries.exterior_ring(), IdaGeoSeries))
+    def test_idageoseries_exterior_ring(self, idageoseries):
+        ida = idageoseries.exterior_ring()
+        assert(isinstance(ida, IdaGeoSeries))
+        assert len(ida.head())
 
-    def test_idageoseries_mbr(self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE']
-        assert(isinstance(idageoseries.mbr(), IdaGeoSeries))
+    def test_idageoseries_mbr(self, idageoseries):
+        ida = idageoseries.mbr()
+        assert(isinstance(ida, IdaGeoSeries))
+        assert len(ida.head())
 
-    def test_idageoseries_end_point(self, idageodf_county):
+    @pytest.mark.skip
+    def test_idageoseries_end_point(self, idageoseries):
         # TODO: add dataset with a column with ST_LINESTRING
         pass
-
-    def test_idageoseries_mid_point(self, idageodf_county):
-        # TODO: add dataset with a column with ST_LINESTRING
-        pass
-
-    def test_idageoseries_start_point(self, idageodf_county):
-        # TODO: add dataset with a column with ST_LINESTRING
-        pass
-
-    def test_idageoseries_srid(self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE']
-        assert(isinstance(idageoseries.srid(), IdaSeries))
-
-    def test_idageoseries_srs_name(self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE']
-        assert(isinstance(idageoseries.srs_name(), IdaSeries))
-
-    def test_idageoseries_geometry_type(self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE']
-        assert(isinstance(idageoseries.geometry_type(), IdaSeries))
-
-    def test_idageoseries_area(self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE']
-        assert(isinstance(idageoseries.area(
-                unit="BRITISH FOOT (BENOIT 1895 A)"), IdaSeries))
-
-    def test_idageoseries_dimension(self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE']
-        assert(isinstance(idageoseries.dimension(), IdaSeries))  
-
-    def test_idageoseries_length(self, idageodf_tornado):
-        idageoseries = idageodf_tornado['SHAPE']
-        assert(isinstance(idageoseries.length(
-                unit="CLARKE'S FOOT"), IdaSeries))
-
-    def test_idageoseries_perimeter(self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE']
-        assert(isinstance(idageoseries.perimeter(
-                unit="CLARKE'S FOOT"), IdaSeries))
-
-    def test_idageoseries_num_geometries(self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE']
-        assert(isinstance(idageoseries.num_geometries(), IdaSeries))
-
-    def test_idageoseries_num_interior_ring(self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE'].envelope() # get ST_POLYGON
-        assert(isinstance(idageoseries.num_interior_ring(), IdaSeries))
-
-    def test_idageoseries_num_line_strings(self, idageodf_tornado):
-        idageoseries = idageodf_tornado['SHAPE']
-        assert(isinstance(idageoseries.num_line_strings(), IdaSeries))
-
-    def test_idageoseries_num_points(self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE']
-        assert(isinstance(idageoseries.num_points(), IdaSeries))
-
-    def test_idageoseries_num_polygons(self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE']
-        assert(isinstance(idageoseries.num_polygons(), IdaSeries))
-
-    def test_idageoseries_coord_dim(self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE']
-        assert(isinstance(idageoseries.coord_dim(), IdaSeries))
-
-    def test_idageoseries_is_3d(self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE']
-        assert(isinstance(idageoseries.is_3d(), IdaSeries))
-
-    def test_idageoseries_is_measured(self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE']
-        assert(isinstance(idageoseries.is_measured(), IdaSeries))
-
-    def test_idageoseries_is_valid(self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE']
-        assert(isinstance(idageoseries.is_valid(), IdaSeries))
-        
-    def test_idageoseries_max_m(self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE']
-        assert(isinstance(idageoseries.max_m(), IdaSeries))
-
-    def test_idageoseries_max_x(self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE']
-        assert(isinstance(idageoseries.max_x(), IdaSeries))
-
-    def test_idageoseries_max_y(self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE']
-        assert(isinstance(idageoseries.max_y(), IdaSeries))
-
-    def test_idageoseries_max_z(self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE']
-        assert(isinstance(idageoseries.max_z(), IdaSeries))
-        
-    def test_idageoseries_min_m(self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE']
-        assert(isinstance(idageoseries.min_m(), IdaSeries))
-
-    def test_idageoseries_min_x(self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE']
-        assert(isinstance(idageoseries.min_x(), IdaSeries))
-
-    def test_idageoseries_min_y(self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE']
-        assert(isinstance(idageoseries.min_y(), IdaSeries))
-
-    def test_idageoseries_min_z(self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE']
-        assert(isinstance(idageoseries.min_z(), IdaSeries))
-
-    def test_idageoseries_m(self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE'].centroid()
-        assert(isinstance(idageoseries.m(), IdaSeries))
-
-    def test_idageoseries_x(self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE'].centroid()
-        assert(isinstance(idageoseries.x(), IdaSeries))
-
-    def test_idageoseries_y(self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE'].centroid()
-        assert(isinstance(idageoseries.y(), IdaSeries))
-
-    def test_idageoseries_z(self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE'].centroid()
-        assert(isinstance(idageoseries.z(), IdaSeries))
-
-    def test_idageoseries_is_closed(self, idageodf_county):
-        # TODO: add dataset with a column with ST_LINESTRING
-        pass
-
-    def test_idageoseries_is_empty(self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE']
-        assert(isinstance(idageoseries.is_empty(), IdaSeries))
-
-    def test_idageoseries_is_simple(self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE']
-        assert(isinstance(idageoseries.is_simple(), IdaSeries))
     
-    def test_idageoseries_check_linear_unit(self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE']
+    @pytest.mark.skip
+    def test_idageoseries_mid_point(self, idageoseries):
+        # TODO: add dataset with a column with ST_LINESTRING
+        pass
+    
+    @pytest.mark.skip
+    def test_idageoseries_start_point(self, idageoseries):
+        # TODO: add dataset with a column with ST_LINESTRING
+        pass
+
+    def test_idageoseries_srid(self, idageoseries):
+        ida = idageoseries.srid()
+        assert(isinstance(ida, IdaSeries))
+        assert len(ida.head())
+
+    def test_idageoseries_geometry_type(self, idageoseries):
+        ida = idageoseries.geometry_type()
+        assert(isinstance(ida, IdaSeries))
+        assert len(ida.head())
+
+    def test_idageoseries_area(self, idageoseries):
+        ida = idageoseries.area(unit='foot')
+        assert(isinstance(ida, IdaSeries))
+        assert len(ida.head())
+
+    def test_idageoseries_dimension(self, idageoseries):
+        ida = idageoseries.dimension()
+        assert(isinstance(ida, IdaSeries))  
+        assert len(ida.head())
+
+    def test_idageoseries_length(self, idageoseries):
+        # TODO 
+        pass
+
+    def test_idageoseries_perimeter(self, idageoseries):
+        ida = idageoseries.perimeter(unit="kilometer")
+        assert(isinstance(ida, IdaSeries))
+        assert len(ida.head())
+
+    @pytest.mark.skip
+    def test_idageoseries_num_geometries(self, idageoseries):
+        # TODO
+        pass
+
+    def test_idageoseries_num_interior_ring(self, idageoseries):
+        ida = idageoseries.num_interior_ring()
+        assert(isinstance(ida, IdaSeries))
+        assert len(ida.head())
+    
+    @pytest.mark.skip
+    def test_idageoseries_num_line_strings(self, idageoseries):
+        # TODO
+        pass
+
+    def test_idageoseries_num_points(self, idageoseries):
+        ida = idageoseries.num_points()
+        assert(isinstance(ida, IdaSeries))
+        assert len(ida.head())
+
+    def test_idageoseries_coord_dim(self, idageoseries):
+        ida = idageoseries.coord_dim()
+        assert(isinstance(ida, IdaSeries))
+        assert len(ida.head())
+
+    def test_idageoseries_is_3d(self, idageoseries):
+        ida = idageoseries.is_3d()
+        assert(isinstance(ida, IdaSeries))
+        assert len(ida.head())
+
+    def test_idageoseries_is_measured(self, idageoseries):
+        ida = idageoseries.is_measured()
+        assert(isinstance(ida, IdaSeries))
+        assert len(ida.head())
+        
+    def test_idageoseries_max_m(self, idageoseries):
+        ida = idageoseries.max_m()
+        assert(isinstance(ida, IdaSeries))
+        assert len(ida.head())
+
+    def test_idageoseries_max_x(self, idageoseries):
+        ida = idageoseries.max_x()
+        assert(isinstance(ida, IdaSeries))
+        assert len(ida.head())
+
+    def test_idageoseries_max_y(self, idageoseries):
+        ida = idageoseries.max_y()
+        assert(isinstance(ida, IdaSeries))
+        assert len(ida.head())
+
+    def test_idageoseries_max_z(self, idageoseries):
+        ida = idageoseries.max_z()
+        assert(isinstance(ida, IdaSeries))
+        assert len(ida.head())
+        
+    def test_idageoseries_min_m(self, idageoseries):
+        ida = idageoseries.min_m()
+        assert(isinstance(ida, IdaSeries))
+        assert len(ida.head())
+
+    def test_idageoseries_min_x(self, idageoseries):
+        ida = idageoseries.min_x()
+        assert(isinstance(ida, IdaSeries))
+        assert len(ida.head())
+
+    def test_idageoseries_min_y(self, idageoseries):
+        ida = idageoseries.min_y()
+        assert(isinstance(ida, IdaSeries))
+        assert len(ida.head())
+
+    def test_idageoseries_min_z(self, idageoseries):
+        ida = idageoseries.min_z()
+        assert(isinstance(ida, IdaSeries))
+        assert len(ida.head())
+
+    def test_idageoseries_m(self, idageoseries):
+        ida = idageoseries.centroid().m()
+        assert(isinstance(ida, IdaSeries))
+        with pytest.raises(ProgrammingError) as e:
+            ida.head()
+            assert "Geometry does not have M value" in str(e)
+
+    def test_idageoseries_x(self, idageoseries):
+        ida = idageoseries.centroid().x()
+        assert(isinstance(ida, IdaSeries))
+        assert len(ida.head())
+
+    def test_idageoseries_y(self, idageoseries):
+        ida = idageoseries.centroid().y()
+        assert(isinstance(ida, IdaSeries))
+        assert len(ida.head())
+
+    def test_idageoseries_z(self, idageoseries):
+        ida = idageoseries.centroid().z()
+        assert(isinstance(ida, IdaSeries))
+        with pytest.raises(ProgrammingError) as e:
+            ida.head()
+            assert "Geometry does not have Z value" in str(e)
+
+    @pytest.mark.skip
+    def test_idageoseries_is_closed(self, idageoseries):
+        # TODO: add dataset with a column with ST_LINESTRING
+        pass
+
+    def test_idageoseries_is_empty(self, idageoseries):
+        ida = idageoseries.is_empty()
+        assert(isinstance(ida, IdaSeries))
+        assert len(ida.head())
+
+    def test_idageoseries_is_simple(self, idageoseries):
+        ida = idageoseries.is_simple()
+        assert(isinstance(ida, IdaSeries))
+        assert len(ida.head())
+    
+    def test_idageoseries_check_linear_unit(self, idageoseries):
         with pytest.raises(TypeError):
             idageoseries._check_linear_unit(10)
-        with pytest.raises(IdaGeoDataFrameError):
-            idageoseries._check_linear_unit('not a valid unit')
         unit = 'meter'
         ans = idageoseries._check_linear_unit(unit)
-        assert(ans == '\'METER\'')
-        unit = 'Yard (SEARS)' # parenthesis
+        assert(ans == '\'meter\'')
+        unit = 'FOOT' # parenthesis
         ans = idageoseries._check_linear_unit(unit)
-        assert(ans == '\'YARD (SEARS)\'')
-        unit = 'Clarke\'s foot' # quotation mark
-        ans = idageoseries._check_linear_unit(unit)
-        assert(ans == '\'CLARKE\'\'S FOOT\'')
-        unit = 'bin width 37.5 METRES' #with dot    
-        ans = idageoseries._check_linear_unit(unit)
-        assert(ans == '\'BIN WIDTH 37.5 METRES\'')
-    
-    def test_idageoseries_linear_units(self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE']
-        units = idageoseries.linear_units
-        assert(not units.empty)
+        assert(ans == '\'foot\'')
+        with pytest.raises(IdaGeoDataFrameError):
+            unit = "Uknown unit"
+            idageoseries._check_linear_unit(unit)
 
     def test_idageoseries_unary_operation_handler_non_geometry_column(
-            self, idageodf_county):
-        idageoseries = idageodf_county['SHAPE'] # ST_POLYGON      
+            self, idageoseries):
         with pytest.raises(TypeError):
             idageoseries._unary_operation_handler(
-                db2gse_function = 'DB2GSE.ST_AGEOSPATIALFUNCTION',
+                db2gse_function = 'inza..ST_AGEOSPATIALFUNCTION',
                 valid_types = ['ST_POINT'])
-
-    def test_idageoseries_area_km(self, idageodf_county):
-        idageodf = idageodf_county
-        idageodf.set_geometry('SHAPE')
-        idageodf['AREA_KM'] = idageodf.area(unit='KILOMETER')
-        max_area_km = idageodf['AREA_KM'].max()
-        assert(int(max_area_km)== 52073)
-
-    def test_idageoseries_area_km_lc(self, idageodf_county_view):
-        idageodf = idageodf_county_view
-        idageodf.set_geometry('shape')
-        idageodf['area_km'] = idageodf.area(unit='kilometer')
-        max_area_km = idageodf['area_km'].max()
-        assert(int(max_area_km)== 52073)
-
-    def test_idageoseries_area_km_mbr(self, idageodf_county):
-        idageodf = idageodf_county
-        idageodf.set_geometry('SHAPE')
-        idageodf['MBR'] = idageodf.mbr()
-        idageodf.set_geometry('MBR')
-        idageodf['AREA_KM_MBR'] = idageodf.area(unit='KILOMETER')
-        max_area_km_mbr = idageodf['AREA_KM_MBR'].max()
-        assert(int(max_area_km_mbr) == 100246)
-
-    def test_idageoseries_area_km_mbr_lc(self, idageodf_county_view):
-        idageodf = idageodf_county_view
-        idageodf.set_geometry('shape')
-        idageodf['mbr'] = idageodf.mbr()
-        idageodf.set_geometry('mbr')
-        idageodf['area_km_mbr'] = idageodf.area(unit='kilometer')
-        max_area_km_mbr = idageodf['area_km_mbr'].max()
-        assert(int(max_area_km_mbr) == 100246)

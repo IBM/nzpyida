@@ -29,6 +29,7 @@ import nzpyida
 from nzpyida.frame import IdaDataFrame
 from nzpyida.geoSeries import IdaGeoSeries
 from nzpyida.exceptions import IdaGeoDataFrameError
+from nzpy.core import ProgrammingError
 
 from copy import deepcopy
 
@@ -176,7 +177,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         ida = super(IdaGeoDataFrame, self).__getitem__(item)
         if isinstance(ida, nzpyida.IdaSeries):
-            if ida.dtypes['TYPENAME'][ida.column].find('ST_') == 0:
+            if item == self._geometry_colname:
                 idageoseries = IdaGeoSeries.from_IdaSeries(ida)
                 # Return IdaGeoSeries
                 return idageoseries
@@ -318,16 +319,15 @@ class IdaGeoDataFrame(IdaDataFrame):
         if not isinstance(column_name, six.string_types):
             raise TypeError("column_name must be a string")
         if column_name not in self.columns:
-            raise KeyError(
-                "'" + column_name + "' cannot be set as geometry column: "
-                "not a column in the IdaGeoDataFrame."
-            )
+            raise KeyError( "'" + column_name + "' cannot be set as geometry column: "
+                "not a column in the IdaGeoDataFrame.")
         
-        idaseries = IdaGeoSeries.from_IdaSeries(self[column_name])
-        self.geo_column_data_type = idaseries.geometry_type().head().iloc[0]
-        if not self.geo_column_data_type.startswith("ST_"):
-            raise TypeError("Specified column doesn't have geometry type. " + 
-                            "Cannot create IdaGeoSeries object")
+        try: 
+            idaseries = IdaGeoSeries.from_IdaSeries(self[column_name])
+            self.geo_column_data_type = idaseries.geometry_type().head().iloc[0]
+        except TypeError:
+            raise TypeError("'" + column_name + "' cannot be set as geometry column: "
+                "specified column doesn't have geometry type")
         del idaseries
         
         self._geometry_colname = column_name

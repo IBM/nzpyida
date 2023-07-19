@@ -33,6 +33,8 @@ import nzpyida
 from nzpyida.series import IdaSeries
 from nzpyida.exceptions import IdaGeoDataFrameError
 
+from nzpy.core import ProgrammingError
+
 class IdaGeoSeries(nzpyida.IdaSeries):
     """
     An IdaSeries whose column must have geometry type.
@@ -86,10 +88,11 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         """
 
         super(IdaGeoSeries, self).__init__(idadb, tablename, indexer, column)
-        self.column_data_type = self.geometry_type().head().iloc[0]
-        if not self.column_data_type.startswith("ST_"):
+        try:
+            self.column_data_type = self.geometry_type().head().iloc[0]
+        except ProgrammingError:
             raise TypeError("Specified column doesn't have geometry type. " + 
-                        "Cannot create IdaGeoSeries object")
+                            "Cannot create IdaGeoSeries object")
 
     @classmethod
     def from_IdaSeries(cls, idaseries):
@@ -97,6 +100,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         Creates an IdaGeoSeries from an IdaSeries, ensuring that the column
         of the given IdaSeries has geometry type.
         """
+        is_geometry_type = True
         if not isinstance(idaseries, IdaSeries):
             raise TypeError("Expected IdaSeries")
         else:
@@ -105,11 +109,16 @@ class IdaGeoSeries(nzpyida.IdaSeries):
             # used for this purpose.
             idageoseries = idaseries
             idageoseries.__class__ = IdaGeoSeries
-
-            idageoseries.column_data_type = idageoseries.geometry_type().head().iloc[0]
-            if not idageoseries.column_data_type.startswith("ST_"):
+            try:
+                idageoseries.column_data_type = idageoseries.geometry_type().head().iloc[0]
+            except ProgrammingError as e:
+                if "Geometry unsupported" in str(e):
+                    is_geometry_type = False
+                else:
+                    raise e    
+            if not is_geometry_type:
                 raise TypeError("Specified column doesn't have geometry type. " + 
-                                "Cannot create IdaGeoSeries object")
+                                    "Cannot create IdaGeoSeries object")
             return idageoseries
 
 #==============================================================================
@@ -687,38 +696,6 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         return self._unary_operation_handler(
                 function_name = 'inza..ST_SRID')
 
-    def srs_name(self):
-        """
-        Valid types for the column in the calling IdaGeoSeries:
-        ST_Geometry or one of its subtypes.
-
-        Returns an IdaSeries with strings representing the name of the spatial
-        reference system of each of the geometries in the calling IdaGeoSeries.
-
-        Returns
-        -------
-        IdaSeries.
-
-        References
-        ----------
-        Netezza Performance Server Analytics ST_SRSNAME() function.
-
-        Examples
-        --------
-        >>> tornadoes = IdaGeoDataFrame(idadb,'SAMPLES.GEO_TORNADO',indexer='OBJECTID')
-        >>> tornadoes.set_geometry('SHAPE')
-        >>> tornadoes['srs_name'] = tornadoes.srs_name()
-        >>> tornadoes[['OBJECTID', 'SHAPE', 'srs_name']].head()
-        OBJECTID   SHAPE 	                                            srs_name
-        1 	       MULTILINESTRING ((-90.2200062071 38.7700071663...    SAMPLE_GCS_WGS_1984
-        2 	       MULTILINESTRING ((-89.3000059755 39.1000072739...    SAMPLE_GCS_WGS_1984
-        3 	       MULTILINESTRING ((-84.5800047496 40.8800078382...    SAMPLE_GCS_WGS_1984
-        4 	       MULTILINESTRING ((-94.3700070010 34.4000061520...    SAMPLE_GCS_WGS_1984
-        5 	       MULTILINESTRING ((-90.6800062393 37.6000069289...    SAMPLE_GCS_WGS_1984
-        """
-        return self._unary_operation_handler(
-                function_name = 'inza..ST_SRSNAME')
-
     def geometry_type(self):
         """
         Valid types for the column in the calling IdaGeoSeries:
@@ -1173,42 +1150,6 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         return self._unary_operation_handler(
                 function_name = 'inza..ST_NUMPOINTS')
 
-    def num_polygons(self):
-        """
-        Valid types for the column in the calling IdaGeoSeries:
-        ST_MULTIPOLYGON.
-
-        Returns an IdaSeries with integers representing the number of
-        polygons of each of the multipolygons in the calling IdaGeoSeries.
-
-        For None multipolygons the output is None.
-        For empty multipolygons the output is None.
-
-        Returns
-        -------
-        IdaSeries.
-
-        References
-        ----------
-        Netezza Performance Server Analytics ST_NUMPOLYGONS() function.
-
-        Examples
-        --------
-        >>> counties = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_COUNTY', indexer = "OBJECTID", geometry = "SHAPE")
-        >>> counties["NUM_POLY"] = counties.num_polygons()
-        >>> print(counties['NUM_POLY'][counties['NUM_POLY']>1].shape)
-        (57, 1)
-        >>> counties["NUM_POLY"][counties["NUM_POLY"]>1].head()
-        0    4
-        1    2
-        2    2
-        3    2
-        4    2
-        Name: NUM_POLY, dtype: int64
-        """
-        return self._unary_operation_handler(
-                function_name = 'inza..ST_NUMPOLYGONS')
-
     def coord_dim(self):
         """
         Valid types for the column in the calling IdaGeoSeries:
@@ -1328,43 +1269,6 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         """
         return self._unary_operation_handler(
                 function_name = 'inza..ST_ISMEASURED')
-
-    def is_valid(self):
-        """
-        Valid types for the column in the calling IdaGeoSeries:
-        ST_Geometry or one of its subtypes.
-
-        Returns an IdaSeries with integers (1 if it is valid, 0 otherwise) for
-        each of the geometries in the calling IdaGeoSeries.
-
-        A geometry is valid only if all of the attributes in the structured
-        type are consistent with the internal representation of geometry data,
-        and if the internal representation is not corrupted.
-
-        For None geometries the output is None.
-
-        Returns
-        -------
-        IdaSeries.
-
-        References
-        ----------
-        Netezza Performance Server Analytics ST_ISVALID() function.
-
-        Examples
-        --------
-        Use sample table SAMPLE_POINTS, obtained with SQL script
-        
-        >>> sample_points = IdaGeoDataFrame(idadb, "SAMPLE_POINTS", indexer = "id", geometry = "LOC")
-        >>> sample_points.is_valid().head()
-        0    1
-        1    1
-        2    1
-        3    1
-        4    1        
-        """
-        return self._unary_operation_handler(
-                function_name = 'inza..ST_ISVALID')
 
     def max_m(self):
         """
@@ -1963,35 +1867,30 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         Returns
         -------
         str
-            The name of the unit in uppercase and formatted for DB2GSE syntax.
+            The name of the unit in uppercase and formatted for netezza syntax.
 
         Raises
         ------
         TypeError
             * If the unit is not a string
             * If the unit is a string larger than 128 characters
-        IdaGeoDataFrameError
-            If the given unit is not a valid linear unit of DB2GSE.
         """
-
+        available_units = ['meter', 'kilometer', 'foot', 'mile', 'nautical mile']
         if not isinstance(unit, six.string_types):
             raise TypeError("unit must be a string")
         elif len(unit) > 128:
             raise TypeError("unit length exceeded")
         else:
-            unit = unit.upper()
-            if unit not in self.linear_units.tolist():
+            unit = unit.lower()
+            if unit not in available_units:
                 raise IdaGeoDataFrameError(
-                    "Invalid unit\n"
-                    "Hint: use linear_units attribute to see the valid units")
-            else:
-                # Replace single quotation marks with two of them
-                if "\'" in unit:
-                    unit = unit.replace("'", "''")
+                    f"Invalid unit,  must be one of: {available_units}")
+            if "\'" in unit:
+                unit = unit.replace("'", "''")
 
-                # Enclose in single quotation marks
-                unit = '\''+unit+'\''
-                return unit
+            # Enclose in single quotation marks
+            unit = '\''+unit+'\''
+            return unit
 
     def _unary_operation_handler(self, function_name,
                                  valid_types = None,
