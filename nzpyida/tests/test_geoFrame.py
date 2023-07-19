@@ -73,7 +73,6 @@ def idageodf2(idadb):
     idadb.ida_query(f"DROP TABLE {GEO_TABLE_NAME2} IF EXISTS")
 
 class Test_IdaGeoDataFrame(object):
-    """
     def test_idageodf_set_geometry_error(self, idageodf1):
         with pytest.raises(KeyError):
             idageodf1.set_geometry('not a column in the Ida')
@@ -210,7 +209,6 @@ class Test_IdaGeoDataFrame(object):
     def test_idageodf_max_distance(self, idageodf1, idageodf2):
          res = idageodf1.distance(idageodf2, 'kilometer')
          assert res['RESULT'].max()
-    """
 
     def test_idageodf_max_distance_mbr(self, idageodf1):
          idageodf1_mbr = idageodf1
@@ -219,7 +217,7 @@ class Test_IdaGeoDataFrame(object):
          ida1 = idageodf1_mbr[idageodf1_mbr['NAME'] == 'SQ1']
          ida2 = idageodf1_mbr[idageodf1_mbr['NAME'] == "SQ2"]
          res = ida1.distance(ida2)
-         assert res['RESULT'].max()
+         assert res['RESULT'].max() is not None
 
     def test_idageodf_max_area_union(self, idageodf1, idageodf2):
          idageodf1_mbr = idageodf1

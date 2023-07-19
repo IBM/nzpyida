@@ -1038,8 +1038,8 @@ class IdaGeoDataFrame(IdaDataFrame):
         # FROM clause
         from_clause=(
             'FROM '+
-            ida1.name+' AS IDA1, '+
-            ida2.name+' AS IDA2 '
+            '(SELECT * FROM ' + ida1.name + ') AS IDA1, '+
+            '(SELECT * FROM ' + ida2.name + ') AS IDA2 '
         )
 
         # Create a view
