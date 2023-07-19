@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #-----------------------------------------------------------------------------
-# Copyright (c) 2015, IBM Corp.
+# Copyright (c) 2015-2023, IBM Corp.
 # All rights reserved.
 #
 # Distributed under the terms of the BSD Simplified License.
@@ -1076,13 +1076,13 @@ class IdaDataFrame(object):
             data = self.ida_query("SELECT * FROM %s %s LIMIT %s "%(name, order, nrow))
 
             if data.shape[0] != 0:
-                # otherwise column sort order is reverted
-                if not 'SELECT ' in name:
+                if isinstance(self, nzpyida.IdaSeries):
+                    if not isinstance(data, pd.Series):
+                        data = data[self.column]
+                elif not 'SELECT ' in name:
                     columns = self.columns
                     data.columns = columns
 #                data = ibmdbpy.utils._convert_dtypes(self, data)
-                if isinstance(self, nzpyida.IdaSeries):
-                    data = pd.Series(data)
             return data
 
     # TODO : There is a warning in anaconda when there are missing values -> why ?
