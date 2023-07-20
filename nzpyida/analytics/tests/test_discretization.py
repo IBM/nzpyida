@@ -30,13 +30,13 @@ def test_ewdisc(idadb: IdaDataBase, idf):
         bin_df = ewdisc.fit(idf)
         assert bin_df
         assert len(bin_df) == 4
-        assert all(bin_df.columns == ['COLNAME', 'BREAK'])
+        assert all(bin_df.columns == idadb.to_def_case(['COLNAME', 'BREAK']))
 
         ew_df = ewdisc.apply(idf, in_bin_df=bin_df, keep_org_values=True)
         assert ew_df
         assert len(ew_df) == len(idf)
-        assert all(ew_df.columns == ['A', 'DISC_A'])
-        assert set(ew_df['DISC_A'].head(10).values) == {'1', '2', '3', '4', '5'}
+        assert all(ew_df.columns == ['A', idadb.to_def_case('DISC') + '_A'])
+        assert set(ew_df[idadb.to_def_case('DISC') + '_A'].head(10).values) == {'1', '2', '3', '4', '5'}
 
 
 def test_efdisc(idadb: IdaDataBase, idf):
@@ -45,13 +45,13 @@ def test_efdisc(idadb: IdaDataBase, idf):
         bin_df = efdisc.fit(idf)
         assert bin_df
         assert len(bin_df) == 1
-        assert all(bin_df.columns == ['COLNAME', 'BREAK'])
+        assert all(bin_df.columns == idadb.to_def_case(['COLNAME', 'BREAK']))
 
         ef_df = efdisc.apply(idf, in_bin_df=bin_df, keep_org_values=True)
         assert ef_df
         assert len(ef_df) == len(idf)
-        assert all(ef_df.columns == ['A', 'DISC_A'])
-        assert set(ef_df['DISC_A'].head(10).values) == {'1', '2'}
+        assert all(ef_df.columns == ['A', idadb.to_def_case('DISC') + '_A'])
+        assert set(ef_df[idadb.to_def_case('DISC') + '_A'].head(10).values) == {'1', '2'}
 
 
 def test_emdisc(idadb: IdaDataBase, idf):
@@ -59,10 +59,10 @@ def test_emdisc(idadb: IdaDataBase, idf):
         emdisc = EMDisc(idadb, target='A')
         bin_df = emdisc.fit(idf)
         assert bin_df
-        assert all(bin_df.columns == ['COLNAME', 'BREAK'])
+        assert all(bin_df.columns == idadb.to_def_case(['COLNAME', 'BREAK']))
 
         em_df = emdisc.apply(idf, in_bin_df=bin_df, keep_org_values=True)
         assert em_df
         assert len(em_df) == len(idf)
-        assert all(em_df.columns == ['A', 'DISC_A'])
-        assert len(set(em_df['DISC_A'].head(10).values)) < len(idf)
+        assert all(em_df.columns == ['A', idadb.to_def_case('DISC') + '_A'])
+        assert len(set(em_df[idadb.to_def_case('DISC') + '_A'].head(10).values)) < len(idf)

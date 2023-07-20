@@ -25,7 +25,7 @@ from typing import List
 from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
 from nzpyida.analytics.predictive.regression import Regression
-from nzpyida.analytics.utils import map_to_props
+from nzpyida.analytics.utils import map_to_props, q
 
 class DecisionTreeRegressor(Regression):
     """
@@ -49,7 +49,7 @@ class DecisionTreeRegressor(Regression):
         super().__init__(idadb, model_name)
         self.fit_proc = 'REGTREE'
         self.predict_proc = 'PREDICT_REGTREE'
-        self.target_column_in_output = "CLASS"
+        self.target_column_in_output = idadb.to_def_case("CLASS")
         self.has_print_proc = True
 
     def fit(self, in_df: IdaDataFrame, target_column: str, id_column: str=None,
@@ -147,9 +147,9 @@ class DecisionTreeRegressor(Regression):
         """
 
         params = {
-            'id': id_column,
-            'target': target_column,
-            'incolumn': in_columns,
+            'id': q(id_column),
+            'target': q(target_column),
+            'incolumn': q(in_columns),
             'coldeftype': col_def_type,
             'coldefrole': col_def_role,
             'colpropertiestable': col_properties_table,
@@ -192,7 +192,7 @@ class DecisionTreeRegressor(Regression):
         """
 
         params = {
-            'id': id_column,
+            'id': q(id_column),
             'var': variance
             }
 

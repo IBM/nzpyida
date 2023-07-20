@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #-----------------------------------------------------------------------------
-# Copyright (c) 2015, IBM Corp.
+# Copyright (c) 2015-2023, IBM Corp.
 # All rights reserved.
 #
 # Distributed under the terms of the BSD Simplified License.
@@ -532,6 +532,7 @@ class IdaDataBase(object):
         # determine name of database
         if self._is_netezza_system():
             self._database_name = self.ida_scalar_query('select OBJNAME from _T_OBJECT where OBJID = CURRENT_DB;')
+            self._upper_cased = self.ida_scalar_query('select identifier_case;') == 'UPPERCASE'
         else:
             self._database_name = self.ida_scalar_query('select CURRENT_SERVER from SYSIBM.SYSDUMMY1')
 
@@ -622,15 +623,10 @@ class IdaDataBase(object):
             where_part = ("AND TABSCHEMA = '%s' " % self.current_schema)
 
         if self._is_netezza_system():
-            query = ("SELECT SCHEMA as TABSCHEMA, TABLENAME as TABNAME, OWNER, 'T' as TYPE FROM _V_TABLE " +
-                     "WHERE DATABASE = '" + self._database_name + "' and OBJTYPE = 'TABLE' " + where_part +
-                     "UNION ALL " +
-                     "SELECT SCHEMA as TABSCHEMA, VIEWNAME as TABNAME, OWNER, 'V' as TYPE FROM _V_VIEW " +
-                     "WHERE DATABASE = '" + self._database_name + "' and OBJTYPE = 'VIEW' " + where_part)
             query = ("SELECT SCHEMA as TABSCHEMA, OBJNAME as TABNAME, OWNER, " +
-                             "CASE WHEN OBJTYPE = 'TABLE' THEN 'T' ELSE 'V' END AS TYPE " +
+                             "CASE WHEN UPPER(OBJTYPE) = 'TABLE' THEN 'T' ELSE 'V' END AS TYPE " +
                       "FROM _V_OBJECTS  " +
-                      "WHERE OBJTYPE in ('TABLE', 'VIEW') " + where_part +
+                      "WHERE UPPER(OBJTYPE) in ('TABLE', 'VIEW') " + where_part +
                       "ORDER BY TABSCHEMA, TABNAME")
         else:
             query = ("SELECT DISTINCT TABSCHEMA, TABNAME, OWNER, TYPE " +
@@ -645,7 +641,7 @@ class IdaDataBase(object):
         # This is hardcoded, so be careful
         data.columns = ['TABSCHEMA', 'TABNAME', 'OWNER', 'TYPE']
         
-        data = self._upper_columns(data)
+        #data = self._upper_columns(data)
 
         # Db2 Warehouse FIX: schema "SAMPLES" and "GOSALES" saved with an extra blank,
         # By doing so, we delete the extra blank.
@@ -686,7 +682,7 @@ class IdaDataBase(object):
         if self._is_netezza_system():
             list_models_stmt = ("SELECT MODELNAME, OWNER, CREATED, STATE, MININGFUNCTION, ALGORITHM, USERCATEGORY " +
                                 "FROM INZA.V_NZA_MODELS")
-            result_columns =  ['modelname', 'owner', 'created', 'state','miningfunction', 'algorithm', 'usercategory']
+            #result_columns =  ['modelname', 'owner', 'created', 'state','miningfunction', 'algorithm', 'usercategory']
         else:
             list_models_stmt = "call IDAX.LIST_MODELS()"
             result_columns = ['modelschema', 'modelname', 'owner', 'created', 'state',
@@ -694,12 +690,12 @@ class IdaDataBase(object):
 
         data = self.ida_query(list_models_stmt)
 
-        data.columns = result_columns
+        #data.columns = result_columns
 
         # Workaround for some ODBC version which does not get the entire
         # string of the column name in the cursor descriptor. 
         # This is hardcoded, so be careful
-        data = self._upper_columns(data)
+        #data = self._upper_columns(data)
         return data
 
     def exists_table_or_view(self, objectname):
@@ -818,7 +814,7 @@ class IdaDataBase(object):
         >>> idadb.exists_model("NO_MODEL")
         TypeError : NO_MODEL exists but is not a model (of type '?')
         """
-        modelname = nzpyida.utils.check_modelname(modelname)
+        modelname = nzpyida.utils.check_modelname(modelname, self._upper_cased)
         if '.' in modelname:
             modelschema, modelname = modelname.split('.')
         else:
@@ -968,7 +964,7 @@ class IdaDataBase(object):
         >>> idadb.is_model("NOT_EXISTING")
         ValueError : NOT_EXISTING doesn't exist in database
         """
-        modelname = nzpyida.utils.check_modelname(modelname)
+        modelname = nzpyida.utils.check_modelname(modelname, self._upper_cased)
 
         if '.' in modelname:
             modelname_noschema = modelname.split('.')[-1]
@@ -976,7 +972,7 @@ class IdaDataBase(object):
             modelname_noschema = modelname
         data = self.show_models()
         if not data.empty:
-            if modelname_noschema in data['MODELNAME'].values:
+            if modelname_noschema in data[self.to_def_case('MODELNAME')].values:
                 return True
 
         # This part is executed if data is empty or model is not in data
@@ -1134,7 +1130,7 @@ class IdaDataBase(object):
         if tablename is None:
                 tablename = self._get_valid_tablename(prefix="DATA_FRAME_")
 
-        tablename = nzpyida.utils.check_tablename(tablename)
+        tablename = nzpyida.utils.check_tablename(tablename, self._upper_cased)
 
         if primary_key is not None:
             if not isinstance(primary_key, six.string_types):
@@ -1323,7 +1319,7 @@ class IdaDataBase(object):
         # Actually we could support it for views too
         # Question : Is it better to accept an idadf as argument or rather the name of the table?
         oldname = idadf._name
-        newname = nzpyida.utils.check_tablename(newname)
+        newname = nzpyida.utils.check_tablename(newname, self._upper_cased)
 
         if self.is_table(idadf._name):
             if self._is_netezza_system():
@@ -1807,7 +1803,7 @@ class IdaDataBase(object):
         For more information, see exists_table_or_view, exists_table, 
         exists_view functions.
         """
-        objectname = nzpyida.utils.check_tablename(objectname)
+        objectname = nzpyida.utils.check_tablename(objectname, self._upper_cased)
 
         tablelist = self.show_tables(show_all=True)
         schema, name = self._get_name_and_schema(objectname)
@@ -1834,7 +1830,7 @@ class IdaDataBase(object):
         -----
         For more information, see is_table_or_view, is_table, is_view functions.
         """
-        objectname = nzpyida.utils.check_tablename(objectname)
+        objectname = nzpyida.utils.check_tablename(objectname, self._upper_cased)
 
         tablelist = self.show_tables(show_all=True)
         schema, name = self._get_name_and_schema(objectname)
@@ -1860,7 +1856,7 @@ class IdaDataBase(object):
         For more information, seedrop_table and drop_view functions.
 
         """
-        objectname = nzpyida.utils.check_tablename(objectname)
+        objectname = nzpyida.utils.check_tablename(objectname, self._upper_cased)
 
         if object_type == "T":
             to_drop = "TABLE"
@@ -1972,7 +1968,7 @@ class IdaDataBase(object):
         >>> idadb._get_valid_tablename("mydata$")
         ValueError: Table name is not valid, only alphanumeric characters and underscores are allowed.
         """
-        prefix = nzpyida.utils.check_tablename(prefix)
+        prefix = nzpyida.utils.check_tablename(prefix, self._upper_cased)
         # We may assume that the generated name is unlikely to exist
         name = "%s%s_%s" % (prefix, random.randint(0, 100000), int(time()))
         return name
@@ -2058,7 +2054,7 @@ class IdaDataBase(object):
                 raise TypeError("primary_key argument should be a string")
 
         # Check the tablename
-        tablename = nzpyida.utils.check_tablename(tablename)
+        tablename = nzpyida.utils.check_tablename(tablename, self._upper_cased)
 
         # for Netezza we have to check if the schema exists already
         # otherwise we have to create it
@@ -2144,7 +2140,7 @@ class IdaDataBase(object):
 
         # Check the viewname
         if viewname is not None:
-            viewname = nzpyida.utils.check_viewname(viewname)
+            viewname = nzpyida.utils.check_viewname(viewname, self._upper_cased)
         else:
             viewname = self._get_valid_viewname()
 
@@ -2185,7 +2181,7 @@ class IdaDataBase(object):
 
         # Check the viewname
         if viewname is not None:
-            viewname = nzpyida.utils.check_viewname(viewname)
+            viewname = nzpyida.utils.check_viewname(viewname, self._upper_cased)
         else:
             viewname = self._get_valid_viewname()
 
@@ -2219,7 +2215,7 @@ class IdaDataBase(object):
         # TODO : Handle more datatypes
         if schema is None or schema.strip() == '':
             schema = self.current_schema
-        tablename = nzpyida.utils.check_tablename(tablename)
+        tablename = nzpyida.utils.check_tablename(tablename, self._upper_cased)
         column_string = '\"%s\"' % '\", \"'.join([str(x).strip() for x in dataframe.columns])
         row_string = ''
 
@@ -2328,7 +2324,7 @@ class IdaDataBase(object):
         if alg_name is None:
             alg_name = proc_name
         if self._is_netezza_system():
-            query = ("SELECT COUNT(*) FROM NZA.._V_PROCEDURE WHERE PROCEDURE='%s'") % proc_name
+            query = ("SELECT COUNT(*) FROM NZA.._V_PROCEDURE WHERE UPPER(PROCEDURE)='%s'") % proc_name
         else:
             query = ("SELECT COUNT(*) FROM SYSCAT.ROUTINES WHERE ROUTINENAME='%s" +
                      "' AND ROUTINEMODULENAME = 'IDAX'") % proc_name
@@ -2465,3 +2461,15 @@ class IdaDataBase(object):
          Checks if the underlying database system is Netezza.
          """
          return self._database_system == 'netezza'
+
+    def to_def_case(self, text):
+        """
+        Converts the given object to the default case on this database.
+        The object can be a string or list of strings.
+        """
+        if isinstance(text, str):
+            return text.upper() if self._upper_cased else text.lower()
+        elif isinstance(text, list):
+            return [x.upper() if self._upper_cased else x.lower() for x in text]
+        else:
+            return text

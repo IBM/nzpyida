@@ -85,7 +85,7 @@ def test_tree_bayes_network(idadb: IdaDataBase, mm: ModelManager, idf_train: Ida
 
     pred  = model.predict(idf_test, target_column="B", id_column="ID", out_table=OUT_TABLE_PRED)
     assert pred
-    assert all(pred.columns == ["ID", "B_PRED"])
+    assert all(pred.columns == ["ID", "B_" + idadb.to_def_case("PRED")])
     # assert any(round(x) == y for x, y in zip(list(pred.as_dataframe()['B_PRED'].values),  [2, 4, 2223, -999, 11112]))
 
 
@@ -100,8 +100,8 @@ def test_binary_tree_bayes_network(idadb: IdaDataBase, mm: ModelManager, idf_tra
 
     pred  = model.predict(idf_test, target_column="B", id_column="ID", out_table=OUT_TABLE_PRED)
     assert pred
-    assert all(pred.columns == ["ID", "B_PRED"])
-    assert any(round(x) == y for x, y in zip(list(pred.head()['B_PRED'].values),  [2, 4, 2223, -999, 11112]))
+    assert all(pred.columns == ["ID", "B_" + idadb.to_def_case("PRED")])
+    assert any(round(x) == y for x, y in zip(list(pred.head()['B_'+idadb.to_def_case('PRED')].values),  [2, 4, 2223, -999, 11112]))
 
 
 def test_multi_tree_bayes_network(idadb: IdaDataBase, mm: ModelManager, idf_train_nom: IdaDataFrame ,
@@ -115,8 +115,8 @@ def test_multi_tree_bayes_network(idadb: IdaDataBase, mm: ModelManager, idf_trai
 
     pred  = model.predict(idf_test_nom, target_column="B", id_column="ID", out_table=OUT_TABLE_PRED)
     assert pred
-    assert all(pred.columns == ["ID", "B_PRED"])
-    assert any(round(x) == y for x, y in zip(list(pred.head()['B_PRED'].values),  [2, 4, 2223, -999, 11112]))
+    assert all(pred.columns == ["ID", "B_" + idadb.to_def_case("PRED")])
+    assert any(round(x) == y for x, y in zip(list(pred.head()['B_' + idadb.to_def_case('PRED')].values),  [2, 4, 2223, -999, 11112]))
 
 
 def test_tree_bayes_network_1g(idadb: IdaDataBase, mm: ModelManager, idf_train: IdaDataFrame,

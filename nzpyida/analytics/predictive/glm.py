@@ -15,6 +15,7 @@ from nzpyida.base import IdaDataBase
 from typing import List
 import pandas as pd
 from nzpyida.analytics.predictive.regression import Regression
+from nzpyida.analytics.utils import q
 
 
 class GLM(Regression):
@@ -39,7 +40,8 @@ class GLM(Regression):
         self.fit_proc = "GLM"
         self.predict_proc = "PREDICT_GLM"
         self.has_print_proc = True
-        self.target_column_in_output = 'PRED'
+        self.target_column_in_output = idadb.to_def_case('PRED')
+        self.id_column_in_output = None
 
     
     def fit(self, in_df: IdaDataFrame, target_column: str, id_column: str=None, in_columns: List[str]=None,  
@@ -135,9 +137,9 @@ class GLM(Regression):
         """
         params = {
             'family': self.family,
-            'target': target_column,
-            'id': id_column,
-            'incolumn': in_columns,
+            'target': q(target_column),
+            'id': q(id_column),
+            'incolumn': q(in_columns),
             'coldefrole': col_def_role,
             'coldeftype': col_def_type,
             'colPropertiesTable': col_properties_table,
@@ -154,7 +156,7 @@ class GLM(Regression):
         if interaction:
             params['interaction'] = interaction
         if trials:
-            params['trials'] = trials
+            params['trials'] = q(trials)
 
         return self._fit(in_df=in_df, params=params)
 
@@ -179,7 +181,7 @@ class GLM(Regression):
             the data frame containing row identifiers and predicted target values
         """
         params = {
-            'id': id_column,
+            'id': q(id_column),
             'debug': debug
         }
 

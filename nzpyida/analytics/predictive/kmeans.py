@@ -28,7 +28,7 @@ from typing import List
 from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
 from nzpyida.analytics.utils import map_to_props, make_temp_table_name
-from nzpyida.analytics.utils import get_auto_delete_context
+from nzpyida.analytics.utils import get_auto_delete_context, q
 from nzpyida.analytics.predictive.predictive_modeling import PredictiveModeling
 
 
@@ -56,8 +56,8 @@ class KMeans(PredictiveModeling):
         self.fit_proc = 'KMEANS'
         self.predict_proc = 'PREDICT_KMEANS'
         self.score_proc = 'MSE'
-        self.target_column_in_output = 'CLUSTER_ID'
-        self.id_column_in_output = 'ID'
+        self.target_column_in_output = idadb.to_def_case('CLUSTER_ID')
+        self.id_column_in_output = idadb.to_def_case('ID')
         self.has_print_proc = True
 
     def fit(self, in_df: IdaDataFrame, id_column: str=None,
@@ -174,7 +174,7 @@ class KMeans(PredictiveModeling):
 
         if not id_column:
             if in_df.indexer:
-                id_column = in_df.indexer
+                id_column = q(in_df.indexer)
             else:
                 raise TypeError('Missing id column - either use id_column attribute or set '
                     'indexer column in the input data frame')
@@ -185,8 +185,8 @@ class KMeans(PredictiveModeling):
             out_table = make_temp_table_name()
 
         params = {
-            'id': id_column,
-            'incolumn': in_columns,
+            'id': q(id_column),
+            'incolumn': q(in_columns),
             'coldeftype': col_def_type,
             'coldefrole': col_def_role,
             'colpropertiestable': col_properties_table,
@@ -231,7 +231,7 @@ class KMeans(PredictiveModeling):
         """
 
         params = {
-            'id': id_column
+            'id': q(id_column)
         }
 
         return self._predict(in_df=in_df, params=params, out_table=out_table)
@@ -260,7 +260,7 @@ class KMeans(PredictiveModeling):
         """
 
         params = {
-            'id': id_column
+            'id': q(id_column)
         }
 
         return self._score(in_df=in_df, predict_params=params, target_column=target_column)

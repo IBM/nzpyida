@@ -96,7 +96,7 @@ def test_glm(idadb: IdaDataBase, mm: ModelManager, clear_up, model_name):
 
     pred = model.predict(idf_test, id_column="ID", out_table=OUT_TABLE_PRED)
     assert pred
-    assert all(pred.columns == ['ID', 'PRED'])
+    assert all(pred.columns == ['ID', idadb.to_def_case('PRED')])
     # assert any(round(x) == y for x, y in zip(list(pred.as_dataframe()['CLASS'].values),  [1, 4, 2223, -999, 11112]))
 
     score = model.score(idf_test, id_column="ID", target_column="B")

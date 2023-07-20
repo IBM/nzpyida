@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #-----------------------------------------------------------------------------
-# Copyright (c) 2015, IBM Corp.
+# Copyright (c) 2015-2023, IBM Corp.
 # All rights reserved.
 #
 # Distributed under the terms of the BSD Simplified License.
@@ -304,8 +304,8 @@ class InternalState(object):
                     temp1 = "TEMP1."
 
                 if self._idadf.indexer:
-                    query = ("SELECT " + columns + " FROM %s " + as_temp1 + " WHERE " +
-                             self._idadf.indexer + indexstring)
+                    query = ("SELECT " + columns + " FROM %s " + as_temp1 + " WHERE \"" +
+                             self._idadf.indexer + "\"" + indexstring)
                 else:
                     query = ("SELECT " + columns + " FROM (SELECT " + temp1 + "*, "+
                             "(ROW_NUMBER() OVER(" + order_by + ")-1) AS RN FROM %s " + as_temp1 + ") AS TEMP2 "+

@@ -51,4 +51,4 @@ def test_cross_validation(idadb: IdaDataBase, clear_up):
 
         assert df_cv
         assert len(df_cv) == len(idf)
-        assert all(df_cv.columns == ["ID", "CLASS", "FOLD"])
+        assert all(df_cv.columns == idadb.to_def_case(["ID", "CLASS", "FOLD"]))

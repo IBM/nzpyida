@@ -19,6 +19,7 @@ call_proc_df_in_out
 from nzpyida.analytics.utils import get_auto_delete_context
 from nzpyida.analytics.predictive.predictive_modeling import PredictiveModeling
 from nzpyida.analytics.model_manager import ModelManager
+from nzpyida.analytics.utils import q
 
 
 class Classification(PredictiveModeling):
@@ -42,8 +43,8 @@ class Classification(PredictiveModeling):
         """
 
         super().__init__(idadb, model_name)
-        self.target_column_in_output = 'CLASS'
-        self.id_column_in_output = 'ID'
+        self.target_column_in_output = idadb.to_def_case('CLASS')
+        self.id_column_in_output = idadb.to_def_case('ID')
         self.score_proc = 'CERROR'
         self.score_inv = True
         self.type = None
@@ -67,7 +68,7 @@ class Classification(PredictiveModeling):
         """
 
         params = {
-            'id': id_column
+            'id': q(id_column)
         }
 
         return self._predict(in_df=in_df, params=params, out_table=out_table)
@@ -95,7 +96,7 @@ class Classification(PredictiveModeling):
         """
 
         params = {
-            'id': id_column
+            'id': q(id_column)
         }
 
         return self._score(in_df=in_df, predict_params=params, target_column=target_column)
@@ -134,8 +135,8 @@ class Classification(PredictiveModeling):
         """
 
         params = {
-            'id': id_column,
-            'target': target_column
+            'id': q(id_column),
+            'target': q(target_column)
         }
         return self._conf_matrix(in_df, out_matrix_table, params)
         
@@ -147,7 +148,7 @@ class Classification(PredictiveModeling):
 
         if not params.get('id'):
             if in_df.indexer:
-                params['id'] = in_df.indexer
+                params['id'] = q(in_df.indexer)
             else:
                 raise TypeError('Missing id column - either use id_column attribute or set '
                     'indexer column in the input data frame')
@@ -168,9 +169,9 @@ class Classification(PredictiveModeling):
             params_s = map_to_props({
                 'resulttable': pred_view,
                 'intable': true_view,
-                'resultid': 'ID',
+                'resultid': self.idadb.to_def_case('ID'),
                 'id': params['id'],
-                'resulttarget': 'CLASS',
+                'resulttarget': self.idadb.to_def_case('CLASS'),
                 'target': params['target'],
                 'matrixTable': out_matrix_table
             })
@@ -231,8 +232,8 @@ class Classification(PredictiveModeling):
             'modelType': self.fit_proc,
             'model': self.model_name,
             'intable': in_df,
-            'id': id_column,
-            'target': target_column,
+            'id': q(id_column),
+            'target': q(target_column),
             'outtable': out_table,
             'folds': folds,
         }

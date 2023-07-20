@@ -31,6 +31,8 @@ from nzpyida.base import IdaDataBase
 from nzpyida.analytics.predictive.predictive_modeling import PredictiveModeling
 from nzpyida.analytics.utils import call_proc_df_in_out
 from nzpyida.analytics.model_manager import ModelManager
+from nzpyida.analytics.utils import q as q0
+
 
 class TimeSeries(PredictiveModeling):
     """
@@ -156,9 +158,9 @@ class TimeSeries(PredictiveModeling):
 
         params = {
             'model': self.model_name,
-            'time': time_column,
-            'target': target_column,
-            'by': by_column,
+            'time': q0(time_column),
+            'target': q0(target_column),
+            'by': q0(by_column),
             'desctable': description_table,
             'algorithm': algorithm,
             'interpolationmethod': interpolation_method,

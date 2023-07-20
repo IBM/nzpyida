@@ -58,8 +58,8 @@ def test_linear_regression(idadb: IdaDataBase, mm: ModelManager, clear_up):
 
     pred = model.predict(idf_test, out_table=OUT_TABLE_PRED)
     assert pred
-    assert all(pred.columns == ['ID', 'B'])
-    assert any(round(x) == y for x, y in zip(list(pred.as_dataframe()['B'].values),  [1, 4, 2223, -999, 11112]))
+    assert all(pred.columns == idadb.to_def_case(['ID', 'B']))
+    assert any(round(x) == y for x, y in zip(list(pred.as_dataframe()[idadb.to_def_case('B')].values),  [1, 4, 2223, -999, 11112]))
 
     score = model.score(idf_test, target_column='B')
 

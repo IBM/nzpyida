@@ -48,6 +48,7 @@ from typing import List
 from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
 from nzpyida.analytics.predictive.predictive_modeling import PredictiveModeling
+from nzpyida.analytics.utils import q
 
 class ARule(PredictiveModeling):
     def __init__(self, idadb: IdaDataBase, model_name: str):
@@ -142,9 +143,9 @@ class ARule(PredictiveModeling):
         if support_type == 'percent' and not support:
             support = 5.0
         params = {
-            'tid': transaction_id_column,
-            'item': item_column,
-            'by': by_column,
+            'tid': q(transaction_id_column),
+            'item': q(item_column),
+            'by': q(by_column),
             'lvl': level,
             'maxsetsize': max_set_size,
             'support': support,
@@ -248,9 +249,9 @@ class ARule(PredictiveModeling):
             the data frame containing output of a Association Rules model prediction
         """
         params = {
-            'tid': transaction_id_column,
-            'item': item_column,
-            'by': by_column,
+            'tid': q(transaction_id_column),
+            'item': q(item_column),
+            'by': q(by_column),
             'type': scoring_type,
             'namemap': name_map_column,
             'itemname': item_name_column,

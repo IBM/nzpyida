@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #-----------------------------------------------------------------------------
-# Copyright (c) 2015, IBM Corp.
+# Copyright (c) 2015-2023, IBM Corp.
 # All rights reserved.
 #
 # Distributed under the terms of the BSD Simplified License.
@@ -48,11 +48,11 @@ class Test_IdaDataBase_PrivateMethods(object):
     def test_idadb_get_valid_tablename_default(self, idadb):
         tablename = idadb._get_valid_tablename()
         assert(isinstance(tablename, six.string_types))
-        assert("DATA_FRAME_" in tablename)
+        assert("DATA_FRAME_" in tablename.upper())
 
     def test_idadb_get_valid_tablename_custom(self, idadb):
         tablename = idadb._get_valid_tablename("MY_PERSONAL_PREFIX")
-        assert("MY_PERSONAL_PREFIX" in tablename)
+        assert("MY_PERSONAL_PREFIX" in tablename.upper())
 
     def test_idadb_get_valid_tablename_error(self, idadb):
         with pytest.raises(ValueError):
@@ -61,11 +61,11 @@ class Test_IdaDataBase_PrivateMethods(object):
     def test_idadb_get_valid_viewname_default(self, idadb):
         viewname = idadb._get_valid_viewname()
         assert(isinstance(viewname, six.string_types))
-        assert("VIEW_" in viewname)
+        assert("VIEW_" in viewname.upper())
 
     def test_idadb_get_valid_viewname_custom(self, idadb):
         viewname = idadb._get_valid_viewname("MY_PERSONAL_PREFIX")
-        assert("MY_PERSONAL_PREFIX" in viewname)
+        assert("MY_PERSONAL_PREFIX" in viewname.upper())
 
     def test_idadb_get_valid_viewname_error(self, idadb):
         with pytest.raises(ValueError):
@@ -74,11 +74,11 @@ class Test_IdaDataBase_PrivateMethods(object):
     def test_idadb_get_valid_modelname_default(self, idadb):
         modelname = idadb._get_valid_modelname()
         assert(isinstance(modelname, six.string_types))
-        assert("MODEL_" in modelname)
+        assert("MODEL_" in modelname.upper())
 
     def test_idadb_get_valid_modelname_custom(self, idadb):
         modelname = idadb._get_valid_modelname("MY_PERSONAL_PREFIX")
-        assert("MY_PERSONAL_PREFIX" in modelname)
+        assert("MY_PERSONAL_PREFIX" in modelname.upper())
 
     def test_idadb_get_valid_modelname_error(self, idadb):
         with pytest.raises(ValueError):

@@ -65,7 +65,7 @@ def materialize_df(df: IdaDataFrame) -> Tuple[str, bool]:
 
     if df.internal_state.views:
         temp_view_name = make_temp_table_name()
-        query = f'CREATE VIEW "{temp_view_name}" AS ({df.internal_state.get_state()})'
+        query = f'CREATE VIEW {temp_view_name} AS ({df.internal_state.get_state()})'
         df.ida_query(query, autocommit = True)
         return temp_view_name, True
     else:
@@ -168,3 +168,30 @@ def out_str_to_df(out_str: str):
             value = clean_str_split[i+1]
         out_dict[clean_str_split[i].upper()] = [value]
     return  pd.DataFrame.from_dict(out_dict)
+
+def q(txt):
+    """
+    Quotes the given object. It supports the following types:
+    str - it will be quited, it it is not already quoted. Also strings in format A:B got quoting only for A part.
+    list - each item is quoted separately and the list is returned.
+    everything else - txt without modifications is returned
+
+    Parameters
+    ----------
+    txt
+        an object to quote
+
+    Returns
+    -------
+    Quited copy of the object
+    """
+    
+    if isinstance(txt, str) and (not txt.startswith('"') or not txt.endswith('"')):
+        if ':' in txt:
+            ix = txt.index(':')
+            return f'"{txt[:ix]}":{txt[ix+1:]}'
+        return f'"{txt}"'
+    elif isinstance(txt, list):
+        return [q(x) for x in txt]
+    else:
+        return txt

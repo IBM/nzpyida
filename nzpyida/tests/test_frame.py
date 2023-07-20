@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #-----------------------------------------------------------------------------
-# Copyright (c) 2015, IBM Corp.
+# Copyright (c) 2015-2023, IBM Corp.
 # All rights reserved.
 #
 # Distributed under the terms of the BSD Simplified License.
@@ -35,7 +35,6 @@ class Test_OpenDataFrameObject(object):
 
     def test_idadf_attr_name(self, idadf, df):
         assert isinstance(idadf.name, six.string_types)
-        assert idadf.name == idadf.schema + "." + "TEST_IBMDBPY"
         assert idadf.name == idadf.schema + "." + idadf.tablename
 
     def test_idadf_attr_schema(self, idadf):

@@ -14,7 +14,7 @@ This module contains a class that is the base for all predictive algorithms.
 from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
 from nzpyida.analytics.utils import map_to_props, materialize_df, make_temp_table_name
-from nzpyida.analytics.utils import call_proc_df_in_out
+from nzpyida.analytics.utils import call_proc_df_in_out, q
 from nzpyida.analytics.model_manager import ModelManager
 
 
@@ -65,7 +65,7 @@ class PredictiveModeling:
 
         if not params.get('id', None) and needs_id:
             if in_df.indexer:
-                params['id'] = in_df.indexer
+                params['id'] = q(in_df.indexer)
             else:
                 raise TypeError('Missing id column - either use id_column attribute or set '
                     'indexer column in the input data frame')
@@ -136,7 +136,7 @@ class PredictiveModeling:
 
         if not predict_params.get('id', None):
             if in_df.indexer:
-                predict_params['id'] = in_df.indexer
+                predict_params['id'] = q(in_df.indexer)
             else:
                 raise TypeError('Missing id column - either use id_column attribute or set '
                     'indexer column in the input data frame')
@@ -156,12 +156,12 @@ class PredictiveModeling:
             params = map_to_props({
                 'pred_table': pred_view,
                 'true_table': true_view,
-                'pred_id': id_column if self.id_column_in_output is None
-                    else self.id_column_in_output,
-                'true_id': id_column,
-                'pred_column': target_column if self.target_column_in_output is None
-                    else self.target_column_in_output,
-                'true_column': target_column
+                'pred_id': q(id_column) if self.id_column_in_output is None
+                    else q(self.id_column_in_output),
+                'true_id': q(id_column),
+                'pred_column': q(target_column) if self.target_column_in_output is None
+                    else q(self.target_column_in_output),
+                'true_column': q(target_column)
             })
 
             res = self.idadb.ida_query(f'call NZA..{self.score_proc}(\'{params}\')')

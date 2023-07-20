@@ -19,7 +19,7 @@ if the data set is to be used for creation of a classification model.
 from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
 from nzpyida.analytics.utils import map_to_props, materialize_df, make_temp_table_name
-from nzpyida.analytics.utils import get_auto_delete_context, call_proc_df_in_out
+from nzpyida.analytics.utils import get_auto_delete_context, call_proc_df_in_out, q
 from nzpyida.analytics.auto_delete_context import AutoDeleteContext
 
 
@@ -59,9 +59,9 @@ class Discretization:
         IdaDataFrame
             the data frame with discretization bins
         """
-        in_columns = ';'.join(['"' + x + '"' for x in in_df.columns])
+        in_columns = list(in_df.columns)
         params_dict = {
-            'incolumn': in_columns,
+            'incolumn': q(in_columns),
             'outtabletype': 'table'
         }
         params_dict.update(self.params)
@@ -276,7 +276,7 @@ class EMDisc(Discretization):
 
         super().__init__(idadb)
         self.proc = 'EMDISC'
-        self.params = {'target': target}
+        self.params = {'target': q(target)}
 
 def em_disc(in_df: IdaDataFrame, target: str, keep_org_values: bool=False, out_table: str=None):
     """
