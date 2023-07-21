@@ -60,8 +60,8 @@ After you download and install the nzjdbc3.jar file, you must include its locati
 The connection is done using the JDBC URL string.
 
 >>> from nzpyida import IdaDataBase
->>> jdbc_dsn = jdbc:netezza://IP ADDRESS:PORT/DATABASE NAME"
->>> idadb = IdaDataBase(jdbc_dsn, uid="USRENAME", pwd="PASSWORD")
+>>> jdbc_dsn = "jdbc:netezza://IP ADDRESS:PORT/DATABASE NAME"
+>>> idadb = IdaDataBase(jdbc_dsn, uid="USERNAME", pwd="PASSWORD")
 
 Conventions
 -----------
