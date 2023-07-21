@@ -17,7 +17,7 @@ Netezza has three basic classes of geometric objects, which are Netezza spatial 
 
 Open an IdaGeoSeries
 ====================
-.. currentmodule:: nzpyida.geoSeries
+.. currentmodule:: nzpyida.geo_series
 
 .. autoclass:: IdaGeoSeries
 
@@ -75,10 +75,6 @@ Exterior Ring
 -------------
 .. automethod:: IdaGeoSeries.exterior_ring
 
-Generalize
-----------
-.. automethod:: IdaGeoSeries.generalize
-
 Geometry Type
 -------------
 .. automethod:: IdaGeoSeries.geometry_type
@@ -127,10 +123,6 @@ MBR
 ---
 .. automethod:: IdaGeoSeries.mbr
 
-Mid Point
----------
-.. automethod:: IdaGeoSeries.mid_point
-
 min M
 -----
 .. automethod:: IdaGeoSeries.min_m
@@ -154,10 +146,6 @@ num Geometries
 num Interior Ring
 -----------------
 .. automethod:: IdaGeoSeries.num_interior_ring
-
-num Linestrings
----------------
-.. automethod:: IdaGeoSeries.num_line_strings
 
 num Points
 ----------

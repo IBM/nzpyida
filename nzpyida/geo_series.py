@@ -47,7 +47,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
           GEO_TORNADO, GEO_COUNTY
 
         * Sample tables which you can create by executing the SQL statements in
-          https://github.com/ibmdbanalytics/ibmdbpy/blob/master/ibmdbpy/sampledata/sql_script:
+          https://github.com/IBM/nzpyida/blob/main/nzpyida/sampledata/sql_script:
 
           SAMPLE_POLYGONS, SAMPLE_LINES, SAMPLE_GEOMETRIES, SAMPLE_MLINES, SAMPLE_POINTS
 
@@ -298,12 +298,12 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         >>> counties.set_geometry('SHAPE')
         >>> counties['convex_envelope'] = counties["SHAPE"].convex_hull()
         >>> counties[['OBJECTID','SHAPE','convex_envelope']].head()
-            OBJECTID 	SHAPE 	                convex_envelope
-        0 	1 	        <Geometry binary data>  <Geometry binary data>
-        1 	2 	        <Geometry binary data> 	<Geometry binary data>
-        2 	3 	        <Geometry binary data> 	<Geometry binary data>
-        3 	4 	        <Geometry binary data> 	<Geometry binary data>
-        4 	5 	        <Geometry binary data> 	<Geometry binary data>
+            OBJECTID    SHAPE                   convex_envelope
+        0   1           <Geometry binary data>  <Geometry binary data>
+        1   2           <Geometry binary data>  <Geometry binary data>
+        2   3           <Geometry binary data>  <Geometry binary data>
+        3   4           <Geometry binary data>  <Geometry binary data>
+        4   5           <Geometry binary data>  <Geometry binary data>
         """
         return self._unary_operation_handler(
                 function_name = 'inza..ST_CONVEXHULL',
@@ -437,9 +437,9 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         --------
         >>> sample_polygons["ext_ring"] = sample_polygons.exterior_ring()
         >>> sample_polygons.head()
-            ID 	    GEOMETRY 	            ext_ring
-        0 	1101 	<Geometry binary data> 	<Geometry binary data>
-        1 	1102 	<Geometry binary data> 	<Geometry binary data>
+            ID      GEOMETRY                ext_ring
+        0   1101    <Geometry binary data>  <Geometry binary data>
+        1   1102    <Geometry binary data>  <Geometry binary data>
 
         """
         return self._unary_operation_handler(
@@ -515,7 +515,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         Sample to create in Netezza, geometry column with data type ST_LineString
         Use this sample data for testing:
 
-        >>> sample_lines = IdaGeoDataFrame(idadb, "SAMPLE_LINES", indexer = "ID", geometry  = "LOC")
+        >>> sample_lines = IdaGeoDataFrame(idadb, "SAMPLE_LINES", indexer = "ID", geometry  = "GEOMETRY")
         >>> sample_lines['end_point'] = sample_lines.end_point()
         >>> sample_lines.head()
         	ID 	    GEOMETRY 	            end_point
@@ -525,51 +525,6 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         """
         return self._unary_operation_handler(
                 function_name = 'inza..ST_ENDPOINT',
-                valid_types = ['ST_LINESTRING'],
-                return_geo_series=True)
-
-    def mid_point(self):
-        """
-        Valid types for the column in the calling IdaGeoSeries:
-        ST_LINESTRING.
-
-        Returns an IdaGeoSeries of points which are equidistant from both ends
-        of each of the curves in the calling IdaGeoSeries, measured along the
-        curve.
-
-        The resulting point is represented in the spatial reference system of
-        the given curve.
-
-        If the curve contains Z coordinates or M coordinates (measures),
-        the midpoint is determined solely by the values of the X and Y
-        coordinates in the curve. The Z coordinate and measure in the returned
-        point are interpolated.
-
-        For None curves the output is None.
-        For empty curves, the output is an empty point.
-
-        Returns
-        -------
-        IdaGeoSeries.
-
-        References
-        ----------
-        Netezza Performance Server Analytics ST_MIDPOINT() function.
-
-        Examples
-        --------
-        Sample to create in Netezza, geometry column with data type ST_LineString
-        Use this sample data for testing:
-        
-        >>> sample_lines = IdaGeoDataFrame(idadb, "SAMPLE_LINES", indexer = "ID", geometry  = "LOC")
-        >>> sample_lines["mid_point"] = sample_lines.mid_point()
-        >>> sample_lines.head()
-        	ID 	    GEOMETRY 	            mid_point
-        0 	1110 	<Geometry binary data> 	<Geometry binary data>
-        1 	1111 	<Geometry binary data> 	<Geometry binary data>       
-        """
-        return self._unary_operation_handler(
-                function_name = 'inza..ST_MIDPOINT',
                 valid_types = ['ST_LINESTRING'],
                 return_geo_series=True)
 
@@ -601,7 +556,6 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         
         >>> sample_lines = IdaGeoDataFrame(idadb, "SAMPLE_LINES", indexer = "ID", geometry  = "LOC")
         >>> sample_lines.start_point().head()
-        
         0    <Geometry binary data>
         1    <Geometry binary data>
                
@@ -801,12 +755,12 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         >>> counties.set_geometry('SHAPE')
         >>> counties['centroid_dim'] = counties['centroid'].dimension()
         >>> counties[['centroid', 'centroid_dim']].head()
-        	centroid 	            centroid_dim
-        0 	<Geometry binary data> 	0
-        1 	<Geometry binary data> 	0
-        2 	<Geometry binary data> 	0
-        3 	<Geometry binary data> 	0
-        4 	<Geometry binary data> 	0
+            centroid                centroid_dim
+        0   <Geometry binary data>  0
+        1   <Geometry binary data>  0
+        2   <Geometry binary data>  0
+        3   <Geometry binary data>  0
+        4   <Geometry binary data>  0
         """
         return self._unary_operation_handler(
                 function_name = 'inza..ST_DIMENSION')
@@ -938,12 +892,12 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         >>> counties = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_COUNTY', indexer = 'OBJECTID')
         >>> counties["perimeter"] = counties.perimeter()
         >>> counties[["NAME", "SHAPE", "perimeter"]].head()
-        	NAME 	    SHAPE 	                perimeter
-        0 	Claiborne 	<Geometry binary data> 	2.033745
-        1 	Otsego 	    <Geometry binary data> 	1.656962
-        2 	Madison 	<Geometry binary data> 	1.600404
-        3 	Cleveland 	<Geometry binary data> 	1.662438
-        4 	McIntosh 	<Geometry binary data> 	2.122012       
+        	NAME 	    SHAPE                   perimeter
+        0   Claiborne   <Geometry binary data>  2.033745
+        1   Otsego      <Geometry binary data>  1.656962
+        2   Madison     <Geometry binary data>  1.600404
+        3   Cleveland   <Geometry binary data>  1.662438
+        4   McIntosh    <Geometry binary data>  2.122012       
         """
         additional_args = []
         if unit is not None:
@@ -990,8 +944,8 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         
         >>> sample_mlines = IdaGeoDataFrame(idadb, "SAMPLE_MLINES", indexer = "ID", geometry = "GEOMETRY")
         >>> print(sample_mlines.geometry.dtypes)
-                            TYPENAME
-        GEOMETRY  ST_MULTILINESTRING
+                    TYPENAME
+        GEOMETRY    ST_GEOMETRY
         
         >>> sample_mlines.num_geometries().head()
         0    3       
@@ -1024,47 +978,16 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         --------
         Use sample table SAMPLE_POLYGONS, obtained with SQL script
         
+        >>> sample_polygons = IdaGeoDataFrame(idadb, "SAMPLE_POLYGONS", indexer = "ID", geometry = "GEOMETRY")
         >>> sample_polygons["int_ring"] = sample_polygons.num_interior_ring()
         >>> sample_polygons[["GEOMETRY", "int_ring"]].head()        
-        	GEOMETRY 	            int_ring
-        0 	<Geometry binary data> 	0
-        1 	<Geometry binary data> 	1        
+            GEOMETRY                int_ring
+        0   <Geometry binary data>  0
+        1   <Geometry binary data>  1        
         """
         return self._unary_operation_handler(
                 function_name = 'inza..ST_NUMINTERIORRING',
                 valid_types = ['ST_POLYGON'])
-
-    def num_line_strings(self):
-        """
-        Valid types for the column in the calling IdaGeoSeries:
-        ST_MULTILINESTRING.
-
-        Returns an IdaSeries with integers representing the number of
-        linestrings of each of the multilinestrings in the calling
-        IdaGeoSeries.
-
-        For None multilinestrings the output is None.
-        For empty multilinestrings the output is None.
-
-        Returns
-        -------
-        IdaSeries.
-
-        References
-        ----------
-        Netezza Performance Server Analytics ST_NUMLINESTRINGS() function.
-
-        Examples
-        --------
-        Use sample data createt with SQL script, data type ST_MultiLineString
-        
-        >>> sample_mlines = IdaGeoDataFrame(idadb, "SAMPLE_MLINES", indexer = "ID", geometry = "GEOMETRY")       
-        >>> sample_mlines.num_line_strings().head()
-        0    3
-        """
-        return self._unary_operation_handler(
-                function_name = 'inza..ST_NUMLINESTRINGS',
-                valid_types = ['ST_MULTILINESTRING'])
 
     def num_points(self):
         """
@@ -1092,6 +1015,12 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         >>> sample_geometries = IdaGeoDataFrame(idadb, "SAMPLE_GEOMETRIES", indexer = "ID", geometry = "GEOMETRY")
         >>> sample_geometries["num_points"] = sample_geometries.num_points()
         >>> sample_geometries[["GEOMETRY", "num_points"]].head()
+            GEOMETRY                num_points
+        0   <Geometry binary data> 	1.0
+        1   <Geometry binary data> 	5.0
+        2   <Geometry binary data> 	NaN
+        3   <Geometry binary data> 	NaN
+        4   <Geometry binary data> 	3.0
         """
         return self._unary_operation_handler(
                 function_name = 'inza..ST_NUMPOINTS')
@@ -1136,8 +1065,8 @@ class IdaGeoSeries(nzpyida.IdaSeries):
          	ID 	LOC 	                coord_dim
         0 	1 	<Geometry binary data> 	2
         1 	2 	<Geometry binary data>  3
-        2 	3 	<Geometry binary data>  4
-        3 	4 	<Geometry binary data> 	3
+        2 	3 	<Geometry binary data>  3
+        3 	4 	<Geometry binary data> 	2
         4 	5 	<Geometry binary data>  3
         """
         return self._unary_operation_handler(
@@ -1170,11 +1099,11 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         >>> sample_points["is_3d"] = sample_points.is_3d()
         >>> sample_points[["LOC", "is_3d"]].head()
          	LOC 	                is_3d
-        0 	<Geometry binary data>  0
-        1 	<Geometry binary data> 	1
-        2 	<Geometry binary data>  1
-        3 	<Geometry binary data>	0
-        4 	<Geometry binary data> 	1        
+        0 	<Geometry binary data>  False
+        1 	<Geometry binary data> 	True
+        2 	<Geometry binary data>  True
+        3 	<Geometry binary data>	False
+        4 	<Geometry binary data> 	True        
         """
         return self._unary_operation_handler(
                 function_name = 'inza..ST_IS3D')
@@ -1206,11 +1135,11 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         >>> sample_points["is_M"]=sample_points.is_measured()
         >>> sample_points.head()
         	ID 	LOC 	                coord_dim   is_3d   is_M
-        0 	1 	<Geometry binary data> 	2 	        0 	    0
-        1 	2 	<Geometry binary data> 	3 	        1 	    0
-        2 	3 	<Geometry binary data> 	4 	        1 	    1
-        3 	4 	<Geometry binary data>  3 	        0 	    1
-        4 	5 	<Geometry binary data> 	3 	        1 	    0
+        0 	1 	<Geometry binary data> 	2 	        False   False
+        1 	2 	<Geometry binary data> 	3 	        True    False
+        2 	3 	<Geometry binary data> 	3	        False   True
+        3 	4 	<Geometry binary data>  2 	        False   False
+        4 	5 	<Geometry binary data> 	3 	        True    False
 
         """
         return self._unary_operation_handler(
@@ -1245,12 +1174,13 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         >>> sample_geometries["max_Y"] = sample_geometries.max_y()
         >>> sample_geometries["max_Z"] = sample_geometries.max_z()
         >>> sample_geometries["max_M"] = sample_geometries.max_m()
-         	ID 	GEOMETRY 	            max_X 	max_Y 	max_Z 	max_M
-        0 	1 	<Geometry binary data>  1.0 	2.0 	None 	None
-        1 	2 	<Geometry binary data> 	5.0 	4.0 	None 	None
-        2 	3 	<Geometry binary data>	NaN 	NaN 	None 	None
-        3 	4 	<Geometry binary data> 	NaN 	NaN 	None 	None
-        4 	5 	<Geometry binary data> 	35.0 	6.0 	None 	None
+        >>> sample_geometries.head()
+            ID  GEOMETRY                max_X   max_Y   max_Z   max_M
+        0   1   <Geometry binary data>  1.0 	2.0 	None 	None
+        1   2   <Geometry binary data> 	5.0 	4.0 	None 	None
+        2   3   <Geometry binary data>	NaN 	NaN 	None 	None
+        3   4   <Geometry binary data> 	NaN 	NaN 	None 	None
+        4   5   <Geometry binary data> 	35.0 	6.0 	None 	None
         """
         return self._unary_operation_handler(
                 function_name = 'inza..ST_MAXM')
@@ -1283,12 +1213,13 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         >>> sample_geometries["max_Y"] = sample_geometries.max_y()
         >>> sample_geometries["max_Z"] = sample_geometries.max_z()
         >>> sample_geometries["max_M"] = sample_geometries.max_m()
-         	ID 	GEOMETRY 	            max_X 	max_Y 	max_Z 	max_M
-        0 	1 	<Geometry binary data> 	1.0 	2.0 	None 	None
-        1 	2 	<Geometry binary data> 	5.0 	4.0 	None 	None
-        2 	3 	<Geometry binary data> 	NaN 	NaN 	None 	None
-        3 	4 	<Geometry binary data> 	NaN 	NaN 	None 	None
-        4 	5 	<Geometry binary data> 	35.0 	6.0 	None 	None
+        >>> sample_geometries.head()
+            ID  GEOMETRY                max_X   max_Y   max_Z   max_M
+        0   1   <Geometry binary data>  1.0 	2.0 	None 	None
+        1   2   <Geometry binary data> 	5.0 	4.0 	None 	None
+        2   3   <Geometry binary data>	NaN 	NaN 	None 	None
+        3   4   <Geometry binary data> 	NaN 	NaN 	None 	None
+        4   5   <Geometry binary data> 	35.0 	6.0 	None 	None
         """
         return self._unary_operation_handler(
                 function_name = 'inza..ST_MAXX')
@@ -1321,12 +1252,13 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         >>> sample_geometries["max_Y"] = sample_geometries.max_y()
         >>> sample_geometries["max_Z"] = sample_geometries.max_z()
         >>> sample_geometries["max_M"] = sample_geometries.max_m()
-         	ID 	GEOMETRY 	            max_X 	max_Y 	max_Z 	max_M
-        0 	1 	<Geometry binary data> 	1.0 	2.0 	None 	None
-        1 	2 	<Geometry binary data> 	5.0 	4.0 	None 	None
-        2 	3 	<Geometry binary data> 	NaN 	NaN 	None 	None
-        3 	4 	<Geometry binary data> 	NaN 	NaN 	None 	None
-        4 	5 	<Geometry binary data> 	35.0 	6.0 	None 	None
+        >>> sample_geometries.head()
+            ID  GEOMETRY                max_X   max_Y   max_Z   max_M
+        0   1   <Geometry binary data>  1.0 	2.0 	None 	None
+        1   2   <Geometry binary data> 	5.0 	4.0 	None 	None
+        2   3   <Geometry binary data>	NaN 	NaN 	None 	None
+        3   4   <Geometry binary data> 	NaN 	NaN 	None 	None
+        4   5   <Geometry binary data> 	35.0 	6.0 	None 	None
         """
         return self._unary_operation_handler(
                 function_name = 'inza..ST_MAXY')
@@ -1360,12 +1292,13 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         >>> sample_geometries["max_Y"] = sample_geometries.max_y()
         >>> sample_geometries["max_Z"] = sample_geometries.max_z()
         >>> sample_geometries["max_M"] = sample_geometries.max_m()
-         	ID 	GEOMETRY 	            max_X 	max_Y 	max_Z 	max_M
-        0 	1 	<Geometry binary data> 	1.0 	2.0 	None 	None
-        1 	2 	<Geometry binary data> 	5.0 	4.0 	None 	None
-        2 	3 	<Geometry binary data> 	NaN 	NaN 	None 	None
-        3 	4 	<Geometry binary data> 	NaN 	NaN 	None 	None
-        4 	5 	<Geometry binary data> 	35.0 	6.0 	None 	None
+        >>> sample_geometries.head()
+            ID  GEOMETRY                max_X   max_Y   max_Z   max_M
+        0   1   <Geometry binary data>  1.0 	2.0 	None 	None
+        1   2   <Geometry binary data> 	5.0 	4.0 	None 	None
+        2   3   <Geometry binary data>	NaN 	NaN 	None 	None
+        3   4   <Geometry binary data> 	NaN 	NaN 	None 	None
+        4   5   <Geometry binary data> 	35.0 	6.0 	None 	None
         """
         return self._unary_operation_handler(
                 function_name = 'inza..ST_MAXZ')
@@ -1401,12 +1334,12 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         >>> sample_geometries["min_Z"] = sample_geometries.min_z()
         >>> sample_geometries["min_M"] = sample_geometries.min_m()
         >>> sample_geometries.head()        
-        	ID 	GEOMETRY 	            min_X 	min_Y 	min_Z 	min_M
-        0 	1 	<Geometry binary data> 	1.0 	2.0 	None 	None
-        1 	2 	<Geometry binary data> 	0.0 	0.0 	None 	None
-        2 	3 	<Geometry binary data> 	NaN 	NaN 	None 	None
-        3 	4 	<Geometry binary data> 	NaN 	NaN 	None 	None
-        4 	5 	<Geometry binary data> 	33.0 	2.0 	None 	None
+            ID  GEOMETRY                min_X   min_Y   min_Z   min_M
+        0   1   <Geometry binary data> 	1.0 	2.0 	None 	None
+        1   2   <Geometry binary data> 	0.0 	0.0 	None 	None
+        2   3   <Geometry binary data> 	NaN 	NaN 	None 	None
+        3   4   <Geometry binary data> 	NaN 	NaN 	None 	None
+        4   5   <Geometry binary data> 	33.0 	2.0 	None 	None
         """
         return self._unary_operation_handler(
                 function_name = 'inza..ST_MINM')
@@ -1508,12 +1441,12 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         >>> sample_geometries["min_Z"] = sample_geometries.min_z()
         >>> sample_geometries["min_M"] = sample_geometries.min_m()
         >>> sample_geometries.head()        
-        	ID 	GEOMETRY 	            min_X 	min_Y 	min_Z 	min_M
-        0 	1 	<Geometry binary data> 	1.0 	2.0 	None 	None
-        1 	2 	<Geometry binary data> 	0.0 	0.0 	None 	None
-        2 	3 	<Geometry binary data>	NaN 	NaN 	None 	None
-        3 	4 	<Geometry binary data> 	NaN 	NaN 	None 	None
-        4 	5 	<Geometry binary data> 	33.0 	2.0 	None 	None
+            ID  GEOMETRY                min_X   min_Y   min_Z   min_M
+        0   1   <Geometry binary data> 	1.0 	2.0 	None 	None
+        1   2   <Geometry binary data> 	0.0 	0.0 	None 	None
+        2   3   <Geometry binary data> 	NaN 	NaN 	None 	None
+        3   4   <Geometry binary data> 	NaN 	NaN 	None 	None
+        4   5   <Geometry binary data> 	33.0 	2.0 	None 	None
         """
         return self._unary_operation_handler(
                 function_name = 'inza..ST_MINZ')
@@ -1543,17 +1476,12 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         
         >>> sample_points_extractor = IdaGeoDataFrame(idadb, "SAMPLE_POINTS", indexer = "ID")
         >>> sample_points_extractor.set_geometry("LOC")
-        >>> sample_points_extractor["X"] = sample_points_extractor.x()
-        >>> sample_points_extractor["Y"] = sample_points_extractor.y()
-        >>> sample_points_extractor["Z"] = sample_points_extractor.z()
-        >>> sample_points_extractor["M"] = sample_points_extractor.m()
-        >>> sample_points_extractor.head()
-         	ID 	LOC 	                X 	    Y 	    Z 	    M
-        0 	1 	<Geometry binary data> 	14.0 	58.0 	NaN 	NaN
-        1 	2 	<Geometry binary data> 	12.0 	35.0 	12.0 	NaN
-        2 	3 	<Geometry binary data> 	12.0 	66.0 	43.0 	45.0
-        3 	4 	<Geometry binary data> 	14.0 	58.0 	NaN 	4.0
-        4 	5 	<Geometry binary data>	12.0 	35.0 	12.0 	NaN
+        >>> partial = IdaGeoDataFrame.from_IdaDataFrame(sample_points_extractor.loc[3])
+        >>> partial.set_geometry("LOC")
+        >>> partial["M"] = partial.m()
+        >>> partial.head()
+         	ID 	LOC 	                X 	    Y 	    M
+        0 	3 	<Geometry binary data> 	12.0 	66.0 	43.0
         """
         return self._unary_operation_handler(
                 function_name = 'inza..ST_M',
@@ -1586,15 +1514,13 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         >>> sample_points_extractor.set_geometry("LOC")
         >>> sample_points_extractor["X"] = sample_points_extractor.x()
         >>> sample_points_extractor["Y"] = sample_points_extractor.y()
-        >>> sample_points_extractor["Z"] = sample_points_extractor.z()
-        >>> sample_points_extractor["M"] = sample_points_extractor.m()
         >>> sample_points_extractor.head()
-         	ID 	LOC 	                X 	    Y 	    Z 	    M
-        0 	1 	<Geometry binary data> 	14.0 	58.0 	NaN 	NaN
-        1 	2 	<Geometry binary data> 	12.0 	35.0 	12.0 	NaN
-        2 	3 	<Geometry binary data> 	12.0 	66.0 	43.0 	45.0
-        3 	4 	<Geometry binary data> 	14.0 	58.0 	NaN 	4.0
-        4 	5 	<Geometry binary data> 	12.0 	35.0 	12.0 	NaN
+         	ID 	LOC 	                X 	    Y 	 
+        0 	1 	<Geometry binary data> 	14.0 	58.0
+        1 	2 	<Geometry binary data> 	12.0 	35.0
+        2 	3 	<Geometry binary data> 	12.0 	66.0
+        3 	4 	<Geometry binary data> 	14.0 	58.0
+        4 	5 	<Geometry binary data> 	12.0 	35.0
 
         """
         return self._unary_operation_handler(
@@ -1628,16 +1554,13 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         >>> sample_points_extractor.set_geometry("LOC")
         >>> sample_points_extractor["X"] = sample_points_extractor.x()
         >>> sample_points_extractor["Y"] = sample_points_extractor.y()
-        >>> sample_points_extractor["Z"] = sample_points_extractor.z()
-        >>> sample_points_extractor["M"] = sample_points_extractor.m()
         >>> sample_points_extractor.head()
-         	ID 	LOC 	                X 	    Y 	    Z 	    M
-        0 	1 	<Geometry binary data> 	14.0 	58.0 	NaN 	NaN
-        1 	2 	<Geometry binary data>	12.0 	35.0 	12.0 	NaN
-        2 	3 	<Geometry binary data> 	12.0 	66.0 	43.0 	45.0
-        3 	4 	<Geometry binary data> 	14.0 	58.0 	NaN 	4.0
-        4 	5 	<Geometry binary data> 	12.0 	35.0 	12.0 	NaN
-
+         	ID 	LOC 	                X 	    Y 	 
+        0 	1 	<Geometry binary data> 	14.0 	58.0
+        1 	2 	<Geometry binary data> 	12.0 	35.0
+        2 	3 	<Geometry binary data> 	12.0 	66.0
+        3 	4 	<Geometry binary data> 	14.0 	58.0
+        4 	5 	<Geometry binary data> 	12.0 	35.0
         """
         return self._unary_operation_handler(
                 function_name = 'inza..ST_Y',
@@ -1668,17 +1591,13 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         
         >>> sample_points_extractor = IdaGeoDataFrame(idadb, "SAMPLE_POINTS", indexer = "ID")
         >>> sample_points_extractor.set_geometry("LOC")
-        >>> sample_points_extractor["X"] = sample_points_extractor.x()
-        >>> sample_points_extractor["Y"] = sample_points_extractor.y()
-        >>> sample_points_extractor["Z"] = sample_points_extractor.z()
-        >>> sample_points_extractor["M"] = sample_points_extractor.m()
-        >>> sample_points_extractor.head()
-         	ID 	LOC 	                X 	    Y 	    Z 	    M
-        0 	1 	<Geometry binary data> 	14.0 	58.0 	NaN 	NaN
-        1 	2 	<Geometry binary data> 	12.0 	35.0 	12.0 	NaN
-        2 	3 	<Geometry binary data> 	12.0 	66.0 	43.0 	45.0
-        3 	4 	<Geometry binary data>	14.0 	58.0 	NaN 	4.0
-        4 	5 	<Geometry binary data>	12.0 	35.0 	12.0 	NaN
+        >>> partial = IdaGeoDataFrame.from_IdaDataFrame(sample_points_extractor.loc[5:6])
+        >>> partial.set_geometry("LOC")
+        >>> partial["Z"] = partial.z()
+        >>> partial.head()
+            ID  LOC                     X       Y       Z
+        0   5   <Geometry binary data>  12.0    35.0    12.0
+        1   6   <Geometry binary data>  17.0    65.0    32.0
 
         """
         return self._unary_operation_handler(
@@ -1714,10 +1633,10 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         --------
         Use sample table SAMPLE_LINES, obtained with SQL script
         
-        >>> samplelines = IdaGeoDataFrame(idadb, "SAMPLE_LINES", indexer = "ID", geometry = "GEOMETRY")
+        >>> sample_lines = IdaGeoDataFrame(idadb, "SAMPLE_LINES", indexer = "ID", geometry = "GEOMETRY")
         >>> sample_lines.is_closed().head()
-        0    0
-        1    0
+        0    False
+        1    False
         """
         return self._unary_operation_handler(
                 function_name = 'inza..ST_ISCLOSED',

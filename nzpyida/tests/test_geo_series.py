@@ -94,11 +94,6 @@ class Test_IdaGeoSeries(object):
         pass
     
     @pytest.mark.skip
-    def test_idageoseries_mid_point(self, idageoseries):
-        # TODO: add dataset with a column with ST_LINESTRING
-        pass
-    
-    @pytest.mark.skip
     def test_idageoseries_start_point(self, idageoseries):
         # TODO: add dataset with a column with ST_LINESTRING
         pass
@@ -141,11 +136,6 @@ class Test_IdaGeoSeries(object):
         ida = idageoseries.num_interior_ring()
         assert(isinstance(ida, IdaSeries))
         assert len(ida.head())
-    
-    @pytest.mark.skip
-    def test_idageoseries_num_line_strings(self, idageoseries):
-        # TODO
-        pass
 
     def test_idageoseries_num_points(self, idageoseries):
         ida = idageoseries.num_points()

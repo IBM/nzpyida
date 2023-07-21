@@ -27,7 +27,7 @@ standard_library.install_aliases()
 
 import nzpyida
 from nzpyida.frame import IdaDataFrame
-from nzpyida.geoSeries import IdaGeoSeries
+from nzpyida.geo_series import IdaGeoSeries
 from nzpyida.exceptions import IdaGeoDataFrameError
 from nzpy.core import ProgrammingError
 
