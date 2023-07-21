@@ -30,15 +30,17 @@ from nzpyida import IdaSeries
 from nzpyida import IdaGeoDataFrame
 from nzpyida import IdaGeoSeries
 
-ESRI = False
-COLUMN_TYPE = "ST_GEOMETRY" if ESRI else "VARCHAR"
+
 GEO_TABLE_NAME1 = "GEO_TEST_TABLE1"
 GEO_TABLE_NAME2 = "GEO_TEST_TABLE2"
 GEO_COLUMN_NAME = "THE_GEOM"
 INDEXER_COLUMN = "OBJECTID"
 VARCHAR_COLUMN = "NAME"
 
-prep_table1_commands = f"""
+@pytest.fixture(scope='module')
+def idageodf1(idadb, is_esri):
+    COLUMN_TYPE = "ST_GEOMETRY" if is_esri else "VARCHAR"
+    prep_table1_commands = f"""
 DROP TABLE {GEO_TABLE_NAME1} IF EXISTS;
 CREATE TABLE {GEO_TABLE_NAME1} ({INDEXER_COLUMN} INTEGER, 
 {VARCHAR_COLUMN} VARCHAR(200), {GEO_COLUMN_NAME} {COLUMN_TYPE}(200));
@@ -47,7 +49,15 @@ INSERT INTO {GEO_TABLE_NAME1} VALUES
 INSERT INTO {GEO_TABLE_NAME1} VALUES 
 (2, 'SQ2', inza..ST_WKTToSQL('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))'));
 """
-prep_table2_commands = f"""
+    idadb.ida_query(prep_table1_commands)
+    yield IdaGeoDataFrame(idadb, GEO_TABLE_NAME1, 
+                          indexer=INDEXER_COLUMN, geometry=GEO_COLUMN_NAME)
+    idadb.ida_query(f"DROP TABLE {GEO_TABLE_NAME1} IF EXISTS")
+
+@pytest.fixture(scope='module')
+def idageodf2(idadb, is_esri):
+    COLUMN_TYPE = "ST_GEOMETRY" if is_esri else "VARCHAR"
+    prep_table2_commands = f"""
 DROP TABLE {GEO_TABLE_NAME2} IF EXISTS;
 CREATE TABLE {GEO_TABLE_NAME2} ({INDEXER_COLUMN}  INTEGER, {GEO_COLUMN_NAME} {COLUMN_TYPE}(200));
 INSERT INTO {GEO_TABLE_NAME2} VALUES 
@@ -57,16 +67,6 @@ INSERT INTO {GEO_TABLE_NAME2} VALUES
 INSERT INTO {GEO_TABLE_NAME2} VALUES 
 (3, inza..ST_WKTToSQL('POLYGON ((-1 -1, -2 -1, -2 -2, -1 -2, -1 -1))'));
 """
-
-@pytest.fixture(scope='module')
-def idageodf1(idadb: IdaDataFrame):
-    idadb.ida_query(prep_table1_commands)
-    yield IdaGeoDataFrame(idadb, GEO_TABLE_NAME1, 
-                          indexer=INDEXER_COLUMN, geometry=GEO_COLUMN_NAME)
-    idadb.ida_query(f"DROP TABLE {GEO_TABLE_NAME1} IF EXISTS")
-
-@pytest.fixture(scope='module')
-def idageodf2(idadb):
     idadb.ida_query(prep_table2_commands)
     yield IdaGeoDataFrame.from_IdaDataFrame(IdaDataFrame(
         idadb, GEO_TABLE_NAME2, indexer=INDEXER_COLUMN), geometry=GEO_COLUMN_NAME)
@@ -77,7 +77,9 @@ class Test_IdaGeoDataFrame(object):
         with pytest.raises(KeyError):
             idageodf1.set_geometry('not a column in the Ida')
         with pytest.raises(TypeError):
-            idageodf1.set_geometry('OBJECTID')
+            idageodf1.set_geometry(INDEXER_COLUMN)
+        with pytest.raises(TypeError):
+            idageodf1.set_geometry(VARCHAR_COLUMN)
 
     def test_idageodf_set_geometry_success(self, idageodf1):
         assert(isinstance(idageodf1.geometry, IdaGeoSeries))

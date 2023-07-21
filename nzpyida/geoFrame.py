@@ -61,35 +61,14 @@ class IdaGeoDataFrame(IdaDataFrame):
     --------
     >>> idageodf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_COUNTY',
     indexer='OBJECTID')
-    >>> idageodf.dtypes
-                     TYPENAME
-    OBJECTID          INTEGER
-    SHAPE     ST_MULTIPOLYGON
-    STATEFP           VARCHAR
-    COUNTYFP          VARCHAR
-    COUNTYNS          VARCHAR
-    NAME              VARCHAR
-    GEOID             VARCHAR
-    NAMELSAD          VARCHAR
-    LSAD              VARCHAR
-    CLASSFP           VARCHAR
-    MTFCC             VARCHAR
-    CSAFP             VARCHAR
-    CBSAFP            VARCHAR
-    METDIVFP          VARCHAR
-    FUNCSTAT          VARCHAR
-    ALAND             DECIMAL
-    AWATER            DECIMAL
-    INTPTLAT          VARCHAR
-    INTPTLON          VARCHAR
 
     >>> idageodf[['NAME', 'SHAPE']].head()
-           NAME                                              SHAPE
-    0    Becker  MULTIPOLYGON (((-95.1637185512 46.7176480983, ...
-    1  Jim Hogg  MULTIPOLYGON (((-98.9542377853 26.7856984795, ...
-    2     Henry  MULTIPOLYGON (((-88.0532984194 36.4970648458, ...
-    3     Keith  MULTIPOLYGON (((-102.0517705602 41.0038968011,...
-    4   Clinton  MULTIPOLYGON (((-94.2059683962 39.7458481141, ...
+           NAME                   SHAPE
+    0    Becker  <Geometry binary data>
+    1  Jim Hogg  <Geometry binary data>
+    2     Henry  <Geometry binary data>
+    3     Keith  <Geometry binary data>
+    4   Clinton  <Geometry binary data>
 
     >>> idageodf.geometry
     AttributeError: Geometry property has not been set yet. Use set_geometry
@@ -104,29 +83,39 @@ class IdaGeoDataFrame(IdaDataFrame):
 
     >>> idageoseries = idageodf.geometry    
     >>> idageoseries.head()
-    0    MULTIPOLYGON (((-95.1637185512 46.7176480983, ...
-    1    MULTIPOLYGON (((-98.9542377853 26.7856984795, ...
-    2    MULTIPOLYGON (((-88.0532984194 36.4970648458, ...
-    3    MULTIPOLYGON (((-102.0517705602 41.0038968011,...
-    4    MULTIPOLYGON (((-94.2059683962 39.7458481141, ...
+    0    <Geometry binary data>
+    1    <Geometry binary data>
+    2    <Geometry binary data>
+    3    <Geometry binary data>
+    4    <Geometry binary data>
     Name: SHAPE, dtype: object
 
     >>> idageodf['County area'] = idageodf.area(unit='mile')
 
     >>> counties_with_areas = idageodf[['NAME', 'SHAPE', 'County area']]
+    In case
     >>> counties_with_areas.dtypes
+    (In case you are working with nzspatial_esri)
                         TYPENAME
     NAME                 VARCHAR
-    SHAPE        ST_MULTIPOLYGON
+    SHAPE            ST_GEOMETRY
+    County area           DOUBLE
+
+    
+    >>> counties_with_areas.dtypes
+    (In case you are working with nzspatial)
+                        TYPENAME
+    NAME                 VARCHAR
+    SHAPE                VARCHAR
     County area           DOUBLE
 
     >>> counties_with_areas.head()
-            NAME                                             SHAPE  County area
-    0     Menard  MULTIPOLYGON (((-99.4847630885 30.940610279, ...   902.281540
-    1      Boone  MULTIPOLYGON (((-88.7764991497 42.491919892, ...   282.045087
-    2  Ochiltree  MULTIPOLYGON (((-100.5467326897 36.056542135,...   918.188142
-    3    Sharkey  MULTIPOLYGON (((-90.9143429922 33.007703026, ...   435.548518
-    4    Audubon  MULTIPOLYGON (((-94.7006367168 41.504155369, ...   444.827726
+            NAME                    SHAPE  County area
+    0     Menard   <Geometry binary data>   902.281540
+    1      Boone   <Geometry binary data>   282.045087
+    2  Ochiltree   <Geometry binary data>   918.188142
+    3    Sharkey   <Geometry binary data>   435.548518
+    4    Audubon   <Geometry binary data>   444.827726
     """
 
     def __init__(self, idadb, tablename, indexer = None, geometry = None):
@@ -322,12 +311,14 @@ class IdaGeoDataFrame(IdaDataFrame):
             raise KeyError( "'" + column_name + "' cannot be set as geometry column: "
                 "not a column in the IdaGeoDataFrame.")
         
+        is_geometry_type = True
         try: 
             idaseries = IdaGeoSeries.from_IdaSeries(self[column_name])
-            self.geo_column_data_type = idaseries.geometry_type().head().iloc[0]
+            self.geo_column_data_type = idaseries.column_data_type
         except TypeError:
             raise TypeError("'" + column_name + "' cannot be set as geometry column: "
                 "specified column doesn't have geometry type")
+
         del idaseries
         
         self._geometry_colname = column_name
@@ -868,9 +859,9 @@ class IdaGeoDataFrame(IdaDataFrame):
         >>> result = ida1.difference(ida2)
         >>> result.head()
         INDEXERIDA1  INDEXERIDA2  RESULT
-        2            163          POLYGON ((-96.6219873342 30.0442882117, -96.61...
-        2            1840         POLYGON ((-96.6219873342 30.0442882117, -96.61...
-        2            109          POLYGON ((-96.6219873342 30.0442882117, -96.61...
+        2            163          <Geometry binary data>
+        2            1840         <Geometry binary data>
+        2            109          <Geometry binary data>
         """
         return self._binary_operation_handler(
             ida2,
@@ -958,9 +949,9 @@ class IdaGeoDataFrame(IdaDataFrame):
         >>> result = ida1.union(ida2)
         >>> result.head()
         INDEXERIDA1  INDEXERIDA2  RESULT
-        2            163          MULTIPOLYGON (((-96.6219873342 30.0442882117, ...
-        2            1840         MULTIPOLYGON (((-96.6219873342 30.0442882117, ...
-        2            109          MULTIPOLYGON (((-96.6219873342 30.0442882117, ..
+        2            163          <Geometry binary data>
+        2            1840         <Geometry binary data>
+        2            109          <Geometry binary data>
         """
         return self._binary_operation_handler(
             ida2,

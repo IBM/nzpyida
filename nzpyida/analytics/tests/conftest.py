@@ -52,12 +52,12 @@ def idadb(request):
                 dsn={'database': request.config.getoption('--dsn'), 'host': hostname, 'port': 5480},
                 uid=request.config.getoption('--uid'),
                 pwd=request.config.getoption('--pwd'),
-                autocommit=False)
+                autocommit=True)
         except:
             raise
     elif jdbc != '':
         try:
-            idadb = IdaDataBase(dsn=jdbc, autocommit=False)
+            idadb = IdaDataBase(dsn=jdbc, autocommit=True)
         except:
             raise
     else:
@@ -65,7 +65,7 @@ def idadb(request):
             idadb = IdaDataBase(dsn=request.config.getoption('--dsn'),
                                         uid=request.config.getoption('--uid'),
                                         pwd=request.config.getoption('--pwd'),
-                                        autocommit=False)
+                                        autocommit=True)
         except:
             raise
     return idadb

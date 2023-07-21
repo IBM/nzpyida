@@ -31,7 +31,7 @@ with the IdaGeoDataFrame object. Currently the following methods are supported.
 Note on valid unit names
 -------------------------------------
 Here is the comprehensive list of the allowed unit names which can be given to the `unit`` option of the methods listed below:
-'FOOT', 'LINK', 'MILE', 'METER', 'METRE', 'FATHOM', 'US FOOT', 'KILOMETER', 'KILOMETRE', 'INDIAN FOOT', 'INDIAN YARD', 'LINK (SEARS', 'STATUTE MILE', 'YARD (SEARS)', 'CHAIN (SEARS)', "CLARKE'S FOOT", "CLARKE'S LINK", "CLARKE'S YARD", 'LINK (BENOIT)', 'NAUTICAL MILE', 'YARD (INDIAN)', 'CHAIN (BENOIT)', "CLARKE'S CHAIN", 'US SURVEY FOOT', 'US SURVEY LINK', 'US SURVEY MILE', 'GOLD COAST FOOT', 'US SURVEY CHAIN', 'GERMAN LEGAL METRE', 'INDIAN FOOT (1937)', 'INDIAN FOOT (1962)', 'INDIAN FOOT (1975)', 'INDIAN YARD (1937)', 'INDIAN YARD (1962)', 'INDIAN YARD (1975)', 'BIN WIDTH 25 METRES', 'BRITISH FOOT (1865)', 'FOOT (INTERNATIONAL)', 'BIN WIDTH 12.5 METRES', 'BIN WIDTH 37.5 METRES', 'BIN WIDTH 6.25 METRES', 'BIN WIDTH 3.125 METRES', 'MODIFIED AMERICAN FOOT', 'BRITISH FOOT (SEARS 1922)', 'BRITISH LINK (SEARS 1922)', 'BRITISH YARD (SEARS 1922)', 'BRITISH CHAIN (SEARS 1922)', 'BIN WIDTH 165 US SURVEY FEET', 'BIN WIDTH 330 US SURVEY FEET', 'BRITISH FOOT (BENOIT 1895 A)', 'BRITISH FOOT (BENOIT 1895 B)', 'BRITISH LINK (BENOIT 1895 A)', 'BRITISH LINK (BENOIT 1895 B)', 'BRITISH YARD (BENOIT 1895 A)', 'BRITISH YARD (BENOIT 1895 B)', 'BIN WIDTH 82.5 US SURVEY FEET', 'BRITISH CHAIN (BENOIT 1895 A)', 'BRITISH CHAIN (BENOIT 1895 B)'
+'meter', 'kilometer', 'foot', 'mile', 'nautical mile'. 
 
 .. automethod:: IdaGeoSeries.linear_units
 
@@ -103,10 +103,6 @@ is Simple
 ---------
 .. automethod:: IdaGeoSeries.is_simple
 
-is Valid
---------
-.. automethod:: IdaGeoSeries.is_valid
-
 Length
 ------
 .. automethod:: IdaGeoSeries.length
@@ -167,10 +163,6 @@ num Points
 ----------
 .. automethod:: IdaGeoSeries.num_points
 
-num Polygons
-------------
-.. automethod:: IdaGeoSeries.num_polygons
-
 perimeter
 ---------
 .. automethod:: IdaGeoSeries.perimeter
@@ -182,10 +174,6 @@ Start Point
 SR ID
 -----
 .. automethod:: IdaGeoSeries.srid
-
-SRS Name
---------
-.. automethod:: IdaGeoSeries.srs_name
 
 X coordinate
 ------------

@@ -39,12 +39,7 @@ The results are fetched and formatted into the corresponding data structure, for
 
 The following scenario illustrates how nzpyida works.
 
-Assuming that all ODBC connection parameters are correctly set, issue the following statements to connect to a
-database (in this case, a Netezza database with the name BLUDB) via ODBC:
-
-    >>> from nzpyida import IdaDataBase, IdaGeoDataFrame
-    >>> idadb = IdaDataBase('BLUDB')
-
+Assuming that you've got connection to the databased established via IdaDataBase object named 'idadb'. 
 We can create an IDA geo data frame that points to a sample table:
 
     >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_COUNTY')

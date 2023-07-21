@@ -28,13 +28,14 @@ from nzpyida import IdaSeries
 from nzpyida import IdaGeoSeries
 from nzpyida.exceptions import IdaGeoDataFrameError
 
-ESRI = False
-COLUMN_TYPE = "ST_GEOMETRY" if ESRI else "VARCHAR"
 GEO_SERIES_NAME = "GEO_TEST_SERIES"
 GEO_COLUMN_NAME = "THE_GEOM"
 INDEXER_COLUMN = "OBJECTID"
 
-prep_series_commands = f"""
+@pytest.fixture(scope='module')
+def idageoseries(idadb, is_esri):
+    COLUMN_TYPE = "ST_GEOMETRY" if is_esri else "VARCHAR"
+    prep_series_commands = f"""
 DROP TABLE {GEO_SERIES_NAME} IF EXISTS;
 CREATE TABLE {GEO_SERIES_NAME} ({INDEXER_COLUMN}  INTEGER, {GEO_COLUMN_NAME} {COLUMN_TYPE}(200));
 INSERT INTO {GEO_SERIES_NAME} VALUES 
@@ -44,9 +45,6 @@ INSERT INTO {GEO_SERIES_NAME} VALUES
 INSERT INTO {GEO_SERIES_NAME} VALUES 
 (3, inza..ST_WKTToSQL('POLYGON ((-1 -1, -2 -1, -2 -2, -1 -2, -1 -1))'));
 """
-
-@pytest.fixture(scope='module')
-def idageoseries(idadb):
     idadb.ida_query(prep_series_commands)
     yield IdaGeoSeries(idadb, GEO_SERIES_NAME, 
                           indexer=INDEXER_COLUMN, column=GEO_COLUMN_NAME)
