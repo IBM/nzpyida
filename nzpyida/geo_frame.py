@@ -27,8 +27,9 @@ standard_library.install_aliases()
 
 import nzpyida
 from nzpyida.frame import IdaDataFrame
-from nzpyida.geoSeries import IdaGeoSeries
+from nzpyida.geo_series import IdaGeoSeries
 from nzpyida.exceptions import IdaGeoDataFrameError
+from nzpy.core import ProgrammingError
 
 from copy import deepcopy
 
@@ -60,35 +61,14 @@ class IdaGeoDataFrame(IdaDataFrame):
     --------
     >>> idageodf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_COUNTY',
     indexer='OBJECTID')
-    >>> idageodf.dtypes
-                     TYPENAME
-    OBJECTID          INTEGER
-    SHAPE     ST_MULTIPOLYGON
-    STATEFP           VARCHAR
-    COUNTYFP          VARCHAR
-    COUNTYNS          VARCHAR
-    NAME              VARCHAR
-    GEOID             VARCHAR
-    NAMELSAD          VARCHAR
-    LSAD              VARCHAR
-    CLASSFP           VARCHAR
-    MTFCC             VARCHAR
-    CSAFP             VARCHAR
-    CBSAFP            VARCHAR
-    METDIVFP          VARCHAR
-    FUNCSTAT          VARCHAR
-    ALAND             DECIMAL
-    AWATER            DECIMAL
-    INTPTLAT          VARCHAR
-    INTPTLON          VARCHAR
 
     >>> idageodf[['NAME', 'SHAPE']].head()
-           NAME                                              SHAPE
-    0    Becker  MULTIPOLYGON (((-95.1637185512 46.7176480983, ...
-    1  Jim Hogg  MULTIPOLYGON (((-98.9542377853 26.7856984795, ...
-    2     Henry  MULTIPOLYGON (((-88.0532984194 36.4970648458, ...
-    3     Keith  MULTIPOLYGON (((-102.0517705602 41.0038968011,...
-    4   Clinton  MULTIPOLYGON (((-94.2059683962 39.7458481141, ...
+           NAME                   SHAPE
+    0    Becker  <Geometry binary data>
+    1  Jim Hogg  <Geometry binary data>
+    2     Henry  <Geometry binary data>
+    3     Keith  <Geometry binary data>
+    4   Clinton  <Geometry binary data>
 
     >>> idageodf.geometry
     AttributeError: Geometry property has not been set yet. Use set_geometry
@@ -103,29 +83,39 @@ class IdaGeoDataFrame(IdaDataFrame):
 
     >>> idageoseries = idageodf.geometry    
     >>> idageoseries.head()
-    0    MULTIPOLYGON (((-95.1637185512 46.7176480983, ...
-    1    MULTIPOLYGON (((-98.9542377853 26.7856984795, ...
-    2    MULTIPOLYGON (((-88.0532984194 36.4970648458, ...
-    3    MULTIPOLYGON (((-102.0517705602 41.0038968011,...
-    4    MULTIPOLYGON (((-94.2059683962 39.7458481141, ...
+    0    <Geometry binary data>
+    1    <Geometry binary data>
+    2    <Geometry binary data>
+    3    <Geometry binary data>
+    4    <Geometry binary data>
     Name: SHAPE, dtype: object
 
     >>> idageodf['County area'] = idageodf.area(unit='mile')
 
     >>> counties_with_areas = idageodf[['NAME', 'SHAPE', 'County area']]
+    In case
     >>> counties_with_areas.dtypes
+    (In case you are working with nzspatial_esri)
                         TYPENAME
     NAME                 VARCHAR
-    SHAPE        ST_MULTIPOLYGON
+    SHAPE            ST_GEOMETRY
+    County area           DOUBLE
+
+    
+    >>> counties_with_areas.dtypes
+    (In case you are working with nzspatial)
+                        TYPENAME
+    NAME                 VARCHAR
+    SHAPE                VARCHAR
     County area           DOUBLE
 
     >>> counties_with_areas.head()
-            NAME                                             SHAPE  County area
-    0     Menard  MULTIPOLYGON (((-99.4847630885 30.940610279, ...   902.281540
-    1      Boone  MULTIPOLYGON (((-88.7764991497 42.491919892, ...   282.045087
-    2  Ochiltree  MULTIPOLYGON (((-100.5467326897 36.056542135,...   918.188142
-    3    Sharkey  MULTIPOLYGON (((-90.9143429922 33.007703026, ...   435.548518
-    4    Audubon  MULTIPOLYGON (((-94.7006367168 41.504155369, ...   444.827726
+            NAME                    SHAPE  County area
+    0     Menard   <Geometry binary data>   902.281540
+    1      Boone   <Geometry binary data>   282.045087
+    2  Ochiltree   <Geometry binary data>   918.188142
+    3    Sharkey   <Geometry binary data>   435.548518
+    4    Audubon   <Geometry binary data>   444.827726
     """
 
     def __init__(self, idadb, tablename, indexer = None, geometry = None):
@@ -146,12 +136,7 @@ class IdaGeoDataFrame(IdaDataFrame):
             This attribute must be set through the set_geometry() method.
         geometry : IdaGeoSeries
             The column referenced by _geometry_colname attribute.
-        """
-        # TODO: Add support for receiving either a string or an IdaGeoSeries as 
-        # geometry parameter.        
-
-        if (idadb.__class__.__name__ == "IdaDataBase") & idadb._is_netezza_system():
-            raise IdaGeoDataFrameError("IdaGeoDataFrame objects are not supported on Netezza.")
+        """      
 
         if geometry is not None and not isinstance(geometry, six.string_types):
             raise TypeError("geometry must be a string")
@@ -181,7 +166,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         ida = super(IdaGeoDataFrame, self).__getitem__(item)
         if isinstance(ida, nzpyida.IdaSeries):
-            if ida.dtypes['TYPENAME'][ida.column].find('ST_') == 0:
+            if item == self._geometry_colname:
                 idageoseries = IdaGeoSeries.from_IdaSeries(ida)
                 # Return IdaGeoSeries
                 return idageoseries
@@ -323,17 +308,20 @@ class IdaGeoDataFrame(IdaDataFrame):
         if not isinstance(column_name, six.string_types):
             raise TypeError("column_name must be a string")
         if column_name not in self.columns:
-            raise KeyError(
-                "'" + column_name + "' cannot be set as geometry column: "
-                "not a column in the IdaGeoDataFrame."
-            )
-        elif self.dtypes.TYPENAME[column_name].find('ST_') != 0:
-            raise TypeError(
-                "'" + column_name + "' cannot be set as geometry column: "
-                "column doesn't have geometry type."
-            )
-        else:
-            self._geometry_colname = column_name
+            raise KeyError( "'" + column_name + "' cannot be set as geometry column: "
+                "not a column in the IdaGeoDataFrame.")
+        
+        is_geometry_type = True
+        try: 
+            idaseries = IdaGeoSeries.from_IdaSeries(self[column_name])
+            self.geo_column_data_type = idaseries.column_data_type
+        except TypeError:
+            raise TypeError("'" + column_name + "' cannot be set as geometry column: "
+                "specified column doesn't have geometry type")
+
+        del idaseries
+        
+        self._geometry_colname = column_name
 
     # ==============================================================================
     ### Binary geospatial methods
@@ -367,7 +355,7 @@ class IdaGeoDataFrame(IdaDataFrame):
 
         References
         ----------
-        DB2 Spatial Extender ST_CROSSES() function.
+        Netezza Performance Server Analytics ST_CROSSES() function.
 
         Examples
         --------
@@ -384,9 +372,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._binary_operation_handler(
             ida2,
-            db2gse_function='DB2GSE.ST_EQUALS',
-            valid_types_ida1=['ST_GEOMETRY'],
-            valid_types_ida2=['ST_GEOMETRY'])
+            function_name='inza..ST_EQUALS')
 
     def distance(self, ida2, unit=None):
         """
@@ -425,7 +411,7 @@ class IdaGeoDataFrame(IdaDataFrame):
 
         References
         ----------
-        DB2 Spatial Extender ST_DISTANCE() function.
+        Netezza Performance Server Analytics ST_DISTANCE() function.
 
         Examples
         --------
@@ -447,9 +433,7 @@ class IdaGeoDataFrame(IdaDataFrame):
             add_args.append(unit)
         return self._binary_operation_handler(
             ida2,
-            db2gse_function='DB2GSE.ST_DISTANCE',
-            valid_types_ida1=['ST_GEOMETRY'],
-            valid_types_ida2=['ST_GEOMETRY'],
+            function_name='inza..ST_DISTANCE',
             additional_args = add_args)
 
     def crosses(self, ida2):
@@ -480,7 +464,7 @@ class IdaGeoDataFrame(IdaDataFrame):
 
         References
         ----------
-        DB2 Spatial Extender ST_CROSSES() function.
+        Netezza Performance Server Analytics ST_CROSSES() function.
 
         See also
         --------
@@ -501,9 +485,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._binary_operation_handler(
             ida2,
-            db2gse_function='DB2GSE.ST_CROSSES',
-            valid_types_ida1=['ST_GEOMETRY'],
-            valid_types_ida2=['ST_GEOMETRY'])
+            function_name='inza..ST_CROSSES')
 
     def intersects(self, ida2):
         """
@@ -533,7 +515,7 @@ class IdaGeoDataFrame(IdaDataFrame):
 
         References
         ----------
-        DB2 Spatial Extender ST_INTERSECTS() function.
+        Netezza Performance Server Analytics ST_INTERSECTS() function.
 
         Examples
         --------
@@ -550,9 +532,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._binary_operation_handler(
             ida2,
-            db2gse_function='DB2GSE.ST_INTERSECTS',
-            valid_types_ida1=['ST_GEOMETRY'],
-            valid_types_ida2=['ST_GEOMETRY'])
+            function_name='inza..ST_INTERSECTS')
 
     def overlaps(self, ida2):
         """
@@ -583,7 +563,7 @@ class IdaGeoDataFrame(IdaDataFrame):
 
         References
         ----------
-        DB2 Spatial Extender ST_OVERLAPS() function.
+        Netezza Performance Server Analytics ST_OVERLAPS() function.
 
         Examples
         --------
@@ -600,9 +580,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._binary_operation_handler(
             ida2,
-            db2gse_function='DB2GSE.ST_OVERLAPS',
-            valid_types_ida1=['ST_GEOMETRY'],
-            valid_types_ida2=['ST_GEOMETRY'])
+            function_name='inza..ST_OVERLAPS')
 
     def touches(self, ida2):
         """
@@ -632,7 +610,7 @@ class IdaGeoDataFrame(IdaDataFrame):
 
         References
         ----------
-        DB2 Spatial Extender ST_TOUCHES() function.
+        Netezza Performance Server Analytics ST_TOUCHES() function.
 
         Examples
         --------
@@ -649,9 +627,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._binary_operation_handler(
             ida2,
-            db2gse_function='DB2GSE.ST_TOUCHES',
-            valid_types_ida1=['ST_GEOMETRY'],
-            valid_types_ida2=['ST_GEOMETRY'])
+            function_name='inza..ST_TOUCHES')
 
     def disjoint(self, ida2):
         """
@@ -681,7 +657,7 @@ class IdaGeoDataFrame(IdaDataFrame):
 
         References
         ----------
-        DB2 Spatial Extender ST_DISJOINT() function.
+        Netezza Performance Server Analytics ST_DISJOINT() function.
 
         Examples
         --------
@@ -698,9 +674,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._binary_operation_handler(
             ida2,
-            db2gse_function='DB2GSE.ST_DISJOINT',
-            valid_types_ida1=['ST_GEOMETRY'],
-            valid_types_ida2=['ST_GEOMETRY'])
+            function_name='inza..ST_DISJOINT')
 
     def contains(self, ida2):
         """
@@ -729,7 +703,7 @@ class IdaGeoDataFrame(IdaDataFrame):
 
         References
         ----------
-        DB2 Spatial Extender ST_CONTAINS() function.
+        Netezza Performance Server Analytics ST_CONTAINS() function.
 
         Examples
         --------
@@ -750,9 +724,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._binary_operation_handler(
             ida2,
-            db2gse_function='DB2GSE.ST_CONTAINS',
-            valid_types_ida1=['ST_GEOMETRY'],
-            valid_types_ida2=['ST_GEOMETRY'])
+            function_name='inza..ST_CONTAINS')
 
     def within(self, ida2):
         """
@@ -781,7 +753,7 @@ class IdaGeoDataFrame(IdaDataFrame):
 
         References
         ----------
-        DB2 Spatial Extender ST_WITHIN() function.
+        Netezza Performance Server Analytics ST_WITHIN() function.
 
         Examples
         --------
@@ -802,9 +774,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._binary_operation_handler(
             ida2,
-            db2gse_function='DB2GSE.ST_WITHIN',
-            valid_types_ida1=['ST_GEOMETRY'],
-            valid_types_ida2=['ST_GEOMETRY'])
+            function_name='inza..ST_WITHIN')
 
     def mbr_intersects(self, ida2):
         """
@@ -833,7 +803,7 @@ class IdaGeoDataFrame(IdaDataFrame):
 
         References
         ----------
-        DB2 Spatial Extender ST_MBRIntersects() function.
+        Netezza Performance Server Analytics ST_MBRIntersects() function.
 
         Examples
         --------
@@ -850,9 +820,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._binary_operation_handler(
             ida2,
-            db2gse_function='DB2GSE.ST_MBRINTERSECTS',
-            valid_types_ida1=['ST_GEOMETRY'],
-            valid_types_ida2=['ST_GEOMETRY'])
+            function_name='inza..ST_MBRINTERSECTS')
 
     def difference(self, ida2):
         """
@@ -880,7 +848,7 @@ class IdaGeoDataFrame(IdaDataFrame):
 
         References
         ----------
-        DB2 Spatial Extender ST_Difference() function.
+        Netezza Performance Server Analytics ST_Difference() function.
 
         Examples
         --------
@@ -891,15 +859,13 @@ class IdaGeoDataFrame(IdaDataFrame):
         >>> result = ida1.difference(ida2)
         >>> result.head()
         INDEXERIDA1  INDEXERIDA2  RESULT
-        2            163          POLYGON ((-96.6219873342 30.0442882117, -96.61...
-        2            1840         POLYGON ((-96.6219873342 30.0442882117, -96.61...
-        2            109          POLYGON ((-96.6219873342 30.0442882117, -96.61...
+        2            163          <Geometry binary data>
+        2            1840         <Geometry binary data>
+        2            109          <Geometry binary data>
         """
         return self._binary_operation_handler(
             ida2,
-            db2gse_function='DB2GSE.ST_DIFFERENCE',
-            valid_types_ida1=['ST_GEOMETRY'],
-            valid_types_ida2=['ST_GEOMETRY'])
+            function_name='inza..ST_DIFFERENCE')
 
     def intersection(self, ida2):
         """
@@ -927,7 +893,7 @@ class IdaGeoDataFrame(IdaDataFrame):
 
         References
         ----------
-        DB2 Spatial Extender ST_Intersection() function.
+        Netezza Performance Server Analytics ST_Intersection() function.
 
         Examples
         --------
@@ -944,9 +910,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._binary_operation_handler(
             ida2,
-            db2gse_function='DB2GSE.ST_INTERSECTION',
-            valid_types_ida1=['ST_GEOMETRY'],
-            valid_types_ida2=['ST_GEOMETRY'])
+            function_name='inza..ST_INTERSECTION')
 
     def union(self, ida2):
         """
@@ -974,7 +938,7 @@ class IdaGeoDataFrame(IdaDataFrame):
 
         References
         ----------
-        DB2 Spatial Extender ST_Union() function.
+        Netezza Performance Server Analytics ST_Union() function.
 
         Examples
         --------
@@ -985,18 +949,16 @@ class IdaGeoDataFrame(IdaDataFrame):
         >>> result = ida1.union(ida2)
         >>> result.head()
         INDEXERIDA1  INDEXERIDA2  RESULT
-        2            163          MULTIPOLYGON (((-96.6219873342 30.0442882117, ...
-        2            1840         MULTIPOLYGON (((-96.6219873342 30.0442882117, ...
-        2            109          MULTIPOLYGON (((-96.6219873342 30.0442882117, ..
+        2            163          <Geometry binary data>
+        2            1840         <Geometry binary data>
+        2            109          <Geometry binary data>
         """
         return self._binary_operation_handler(
             ida2,
-            db2gse_function='DB2GSE.ST_UNION',
-            valid_types_ida1=['ST_GEOMETRY'],
-            valid_types_ida2=['ST_GEOMETRY'])
+            function_name='inza..ST_UNION')
 
-    def _binary_operation_handler(self, ida2, db2gse_function,
-                                          valid_types_ida1, valid_types_ida2,
+    def _binary_operation_handler(self, ida2, function_name,
+                                          valid_types_ida1=None, valid_types_ida2=None,
                                           additional_args=None):
 
 
@@ -1011,14 +973,14 @@ class IdaGeoDataFrame(IdaDataFrame):
 
         Parameters
         ----------
-        db2gse_function : str
-                Name of the corresponding DB2GSE function.
+        function_name : str
+                Name of the corresponding function.
         valid_types_ida1 : list of str
                 Valid input typenames for the first IdaGeoSeries.
         valid_types_ida2 : list of str
                 Valid input typenames for the second IdaGeoSeries.
         additional_args : list of str, optional
-                Additional arguments for the DB2GSE function.
+                Additional arguments for the function.
 
         Returns
         -------
@@ -1027,40 +989,38 @@ class IdaGeoDataFrame(IdaDataFrame):
         ida1 = self
         
         # Check if allowed data type
-        if not (ida1.dtypes.TYPENAME[0] in valid_types_ida1 or
-                        valid_types_ida1[0] == 'ST_GEOMETRY'):
-            raise TypeError("Column " + ida1.column +
-                            " has incompatible type.")
-        if not (ida2.dtypes.TYPENAME[0] in valid_types_ida2 or
-                        valid_types_ida2[0] == 'ST_GEOMETRY'):
-            raise TypeError("Column " + ida2.column +
+        if valid_types_ida1 and not ida1.geo_column_data_type in valid_types_ida1:
+            raise TypeError("Column " + ida1.geometry.column +
+                            " has incompatible type: ")
+        if valid_types_ida2 and not ida2.geo_column_data_type in valid_types_ida2:
+            raise TypeError("Column " + ida2.geometry.column +
                             " has incompatible type.")
 
         # Get the definitions of the columns, which will be the arguments for
-        # the DB2GSE function
-        column1_for_db2gse = 'IDA1.\"%s\"' %(ida1.geometry.column)
-        column2_for_db2gse = 'IDA2.\"%s\"' %(ida2.geometry.column)
-        arguments_for_db2gse_function = [column1_for_db2gse, column2_for_db2gse]
+        # the function
+        column1 = 'IDA1.\"%s\"' %(ida1.geometry.column)
+        column2 = 'IDA2.\"%s\"' %(ida2.geometry.column)
+        arguments_for_function = [column1, column2]
         if additional_args is not None:
             for arg in additional_args:
-                arguments_for_db2gse_function.append(arg)
+                arguments_for_function.append(arg)
 
         # SELECT statement
         select_columns=[]
         if hasattr(ida1, '_indexer') and ida1._indexer is not None:
             select_columns.append('IDA1.\"%s\" AS \"INDEXERIDA1\"' %(ida1.indexer))
         else:
-            message = (ida1+"has no indexer defined. Please assign index column with set_indexer and retry.")
+            message = (ida1.tablename + "has no indexer defined. Please assign index column with set_indexer and retry.")
             raise IdaGeoDataFrameError(message)
         if hasattr(ida2, '_indexer') and ida2._indexer is not None:
             select_columns.append('IDA2.\"%s\" AS \"INDEXERIDA2\"' %(ida2.indexer))
         else:
-            message = (ida2+"has no indexer defined. Please assign index column with set_indexer and retry.")
+            message = (ida2.tablename + "has no indexer defined. Please assign index column with set_indexer and retry.")
             raise IdaGeoDataFrameError(message)
         result_column = (
-            db2gse_function+
+            function_name+
             '('+
-            ','.join(map(str, arguments_for_db2gse_function))+
+            ','.join(map(str, arguments_for_function))+
             ')'
         )
         select_columns.append('%s AS \"RESULT\"' %(result_column))
@@ -1069,8 +1029,8 @@ class IdaGeoDataFrame(IdaDataFrame):
         # FROM clause
         from_clause=(
             'FROM '+
-            ida1.name+' AS IDA1, '+
-            ida2.name+' AS IDA2 '
+            '(SELECT * FROM ' + ida1.name + ') AS IDA1, '+
+            '(SELECT * FROM ' + ida2.name + ') AS IDA2 '
         )
 
         # Create a view

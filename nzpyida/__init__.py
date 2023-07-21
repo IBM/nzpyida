@@ -18,7 +18,11 @@ standard_library.install_aliases()
 from .base import IdaDataBase
 from .frame import IdaDataFrame
 from .series import IdaSeries
+from .geo_frame import IdaGeoDataFrame
+from .geo_series import IdaGeoSeries
+
 
 __all__ = ['sampledata', 'tests', 'aggregation', 
 		   'base', 'exceptions', 'filtering', 'frame', 'indexing', 
-		   'internals', 'series', 'sql', 'statistics', 'utils', 'analytics']
+		   'internals', 'series', 'sql', 'statistics', 'utils', 'analytics',
+           'geo_frame', 'geo_series']

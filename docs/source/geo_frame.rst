@@ -14,7 +14,7 @@ of an IdaGeoDataFrame.
 
 Open an IdaGeoDataFrame
 =======================
-.. currentmodule:: nzpyida.geoFrame
+.. currentmodule:: nzpyida.geo_frame
 
 .. autoclass:: IdaGeoDataFrame
 

@@ -92,6 +92,7 @@ Table of Contents
    start.rst
    base.rst
    frame.rst
+   geospatial.rst
    analytics.rst
    utils.rst
    legal.rst

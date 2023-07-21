@@ -99,6 +99,12 @@ def pytest_addoption(parser):
         help="jdbc url string for JDBC connection")
     parser.addoption("--hostname", default='',
         help="hostname for nzpy connection")
+    parser.addoption("--esri", default='true',
+        help="is working on nzspatial_esri cartridge")
+
+@pytest.fixture(scope="session")
+def is_esri(request):
+    return True if request.config.getoption('--esri').lower() == 'true' else False
 
 def get_data(request):
     """

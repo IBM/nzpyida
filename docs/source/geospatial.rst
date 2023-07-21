@@ -33,18 +33,13 @@ __ https://pypi.python.org/pypi/nzpyida
 How the spatial functions work
 ------------------------------
 
-The nzpyida-spatial functions translate geopandas-like syntax into SQL and uses a middleware API (pypyodbc/JayDeBeApi)
-to send it to an ODBC or JDBC-connected database for execution.
+The nzpyida-spatial functions translate geopandas-like syntax into SQL and uses a middleware API (nzpy/pypyodbc/JayDeBeApi)
+to send it to an nzpy, ODBC or JDBC-connected database for execution.
 The results are fetched and formatted into the corresponding data structure, for example, a GeoPandas.GeoDataframe.
 
 The following scenario illustrates how nzpyida works.
 
-Assuming that all ODBC connection parameters are correctly set, issue the following statements to connect to a
-database (in this case, a Netezza database with the name BLUDB) via ODBC:
-
-    >>> from nzpyida import IdaDataBase, IdaGeoDataFrame
-    >>> idadb = IdaDataBase('BLUDB')
-
+Assuming that you've got connection to the databased established via IdaDataBase object named 'idadb'. 
 We can create an IDA geo data frame that points to a sample table:
 
     >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_COUNTY')
@@ -55,12 +50,13 @@ IdaDataBase object, because it holds the connection.
 Now let us compute the area of the counties in the GEO_COUNTY table:
 
     >>> idadf['area'] = idadf['SHAPE'].area()
-         	OBJECTID 	NAME 	        SHAPE 	                                                 area
-         	1 	        Wilbarger 	MULTIPOLYGON (((-99.4756582604 33.8340108094, ... 	0.247254
-         	2 	        Austin 	        MULTIPOLYGON (((-96.6219873342 30.0442882117, ... 	0.162639
-         	3 	        Logan 	        MULTIPOLYGON (((-99.4497297204 46.6316377481, ... 	0.306589
-         	4 	        La Plata 	MULTIPOLYGON (((-107.4817473750 37.0000108736,... 	0.447591
-         	5 	        Randolph 	MULTIPOLYGON (((-91.2589262966 36.2578866492, ... 	0.170844
+    >>> idadf[["NAME", 'area']]
+        NAME		area
+        Wilbarger	0.247254
+     	Austin		0.162639
+     	Logan		0.306589
+        La Plata	0.447591
+     	Randolph	0.170844
 
 The result of the area will be stored as a new column 'area' in the Ida geo data frame.
 
@@ -76,5 +72,5 @@ Here is the SQL request that was executed for this example:
 It's as simple as that!
 
 .. toctree::
-   geoFrame.rst
-   geoSeries.rst
+   geo_frame.rst
+   geo_series.rst

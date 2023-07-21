@@ -9,6 +9,4 @@ include README.md
 include setup.cfg
 include *.gitignore
 
-global-exclude geoFrame.py geoSeries.py
-
 prune docs/build
