@@ -18,8 +18,8 @@ to more refined regression algorithms).
 from typing import List
 from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
-
 from nzpyida.analytics.predictive.regression import Regression
+from nzpyida.analytics.utils import q
 
 
 class LinearRegression(Regression):
@@ -116,10 +116,10 @@ class LinearRegression(Regression):
         """
 
         params = {
-            'id': id_column,
-            'target': target_column,
-            'nominalCols': nominal_colums,
-            'incolumn': in_columns,
+            'id': q(id_column),
+            'target': q(target_column),
+            'nominalCols': q(nominal_colums),
+            'incolumn': q(in_columns),
             'coldeftype': col_def_type,
             'coldefrole': col_def_role,
             'colpropertiestable': col_properties_table,

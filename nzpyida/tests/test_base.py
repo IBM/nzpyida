@@ -48,7 +48,7 @@ class Test_DataBaseExploration(object):
                                   'MININGFUNCTION', 'ALGORITHM', 'USERCATEGORY']
             if not idadb._is_netezza_system():
                 show_model_columns =  ['MODELSCHEMA'] + show_model_columns
-            assert (list(df.columns) == show_model_columns)
+            assert (list(df.columns) == idadb.to_def_case(show_model_columns))
 
     def test_idadb_exists_table_or_view_positive0(self, idadb, idadf, idaview):
         assert(idadb.exists_table_or_view(idadf.name) == 1)
@@ -173,7 +173,7 @@ class Test_DataBaseExploration(object):
         idadb.add_column_id(idadf_tmp, destructive = True)
         # Create a simple DecisionTreeClassifier model
         kmeans = DecisionTreeClassifier(idadb=idadb, model_name="Model_85584573777")
-        kmeans.fit(idadf_tmp, target_column='"species"')
+        kmeans.fit(idadf_tmp, target_column='species')
         assert(idadb.is_model(kmeans.model_name) == 1)
         try : idadb.drop_model(kmeans.model_name)
         except : pass

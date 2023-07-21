@@ -40,11 +40,11 @@ def idf(idadb: IdaDataBase):
 
 def test_std_norm(idadb: IdaDataBase, clean_up, idf):
 
-    out_df = std_norm(idf, in_column=["A:S"], by_column=['B'], out_table=TAB_NAME_TEST)
+    out_df = std_norm(idf, in_column=['A:S'], by_column=['B'], out_table=TAB_NAME_TEST)
     assert out_df
     assert idadb.exists_table_or_view(TAB_NAME_TEST)
 
-    assert all(out_df.columns == ['B', 'ID', 'STD_A'])
+    assert all(out_df.columns == ['B', 'ID', 'std_A'])
 
     assert len(out_df) == len(idf)
 
@@ -80,5 +80,6 @@ def test_train_test_split(idadb: IdaDataBase, idf, clean_up):
     assert round(len(train_df)/len(idf), 1) == 0.8
     assert round(len(test_df)/len(idf), 1) == 0.2
 
-    assert not any(el in train_df['ID'].as_dataframe().values for el in test_df["ID"].as_dataframe().values)
+    train_pdf = train_df['ID'].as_dataframe()
+    assert not any(el in train_pdf.values for el in test_df["ID"].as_dataframe().values)
 

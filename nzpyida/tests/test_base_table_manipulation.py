@@ -76,7 +76,7 @@ class Test_TableManipulation(object):
         original_name = idadf_tmp.tablename
         idadb.rename(idadf_tmp, "TEST_RENAMED")
         idadb.commit()
-        assert(idadf_tmp.name == "TEST_RENAMED")
+        assert(idadf_tmp.name.upper() == "TEST_RENAMED")
         assert(idadb.exists_table("TEST_RENAMED") == 1)
         assert(idadb.exists_table(original_name) == 0)
         idadb.rename(idadf_tmp, original_name)

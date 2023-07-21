@@ -72,25 +72,25 @@ def test_model_manager(idadb, clear_up):
 
     lm_ida = mm.list_models()
     lm = lm_ida.as_dataframe()
-    lm = lm[lm["MODELNAME"]==MOD_NAME]
+    lm = lm[lm[idadb.to_def_case("MODELNAME")]==idadb.to_def_case(MOD_NAME)]
     assert len(lm) == 1
-    assert lm["OWNER"].iloc[0] == "INZAUSER"
-    assert lm["DESCRIPTION"].iloc[0] == "DecTree model"
-    assert lm["COPYRIGHT"].iloc[0] == "Copyright (c) 2023. IBM Corp. All rights reserved."
-    assert lm["USERCATEGORY"].iloc[0] == "DecTree"
-    assert lm["CREATOR"].iloc[0] == "ADMIN"
-    assert lm["ALGORITHM"].iloc[0] == "Decision Tree"
+    assert lm[idadb.to_def_case("OWNER")].iloc[0] == idadb.to_def_case("INZAUSER")
+    assert lm[idadb.to_def_case("DESCRIPTION")].iloc[0] == "DecTree model"
+    assert lm[idadb.to_def_case("COPYRIGHT")].iloc[0] == "Copyright (c) 2023. IBM Corp. All rights reserved."
+    assert lm[idadb.to_def_case("USERCATEGORY")].iloc[0] == "DecTree"
+    assert lm[idadb.to_def_case("CREATOR")].iloc[0] == idadb.to_def_case("ADMIN")
+    assert lm[idadb.to_def_case("ALGORITHM")].iloc[0] == "Decision Tree"
 
     # test grant privileges
 
     mm.revoke_model(MOD_NAME, ["list", "update"], user=["INZAUSER"])
 
-    assert PRIVILEGES_OUTPUT1 in mm.list_privileges()
+    assert PRIVILEGES_OUTPUT1 in mm.list_privileges().upper()
 
     mm.grant_model(MOD_NAME, privilege=["list"], user=["INZAUSER"])
 
-    assert PRIVILEGES_OUTPUT2 in mm.list_privileges()
+    assert PRIVILEGES_OUTPUT2 in mm.list_privileges().upper()
 
-    assert PRIVILEGES_OUTPUT3 in mm.list_privileges(grant=True)
+    assert PRIVILEGES_OUTPUT3 in mm.list_privileges(grant=True).upper()
 
 

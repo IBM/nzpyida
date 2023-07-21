@@ -32,7 +32,7 @@ from nzpyida.analytics.model_manager import ModelManager
 from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
 from nzpyida.analytics.utils import map_to_props, materialize_df, make_temp_table_name
-from nzpyida.analytics.utils import get_auto_delete_context
+from nzpyida.analytics.utils import get_auto_delete_context, q
 from nzpyida.analytics.predictive.regression import Regression
 from nzpyida.analytics.predictive.predictive_modeling import PredictiveModeling
 
@@ -124,7 +124,7 @@ class TreeBayesNetwork(Regression):
             i.e. same as '1')
         """
         params = {
-            'incolumn': in_columns,
+            'incolumn': q(in_columns),
             'coldeftype': col_def_type,
             'coldefrole': col_def_role,
             'colPropertiesTable': col_properties_table,
@@ -168,8 +168,8 @@ class TreeBayesNetwork(Regression):
             the data frame containing row identifiers and predicted target values
         """
         params = {
-            'id': id_column,
-            'target': target_column,
+            'id': q(id_column),
+            'target': q(target_column),
             'type': prediction_type
         }
         return self._predict(in_df, params, out_table)
@@ -202,9 +202,9 @@ class TreeBayesNetwork(Regression):
             the model score
         """
         params = {
-            'id': id_column,
+            'id': q(id_column),
             'type': prediction_type,
-            'target': target_column
+            'target': q(target_column)
         }
         self.target_column_in_output = f"{target_column}_PRED"
         return self._score(in_df, params, target_column)
@@ -250,7 +250,7 @@ class TreeAgumentedNetwork(TreeBayesNetwork):
         """
         params = {
             'inmodel': in_model,
-            'class': class_column,
+            'class': q(class_column),
             'edge_lab_sort': edge_lab_sort
         }
         self._fit(in_df, params, needs_id=False)
@@ -328,8 +328,8 @@ class MultiTreeBayesNetwork(TreeBayesNetwork):
             i.e. same as '1')
         """
         params = {
-            'class': class_column,
-            'incolumn': in_columns,
+            'class': q(class_column),
+            'incolumn': q(in_columns),
             'coldeftype': col_def_type,
             'coldefrole': col_def_role,
             'colPropertiesTable': col_properties_table,
@@ -473,7 +473,7 @@ class TreeBayesNetwork1G(TreeBayesNetworkBase):
         """
         params = {
             'model': self.model_name,
-            'incolumn': in_columns,
+            'incolumn': q(in_columns),
             'coldeftype': col_def_type,
             'coldefrole': col_def_role,
             'colPropertiesTable': col_properties_table,
@@ -571,7 +571,7 @@ class TreeBayesNetwork2G(TreeBayesNetworkBase):
         """
         params = {
             'model': self.model_name,
-            'incolumn': in_columns,
+            'incolumn': q(in_columns),
             'coldeftype': col_def_type,
             'coldefrole': col_def_role,
             'colPropertiesTable': col_properties_table,
@@ -667,7 +667,7 @@ class TreeBayesNetwork1G2P(TreeBayesNetworkBase):
         """
         params = {
             'model': self.model_name,
-            'incolumn': in_columns,
+            'incolumn': q(in_columns),
             'coldeftype': col_def_type,
             'coldefrole': col_def_role,
             'colPropertiesTable': col_properties_table,

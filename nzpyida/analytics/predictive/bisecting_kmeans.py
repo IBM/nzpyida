@@ -49,6 +49,8 @@ from nzpyida.base import IdaDataBase
 from nzpyida.analytics.utils import map_to_props, make_temp_table_name
 from nzpyida.analytics.utils import get_auto_delete_context
 from nzpyida.analytics.predictive.predictive_modeling import PredictiveModeling
+from nzpyida.analytics.utils import q
+
 
 class BisectingKMeans(PredictiveModeling):
     """
@@ -73,8 +75,8 @@ class BisectingKMeans(PredictiveModeling):
         self.fit_proc = 'DIVCLUSTER'
         self.predict_proc = 'PREDICT_DIVCLUSTER'
         self.score_proc = 'MSE'
-        self.target_column_in_output = 'CLUSTER_ID'
-        self.id_column_in_output = 'ID'
+        self.target_column_in_output = idadb.to_def_case('CLUSTER_ID')
+        self.id_column_in_output = idadb.to_def_case('ID')
         self.has_print_proc = True
 
     def fit(self, in_df: IdaDataFrame, id_column: str=None, target_column: str=None,
@@ -169,9 +171,9 @@ class BisectingKMeans(PredictiveModeling):
             out_table = make_temp_table_name()
 
         params = {
-            'id': id_column,
-            'target': target_column,
-            'incolumn': in_columns,
+            'id': q(id_column),
+            'target': q(target_column),
+            'incolumn': q(in_columns),
             'coldeftype': col_def_type,
             'coldefrole': col_def_role,
             'colpropertiestable': col_properties_table,
@@ -218,7 +220,7 @@ class BisectingKMeans(PredictiveModeling):
         """
 
         params = {
-            'id': id_column,
+            'id': q(id_column),
             'level': level
         }
 
@@ -252,7 +254,7 @@ class BisectingKMeans(PredictiveModeling):
         """
 
         params = {
-            'id': id_column,
+            'id': q(id_column),
             'level': level
         }
 

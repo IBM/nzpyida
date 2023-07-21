@@ -148,7 +148,7 @@ class IdaDataFrame(object):
         if not idadb.__class__.__name__ == "IdaDataBase":
             idadb_class = idadb.__class__.__name__
             raise TypeError("Argument 'idadb' is of type %s, expected : IdaDataBase"%idadb_class)
-        tablename = nzpyida.utils.check_tablename(tablename)
+        tablename = nzpyida.utils.check_tablename(tablename, idadb._upper_cased)
 
         #idadb._reset_attributes("cache_show_tables")
 
@@ -2296,14 +2296,14 @@ class IdaDataFrame(object):
                                       'GRAPHIC', 'CLOB']
             numerical_attributes = ['SMALLINT', 'INTEGER', 'BIGINT', 'REAL',
                                     'DOUBLE', 'DOUBLE PRECISION', 'FLOAT', 'DECIMAL', 'NUMERIC']
-            if tup[0] in categorical_attributes:
+            if tup[0].upper() in categorical_attributes:
                 if factor_threshold is None:
                     return "CATEGORICAL"
                 elif tup[1] <= factor_threshold:
                     return "CATEGORICAL"
                 else:
                     return "STRING"
-            elif tup[0] in numerical_attributes:
+            elif tup[0].upper() in numerical_attributes:
                 if factor_threshold is None:
                     return "NUMERIC"
                 elif tup[1] > factor_threshold:
@@ -2338,7 +2338,7 @@ class IdaDataFrame(object):
         """
         num = ['SMALLINT', 'INTEGER', 'BIGINT', 'REAL',
                             'DOUBLE', 'DOUBLE PRECISION', 'FLOAT', 'DECIMAL', 'NUMERIC']
-        return list(self.dtypes.loc[self.dtypes['TYPENAME'].isin(num)].index)
+        return list(self.dtypes.loc[self.dtypes['TYPENAME'].str.upper().isin(num)].index)
 
     def _get_categorical_columns(self):
         """
@@ -2359,7 +2359,7 @@ class IdaDataFrame(object):
         ['species']
         """
         cat = ['VARCHAR', 'CHARACTER', 'VARGRAPHIC', 'GRAPHIC', 'CLOB']
-        return list(self.dtypes.loc[self.dtypes['TYPENAME'].isin(cat)].index)
+        return list(self.dtypes.loc[self.dtypes['TYPENAME'].str.upper().isin(cat)].index)
 
     def _prepare_and_execute(self, query, autocommit = True, silent = False):
         """

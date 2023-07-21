@@ -38,6 +38,7 @@ from typing import List
 from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
 from nzpyida.analytics.predictive.classification import Classification
+from nzpyida.analytics.utils import q
 
 
 class DecisionTreeClassifier(Classification):
@@ -172,9 +173,9 @@ class DecisionTreeClassifier(Classification):
         """
 
         params = {
-            'id': id_column,
-            'target': target_column,
-            'incolumn': in_columns,
+            'id': q(id_column),
+            'target': q(target_column),
+            'incolumn': q(in_columns),
             'coldeftype': col_def_type,
             'coldefrole': col_def_role,
             'colpropertiestable': col_properties_table,
@@ -224,7 +225,7 @@ class DecisionTreeClassifier(Classification):
         """
 
         params = {
-            'id': id_column,
+            'id': q(id_column),
             'prob': prob,
             'outtableprob': out_table_prob
         }

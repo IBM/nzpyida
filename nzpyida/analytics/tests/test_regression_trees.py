@@ -54,7 +54,7 @@ def test_regression_trees(idadb: IdaDataBase, mm: ModelManager, clear_up):
 
     pred = model.predict(idf_test, id_column="ID", out_table=OUT_TABLE_PRED)
     assert pred
-    assert all(pred.columns == ['ID', 'CLASS'])
+    assert all(pred.columns == idadb.to_def_case(['ID', 'CLASS']))
     # assert any(round(x) == y for x, y in zip(list(pred.as_dataframe()['CLASS'].values),  [1, 4, 2223, -999, 11112]))
 
     score = model.score(idf_test, id_column="ID", target_column="B")

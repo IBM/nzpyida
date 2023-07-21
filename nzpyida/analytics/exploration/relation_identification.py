@@ -15,6 +15,7 @@ This module consists of algorithms used to detect and quantify relationships bet
 from nzpyida.analytics.utils import call_proc_df_in_out, make_temp_table_name, out_str_to_df
 from nzpyida.frame import IdaDataFrame
 from typing import List
+from nzpyida.analytics.utils import q
 import pandas as pd
 
 
@@ -49,14 +50,14 @@ def corr(in_df: IdaDataFrame, in_column: List[str], by_column: str=None, out_tab
         the data frame with requested data
     """
     params = {
-        'incolumn': in_column,
-        'by': by_column
+        'incolumn': q(in_column),
+        'by': q(by_column)
     }
     out_df = call_proc_df_in_out(proc="CORR", in_df=in_df, params=params, out_table=out_table)[0]
     temp_table = make_temp_table_name()
     query = f"""create table {temp_table} as
             select case when CORRELATION is null then 0 else CORRELATION
-            end as correlation {', ' + by_column if by_column else ''}
+            end as correlation {', "' + by_column + '"' if by_column else ''}
             from {out_table};
             drop table {out_table};
             alter table {temp_table} rename to {out_table};
@@ -95,8 +96,8 @@ def cov(in_df: IdaDataFrame, in_column: List[str], by_column: str=None, out_tabl
         the data frame with requested data
     """
     params = {
-        'incolumn': in_column,
-        'by': by_column
+        'incolumn': q(in_column),
+        'by': q(by_column)
     }
     return call_proc_df_in_out(proc="COV", in_df=in_df, params=params, out_table=out_table)[0]
 
@@ -133,8 +134,8 @@ def covariance_matrix(in_df: IdaDataFrame, in_column: List[str], out_table: str=
         the data frame with requested data
     """
     params = {
-        'incolumn': in_column,
-        'by': by_column
+        'incolumn': q(in_column),
+        'by': q(by_column)
     }
     return call_proc_df_in_out(proc="COVARIANCEMATRIX", in_df=in_df, params=params, out_table=out_table)[0]
 
@@ -173,14 +174,14 @@ def spearman_corr(in_df: IdaDataFrame, in_column: List[str], by_column: str=None
         the data frame with requested data
     """
     params = {
-        'incolumn': in_column,
-        'by': by_column
+        'incolumn': q(in_column),
+        'by': q(by_column)
     }
     temp_table = make_temp_table_name()
     if by_column:
         out_df =  call_proc_df_in_out(proc="SPEARMAN_CORR", in_df=in_df, params=params, out_table=out_table)[0]
         query = f"""create table {temp_table} as
-            select {by_column + ', '} case when RHO is null then 0 else RHO
+            select {'"' + by_column + '", '} case when RHO is null then 0 else RHO
             end as RHO, N
             from {out_table};
             drop table {out_table};
@@ -229,8 +230,8 @@ def mutual_info(in_df: IdaDataFrame, in_column: List[str], by_column: str=None, 
         the data frame with requested data
     """
     params = {
-        'incolumn': in_column,
-        'by': by_column
+        'incolumn': q(in_column),
+        'by': q(by_column)
     }
     return call_proc_df_in_out(proc="MUTUALINFO", in_df=in_df, params=params, out_table=out_table)[0]
 
@@ -269,8 +270,8 @@ def chisq(in_df: IdaDataFrame, in_column: List[str], out_table: str=None, by_col
         the data frame with requested data
     """
     params = {
-        'incolumn': in_column,
-        'by': by_column
+        'incolumn': q(in_column),
+        'by': q(by_column)
     }
     return call_proc_df_in_out(proc="CHISQ_TEST", in_df=in_df, params=params, out_table=out_table)[0]
 
@@ -308,8 +309,8 @@ def t_me_test(in_df: IdaDataFrame, in_column: str, mean_value: float, by_column:
         the data frame with requested data
     """
     params = {
-        'incolumn': in_column,
-        'by': by_column,
+        'incolumn': q(in_column),
+        'by': q(by_column),
         'mean': mean_value
     }
     return call_proc_df_in_out(proc="T_ME_TEST", in_df=in_df, params=params, out_table=out_table)[0]
@@ -349,9 +350,9 @@ def t_umd_test(in_df: IdaDataFrame, in_column: str, class_column: str, out_table
         the data frame with requested data
     """
     params = {
-        'incolumn': in_column,
-        'by': by_column,
-        'class': class_column
+        'incolumn': q(in_column),
+        'by': q(by_column),
+        'class': q(class_column)
     }
     return call_proc_df_in_out(proc="T_UMD_TEST", in_df=in_df, params=params, out_table=out_table)[0]
 
@@ -386,8 +387,8 @@ def t_pmd_test(in_df: IdaDataFrame, in_column: List[str], expected_diff: float, 
         the data frame with requested data
     """
     params = {
-        'incolumn': in_column,
-        'by': by_column,
+        'incolumn': q(in_column),
+        'by': q(by_column),
         'expdiff': expected_diff
     }
     return call_proc_df_in_out(proc="T_PMD_TEST", in_df=in_df, params=params, out_table=out_table)[0]
@@ -428,8 +429,8 @@ def t_ls_test(in_df: IdaDataFrame, in_column: List[str], slope: float, by_column
         the data frame with requested data
     """
     params = {
-        'incolumn': in_column,
-        'by': by_column,
+        'incolumn': q(in_column),
+        'by': q(by_column),
         'slope': slope
     }
     return call_proc_df_in_out(proc="T_LS_TEST", in_df=in_df, params=params, out_table=out_table)[0]
@@ -467,9 +468,9 @@ def mww_test(in_df: IdaDataFrame, in_column: str, class_column: str, by_column: 
         the data frame with requested data
     """
     params = {
-        'incolumn': in_column,
-        'by': by_column,
-        'class': class_column
+        'incolumn': q(in_column),
+        'by': q(by_column),
+        'class': q(class_column)
     }
     if by_column:
         return call_proc_df_in_out(proc="MWW_TEST", in_df=in_df, params=params, out_table=out_table)[0]
@@ -506,8 +507,8 @@ def wilcoxon_test(in_df: IdaDataFrame, in_column: List[str], by_column: str=None
         the data frame with requested data
     """
     params = {
-        'incolumn': in_column,
-        'by': by_column
+        'incolumn': q(in_column),
+        'by': q(by_column)
     }
     if by_column:
         return call_proc_df_in_out(proc="WILCOXON_TEST", in_df=in_df, params=params, out_table=out_table)[0]
@@ -545,13 +546,13 @@ def canonical_corr(in_df: IdaDataFrame, in_column: List[str], by_column: str=Non
         the data frame with requested data
     """
     params = {
-        'incolumn': in_column,
-        'by': by_column
+        'incolumn': q(in_column),
+        'by': q(by_column)
     }
     return call_proc_df_in_out(proc="CANONICAL_CORR", in_df=in_df, params=params, out_table=out_table)[0]
 
 
-def anova_crd_test(in_df: IdaDataFrame, in_column: List[str], treatment: str, by_column: str=None, out_table: str=None):
+def anova_crd_test(in_df: IdaDataFrame, in_column: List[str], treatment_column: str, by_column: str=None, out_table: str=None):
     """
     This function analyzes the variance of one or several observations for different treatments. 
     It assumes that the input table contains one or several columns with numerical (double) 
@@ -569,7 +570,7 @@ def anova_crd_test(in_df: IdaDataFrame, in_column: List[str], treatment: str, by
     in_column : List[str]
         the input table observation columns, separated by a semi-colon (;) 
     
-    treatment : str
+    treatment_column : str
         the input table column identifying a unique treatment
 
     by_column : str, optional
@@ -584,9 +585,9 @@ def anova_crd_test(in_df: IdaDataFrame, in_column: List[str], treatment: str, by
         the data frame with requested data
     """
     params = {
-        'incolumn': in_column,
-        'by': by_column,
-        'treatment': treatment
+        'incolumn': q(in_column),
+        'by': q(by_column),
+        'treatment': q(treatment_column)
     }
     out_df = call_proc_df_in_out(proc="ANOVA_CRD_TEST", in_df=in_df, params=params, out_table=out_table)[0]
     temp_table = make_temp_table_name()
@@ -594,7 +595,7 @@ def anova_crd_test(in_df: IdaDataFrame, in_column: List[str], treatment: str, by
                                       'DFBETWEEN', 'SSCWITHIN', 'DFWITHIN', 'F'])
     query = f"""create table {temp_table} as
             select {'INCOLUMN, ' if len(in_column)>1 else ''} 
-            {by_column + ', ' if by_column else ''} 
+            {'"' + by_column + '", ' if by_column else ''} 
             {usual_columns},
             case when p is null then 0 else p
             end as p 
@@ -606,7 +607,7 @@ def anova_crd_test(in_df: IdaDataFrame, in_column: List[str], treatment: str, by
     return out_df
 
 
-def anova_rbd_test(in_df: IdaDataFrame, in_column: str, treatment: str, block: str, by_column: str=None, out_table: str=None):
+def anova_rbd_test(in_df: IdaDataFrame, in_column: str, treatment_column: str, block_column: str, by_column: str=None, out_table: str=None):
     """
     This function analyzes the variance of one or several observations for different blocks of treatments. 
     It assumes that the input table contains one or several columns with numerical (double) observation 
@@ -641,10 +642,10 @@ def anova_rbd_test(in_df: IdaDataFrame, in_column: str, treatment: str, block: s
     in_column : str
         the input table observation columns, separated by a semi-colon (;) 
     
-    treatment : str
+    treatment_column : str
         the input table column identifying a unique treatment
 
-    block : str
+    block_column : str
         the input table column identifying a unique block of treatments
         
     by_column : str, optional
@@ -659,15 +660,15 @@ def anova_rbd_test(in_df: IdaDataFrame, in_column: str, treatment: str, block: s
         the data frame with requested data
     """
     params = {
-        'incolumn': in_column,
-        'by': by_column,
-        'treatment': treatment,
-        'block': block
+        'incolumn': q(in_column),
+        'by': q(by_column),
+        'treatment': q(treatment_column),
+        'block': q(block_column)
     }
     return call_proc_df_in_out(proc="ANOVA_RBD_TEST", in_df=in_df, params=params, out_table=out_table)[0]
 
 
-def manova_one_way_test(in_df: IdaDataFrame, in_column: str, factor1: str, id_column: str=None, by_column: str=None, 
+def manova_one_way_test(in_df: IdaDataFrame, in_column: str, factor1_column: str, id_column: str=None, by_column: str=None, 
                         table_type: str='trcv', out_table: str=None, timecheck: str=None):
     """
     This function performs one-way analysis of variance/covariance aiming to tell whether or not 
@@ -687,7 +688,7 @@ def manova_one_way_test(in_df: IdaDataFrame, in_column: str, factor1: str, id_co
         the input table observation columns (dependent variables), separated by a semi-colon (;) 
         used for type='column' only, for type='trcv' these are the values for col-column greater equal 2 
     
-    factor1 : str, optional
+    factor1_column : str, optional
         the input table column identifying a first factor (so-called treatment in RBD/CRD nomenclature) 
         used for type='column' only, for type='trcv' these are the values for col-column equal 1
     
@@ -718,17 +719,17 @@ def manova_one_way_test(in_df: IdaDataFrame, in_column: str, factor1: str, id_co
         the data frame with requested data
     """
     params = {
-        'incolumn': in_column,
-        'by': by_column,
-        'factor1': factor1,
+        'incolumn': q(in_column),
+        'by': q(by_column),
+        'factor1': q(factor1_column),
         'type': table_type,
-        'id': id_column,
+        'id': q(id_column),
         '_timecheck': timecheck
     }
     return call_proc_df_in_out(proc="MANOVA_ONE_WAY_TEST", in_df=in_df, params=params, out_table=out_table)[0]
 
 
-def manova_two_way_test(in_df: IdaDataFrame, in_column: str, factor1: str, factor2: str, table_type: str, 
+def manova_two_way_test(in_df: IdaDataFrame, in_column: str, factor1_column: str, factor2_column: str, table_type: str, 
                         id_column: str=None, by_column: str=None, out_table: str=None, timecheck: str=None):
     """
     This function performs Two-way analysis of variance/covariance aiming to tell whether or 
@@ -743,11 +744,11 @@ def manova_two_way_test(in_df: IdaDataFrame, in_column: str, factor1: str, facto
         the input table observation columns (dependent variables), separated by a semi-colon (;) 
         used for type='column' only, for type='trcv' these are the values for col-column greater equal 3 
     
-    factor1 : str
+    factor1_column : str
         the input table column identifying a first factor (so-called treatment in RBD/CRD nomenclature),
         used for type='column' only, for type='trcv' these are the values for col-column equal 1
     
-    factor2: str
+    factor2_column: str
         the input table column identifying a second factor (so-called block in RBD nomenclature),
         used for type='column' only, for type='trcv' these are the values for col-column equal 2
     
@@ -778,12 +779,12 @@ def manova_two_way_test(in_df: IdaDataFrame, in_column: str, factor1: str, facto
         the data fąrame with requested data
     """
     params = {
-        'incolumn': in_column,
-        'by': by_column,
-        'factor1': factor1,
-        'factor2': factor2,
+        'incolumn': q(in_column),
+        'by': q(by_column),
+        'factor1': q(factor1_column),
+        'factor2': q(factor2_column),
         'type': table_type,
-        'id': id_column,
+        'id': q(id_column),
         '_timecheck': timecheck
     }
     return call_proc_df_in_out(proc="MANOVA_TWO_WAY_TEST", in_df=in_df, params=params, out_table=out_table)[0]

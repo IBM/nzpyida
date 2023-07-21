@@ -15,7 +15,7 @@ of single attributes or the joint distribution of multiple—usually two—attri
 
 from typing import List
 from nzpyida.frame import IdaDataFrame
-from nzpyida.analytics.utils import call_proc_df_in_out
+from nzpyida.analytics.utils import call_proc_df_in_out, q
 
 
 def moments(in_df: IdaDataFrame, in_column: str, by_column: str=None,
@@ -51,8 +51,8 @@ def moments(in_df: IdaDataFrame, in_column: str, by_column: str=None,
     """
 
     params = {
-        'incolumn': in_column,
-        'by': by_column
+        'incolumn': q(in_column),
+        'by': q(by_column)
     }
     return call_proc_df_in_out(proc='MOMENTS', in_df=in_df, params=params, out_table=out_table)[0]
 
@@ -89,7 +89,7 @@ def quantile(in_df: IdaDataFrame, in_column: str, quantiles: List[int],
     """
 
     params = {
-        'incolumn': in_column,
+        'incolumn': q(in_column),
         'quantiles': quantiles
     }
     return call_proc_df_in_out(proc='QUANTILE', in_df=in_df, params=params, out_table=out_table)[0]
@@ -124,7 +124,7 @@ def outliers(in_df: IdaDataFrame, in_column: str, multiplier: float=1.5,
     """
 
     params = {
-        'incolumn': in_column,
+        'incolumn': q(in_column),
         'multiplier': multiplier
     }
     return call_proc_df_in_out(proc='OUTLIERS', in_df=in_df, params=params, out_table=out_table)[0]
@@ -154,7 +154,7 @@ def unitable(in_df: IdaDataFrame, in_column: str, out_table: str=None) -> IdaDat
     """
 
     params = {
-        'incolumn': in_column
+        'incolumn': q(in_column)
     }
     return call_proc_df_in_out(proc='UNITABLE', in_df=in_df, params=params, out_table=out_table)[0]
 
@@ -194,7 +194,7 @@ def bitable(in_df: IdaDataFrame, in_column: List[str], freq: bool=False, cum: bo
     """
 
     params = {
-        'incolumn': in_column,
+        'incolumn': q(in_column),
         'freq': freq,
         'cum': cum
     }
@@ -263,11 +263,11 @@ def histogram(in_df: IdaDataFrame, in_column: str, nbreaks: int=None, right: boo
     """
 
     params = {
-        'incolumn': in_column,
+        'incolumn': q(in_column),
         'nbreaks': nbreaks,
         'right': right,
         'btable': btable,
-        'bcolumn': bcolumn,
+        'bcolumn': q(bcolumn),
         'density': density,
         'midpoints': midpoints,
         'freq': freq,

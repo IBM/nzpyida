@@ -15,7 +15,7 @@ frame for machine learning.
 from typing import List, Tuple
 from nzpyida.frame import IdaDataFrame
 from nzpyida.analytics.utils import materialize_df, make_temp_table_name, \
-    get_auto_delete_context, call_proc_df_in_out, map_to_props
+    get_auto_delete_context, call_proc_df_in_out, map_to_props, q
 
 
 def std_norm(in_df: IdaDataFrame, in_column: List[str], id_column: str = None,
@@ -61,15 +61,15 @@ def std_norm(in_df: IdaDataFrame, in_column: List[str], id_column: str = None,
     """
     if not id_column:
         if in_df.indexer:
-            id_column = in_df.indexer
+            id_column = q(in_df.indexer)
         else:
             raise TypeError('Missing id column - either use id_column attribute or set '
                             'indexer column in the input data frame')
 
     params = {
-        'id': id_column,
-        'incolumn': in_column,
-        'by': by_column
+        'id': q(id_column),
+        'incolumn': q(in_column),
+        'by': q(by_column)
     }
     return call_proc_df_in_out(proc='STD_NORM', in_df=in_df, params=params,
                                out_table=out_table, copy_indexer=True)[0]
@@ -116,7 +116,7 @@ def impute_data(in_df: IdaDataFrame, in_column: str = None, method: str = None,
     """
 
     params = {
-        'incolumn': in_column,
+        'incolumn': q(in_column),
         'method': method,
         'numericvalue': numeric_value,
         'nominalvalue': nominal_value
@@ -186,7 +186,7 @@ def random_sample(in_df: IdaDataFrame, size: int = None, fraction: float = None,
     params = {
         'size': size,
         'fraction': fraction,
-        'by': by_column,
+        'by': q(by_column),
         'outsignature': out_signature,
         'randseed': rand_seed
     }
@@ -234,7 +234,7 @@ def train_test_split(in_df: IdaDataFrame, out_table_train: str=None, out_table_t
         if not in_df.indexer:
             raise ValueError("If dataframe has no indexer 'id_column' has to be provided")
         else:
-            id_column = in_df.indexer
+            id_column = q(in_df.indexer)
 
     if out_table_train and in_df._idadb.exists_table_or_view(out_table_train):
             in_df._idadb.drop_table(out_table_train)
@@ -256,7 +256,7 @@ def train_test_split(in_df: IdaDataFrame, out_table_train: str=None, out_table_t
         'intable': temp_view_name,
         'traintable': out_table_train,
         'testtable': out_table_test,
-        'id': id_column,
+        'id': q(id_column),
         'fraction': fraction
     }
 

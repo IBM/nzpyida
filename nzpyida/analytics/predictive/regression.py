@@ -14,7 +14,7 @@ This module contains a class that is the base for all regression algorithms.
 from typing import Dict
 from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
-from nzpyida.analytics.utils import map_to_props, materialize_df, make_temp_table_name
+from nzpyida.analytics.utils import map_to_props, materialize_df, make_temp_table_name, q
 from nzpyida.analytics.predictive.predictive_modeling import PredictiveModeling
 
 
@@ -40,7 +40,7 @@ class Regression(PredictiveModeling):
 
         super().__init__(idadb, model_name)
         self.score_proc = 'MSE'
-        self.id_column_in_output = 'ID'
+        self.id_column_in_output = idadb.to_def_case('ID')
 
     def predict(self, in_df: IdaDataFrame, out_table: str=None,
         id_column: str=None) -> IdaDataFrame:
@@ -66,7 +66,7 @@ class Regression(PredictiveModeling):
         """
 
         params = {
-            'id': id_column
+            'id': q(id_column)
         }
 
         return self._predict(in_df=in_df, params=params, out_table=out_table)
@@ -95,7 +95,7 @@ class Regression(PredictiveModeling):
         """
 
         params = {
-            'id': id_column
+            'id': q(id_column)
         }
 
         return self._score(in_df=in_df, predict_params=params, target_column=target_column)
@@ -127,7 +127,7 @@ class Regression(PredictiveModeling):
 
         if not id_column:
             if in_df.indexer:
-                id_column = in_df.indexer
+                id_column = q(in_df.indexer)
             else:
                 raise TypeError('Missing id column - either use id_column attribute or set '
                     'indexer column in the input data frame')
@@ -144,12 +144,12 @@ class Regression(PredictiveModeling):
             params = map_to_props({
                 'pred_table': pred_view,
                 'true_table': true_view,
-                'pred_id': id_column if self.id_column_in_output is None
-                    else self.id_column_in_output,
-                'true_id': id_column,
+                'pred_id': q(id_column) if self.id_column_in_output is None
+                    else q(self.id_column_in_output),
+                'true_id': q(id_column),
                 'pred_column': target_column if self.target_column_in_output is None
-                    else self.target_column_in_output,
-                'true_column': target_column
+                    else q(self.target_column_in_output),
+                'true_column': q(target_column)
             })
 
             res1 = pred_df.ida_query(f'call NZA..MSE(\'{params}\')')

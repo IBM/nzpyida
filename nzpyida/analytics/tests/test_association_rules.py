@@ -83,17 +83,17 @@ def test_arule(idadb: IdaDataBase, mm: ModelManager, idf_test: IdaDataFrame,
     assert mm.model_exists(MOD_NAME) 
 
     pred_ida = model.predict(idf_test, OUT_TABLE_PRED, max_conviction=1.25, 
-                       max_affinity=0.6, min_lift=1.0, min_leverage=0.03)
+                       max_affinity=0.6, min_lift=1.0, min_leverage=0.03, transaction_id_column='TID', item_column='ITEM')
     assert pred_ida
-    assert all(pred_ida.columns == ['GID', 'TID', 'LHS_SID', 'RHS_SID', 'LHS_ITEMS', 'RHS_ITEMS', 'SUPPORT',
-       'CONFIDENCE', 'LIFT', 'CONVICTION', 'AFFINITY', 'LEVERAGE'])
+    assert all(pred_ida.columns == idadb.to_def_case(['GID', 'TID', 'LHS_SID', 'RHS_SID', 'LHS_ITEMS', 'RHS_ITEMS', 'SUPPORT',
+       'CONFIDENCE', 'LIFT', 'CONVICTION', 'AFFINITY', 'LEVERAGE']))
     pred = pred_ida.as_dataframe()
-    assert all(pred["SUPPORT"].values >= 0.2)
-    assert all(pred["CONFIDENCE"].values >= 0.4)
-    assert all(pred["CONVICTION"].values <= 1.25)
-    assert all(pred["AFFINITY"].values <= 0.6)
-    assert all(pred["LIFT"].values >= 1.0)
-    assert all(pred["LEVERAGE"].values >=0.03)
+    assert all(pred[idadb.to_def_case("SUPPORT")].values >= 0.2)
+    assert all(pred[idadb.to_def_case("CONFIDENCE")].values >= 0.4)
+    assert all(pred[idadb.to_def_case("CONVICTION")].values <= 1.25)
+    assert all(pred[idadb.to_def_case("AFFINITY")].values <= 0.6)
+    assert all(pred[idadb.to_def_case("LIFT")].values >= 1.0)
+    assert all(pred[idadb.to_def_case("LEVERAGE")].values >=0.03)
 
     assert model.describe()
     
