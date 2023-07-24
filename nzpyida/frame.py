@@ -53,6 +53,7 @@ import nzpyida.indexing
 import nzpyida.aggregation
 import nzpyida.filtering
 import nzpyida.utils
+from nzpyida.groupby import IdaDataFrameGroupBy
 
 from nzpyida.utils import timed, chunklist
 from nzpyida.internals import InternalState
@@ -1232,8 +1233,27 @@ class IdaDataFrame(object):
 
     @idadf_state
     def groupby(self, by):
-        # TODO: create an IdadataFrame groupby
-        raise NotImplementedError()
+        """
+        Create the groupby object 
+        
+        Parameters
+        ----------
+        by : str
+            Column to group the Data Frame by
+        
+        Returns
+        ----------
+        IdaDataFrameGroupBy
+        """
+        if by not in self.columns:
+            raise KeyError(by)
+        
+        columns_to_groupby = [col for col in self.columns if col != by]
+        
+        groupby_object = IdaDataFrameGroupBy(
+            self, columns_to_groupby, by)
+
+        return groupby_object
 
     @idadf_state
     def merge(self):
