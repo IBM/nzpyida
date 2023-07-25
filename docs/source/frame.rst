@@ -191,6 +191,17 @@ sort
 ----
 .. automethod:: IdaDataFrame.sort
 
+groupby
+-------
+.. automethod:: IdaDataFrame.groupby
+
+Obtaing IdaDataFrame with grouped data is possible with aggregate methods of IdaDataFrameGroupBy
+ 
+IdaDataFrameGroupBy
+-------------------
+.. autoclass:: nzpyida.groupby.IdaDataFrameGroupBy
+	:members:
+
 
 Descriptive Statistics
 ======================

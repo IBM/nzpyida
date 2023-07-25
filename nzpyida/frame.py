@@ -1234,7 +1234,7 @@ class IdaDataFrame(object):
     @idadf_state
     def groupby(self, by):
         """
-        Create the groupby object 
+        Creates the groupby object 
         
         Parameters
         ----------
@@ -1244,6 +1244,11 @@ class IdaDataFrame(object):
         Returns
         ----------
         IdaDataFrameGroupBy
+
+        Examples
+        --------
+        >>> ida_iris.groupby("CLASS")
+        <nzpyida.groupby.IdaDataFrameGroupBy at 0x11c288e10>
         """
         if by not in self.columns:
             raise KeyError(by)

@@ -26,6 +26,7 @@ import six
 
 import nzpyida
 from nzpyida import IdaDataBase
+from nzpyida.groupby import IdaDataFrameGroupBy
 
 
 class Test_OpenDataFrameObject(object):
@@ -281,6 +282,7 @@ class Test_DataExploration(object):
     ### head
     # For head and tail we do not test if the rows match because
     # the order is not guaranteed anyway
+    
     def test_idadf_head_default(self, idadb, idadf, df):
         sortkey = idadf.columns[0]
         if idadf._get_numerical_columns():
@@ -432,6 +434,13 @@ class Test_DataExploration(object):
 
     def test_idadf_sort(self, idadf):
         pass
+
+    def test_groupby(self, idadf):
+        groupby_object = idadf.groupby("species")
+        assert isinstance(groupby_object, IdaDataFrameGroupBy)
+        grouped_idadf = groupby_object.mean()
+        assert isinstance(grouped_idadf, nzpyida.IdaDataFrame)
+        assert any([col.startswith("AVG_") for col in grouped_idadf.columns])
 
 # no test
 #__enter__
