@@ -9,11 +9,10 @@
 # The full license is in the LICENSE file, distributed with this software.
 #-----------------------------------------------------------------------------
 import pytest
-from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
 from nzpyida.analytics.model_manager import ModelManager
 from nzpyida.analytics.predictive.decision_trees import DecisionTreeClassifier
-from nzpyida.analytics.tests.conftest import MOD_NAME, TAB_NAME_TRAIN, df_train
+from nzpyida.analytics.tests.conftest import MOD_NAME
 
 import pytest
 
@@ -36,7 +35,7 @@ def clear_up(idadb: IdaDataBase):
         mm.drop_model(MOD_NAME_COPY)
 
 
-def test_model_manager(idadb, clear_up):
+def test_model_manager(idadb, clear_up, idf_train):
     mm = ModelManager(idadb)
     assert mm
 
@@ -49,8 +48,8 @@ def test_model_manager(idadb, clear_up):
     assert not mm.model_exists(MOD_NAME)
 
     # create model and check if mm.model_exits shows it
-    idf_train = idadb.as_idadataframe(df_train, tablename=TAB_NAME_TRAIN, clear_existing=True)
-    DecisionTreeClassifier(idadb, model_name=MOD_NAME).fit(idf_train, id_column='ID', target_column='B')
+    DecisionTreeClassifier(idadb, model_name=MOD_NAME).fit(idf_train, id_column='ID', 
+                                                           target_column='B')
     assert mm.model_exists(MOD_NAME)
 
     # test copy model
@@ -65,8 +64,10 @@ def test_model_manager(idadb, clear_up):
     assert not mm.model_exists(MOD_NAME)
 
     # test alter model
-    mm.alter_model(MOD_NAME_COPY, name=MOD_NAME, owner="INZAUSER", description="DecTree model",
-                   copyright="Copyright (c) 2023. IBM Corp. All rights reserved.", category="DecTree")
+    mm.alter_model(MOD_NAME_COPY, name=MOD_NAME, owner="INZAUSER", 
+                   description="DecTree model",
+                   copyright="Copyright (c) 2023. IBM Corp. All rights reserved.", 
+                   category="DecTree")
     
     assert mm.model_exists(MOD_NAME)
 
@@ -76,7 +77,8 @@ def test_model_manager(idadb, clear_up):
     assert len(lm) == 1
     assert lm[idadb.to_def_case("OWNER")].iloc[0] == idadb.to_def_case("INZAUSER")
     assert lm[idadb.to_def_case("DESCRIPTION")].iloc[0] == "DecTree model"
-    assert lm[idadb.to_def_case("COPYRIGHT")].iloc[0] == "Copyright (c) 2023. IBM Corp. All rights reserved."
+    assert lm[idadb.to_def_case("COPYRIGHT")].iloc[0] == \
+        "Copyright (c) 2023. IBM Corp. All rights reserved."
     assert lm[idadb.to_def_case("USERCATEGORY")].iloc[0] == "DecTree"
     assert lm[idadb.to_def_case("CREATOR")].iloc[0] == idadb.to_def_case("ADMIN")
     assert lm[idadb.to_def_case("ALGORITHM")].iloc[0] == "Decision Tree"

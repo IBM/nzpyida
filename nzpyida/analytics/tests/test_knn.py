@@ -10,18 +10,11 @@
 # The full license is in the LICENSE file, distributed with this software.
 #-----------------------------------------------------------------------------
 
-from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
 from nzpyida.analytics.model_manager import ModelManager
 from nzpyida.analytics.predictive.knn import KNeighborsClassifier
-from nzpyida.analytics.tests.conftest import MOD_NAME, OUT_TABLE_PRED, OUT_TABLE_CM, TAB_NAME_TEST, \
-    TAB_NAME_TRAIN, df_test, df_train
-import pandas as pd
+from nzpyida.analytics.tests.conftest import MOD_NAME, OUT_TABLE_PRED, OUT_TABLE_CM
 import pytest
-
-TAB_NAME_TEST = "TAB_NAME1"
-TAB_NAME_TRAIN = "TAB_NAME2"
-MOD_NAME = "MOD_NAME1"
 
 @pytest.fixture(scope='module')
 def mm(idadb: IdaDataBase):
@@ -43,12 +36,7 @@ def clear_up(idadb: IdaDataBase, mm: ModelManager):
     if idadb.exists_table(OUT_TABLE_CM):
         idadb.drop_table(OUT_TABLE_CM)
 
-def test_knn(idadb: IdaDataBase, mm: ModelManager, clear_up):
-    idf_train = idadb.as_idadataframe(df_train, tablename=TAB_NAME_TRAIN, clear_existing=True)
-    idf_test = idadb.as_idadataframe(df_test, tablename=TAB_NAME_TEST, clear_existing=True)
-    assert idf_train
-    assert idf_test
-
+def test_knn(idadb: IdaDataBase, mm: ModelManager, idf_train, idf_test, clear_up):
     model = KNeighborsClassifier(idadb, MOD_NAME)
     assert model
     assert not mm.model_exists(MOD_NAME)
