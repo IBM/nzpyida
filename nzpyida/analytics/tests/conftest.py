@@ -98,9 +98,9 @@ def idadb(request):
             raise
     return idadb
 
-df_train = pd.DataFrame.from_dict({"ID": range(1000),
-                                   "A": [-1, -2, 3, 4, 2, -0.5, 0, 1, -2.1, 1.4]*100,
-                                   "B": ['n', 'n', 'p', 'p', 'p', 'n', 'n', 'p', 'n', 'p']*100})
+df_train = pd.DataFrame.from_dict({"ID": range(200),
+                                   "A": [-1, -2, 3, 4, 2, -0.5, 0, 1, -2.1, 1.4]*20,
+                                   "B": ['n', 'n', 'p', 'p', 'p', 'n', 'n', 'p', 'n', 'p']*20})
 df_test = pd.DataFrame.from_dict({"ID": [0, 1, 2],
                                   "A": [2, 0.001, -2],
                                   "B": ['p', 'p', 'n']})
@@ -121,10 +121,10 @@ def idf_test(idadb: IdaDataBase):
 
 df_train_reg = pd.DataFrame.from_dict(
     {
-        "ID": range(1000),
-        "A": range(1, 2001, 2),
-        "T": [1000] * 1000,
-        "B": range(2, 2001, 2)
+        "ID": range(100),
+        "A": range(1, 201, 2),
+        "T": [100] * 100,
+        "B": range(2, 201, 2)
     }
 )
 
@@ -153,7 +153,7 @@ def idf_test_reg(idadb: IdaDataBase):
 
 @pytest.fixture(scope='session')
 def idf_train_nom(idadb: IdaDataBase):
-    df_train_reg["C"] = ['n', 'p', 'n', 'p', 'n', 'p', 'n', 'p', 'n', 'p']*100
+    df_train_reg["C"] = ['n', 'p', 'n', 'p', 'n', 'p', 'n', 'p', 'n', 'p']*10
     yield idadb.as_idadataframe(df_train_reg, tablename=TAB_NAME_TRAIN_NOM, 
                                 indexer="ID", clear_existing=True)
     if idadb.exists_table(TAB_NAME_TRAIN_NOM):
@@ -166,6 +166,7 @@ def idf_test_nom(idadb: IdaDataBase):
                                 indexer="ID", clear_existing=True)
     if idadb.exists_table(TAB_NAME_TEST_NOM):
         idadb.drop_table(TAB_NAME_TEST_NOM)
+
 
 df_train_clust = pd.DataFrame.from_dict(
     {

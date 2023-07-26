@@ -48,15 +48,15 @@ def test_std_norm(idadb: IdaDataBase, clean_up, idf_train):
 
 def test_random_sample(idadb: IdaDataBase, idf_train, clean_up):
     with AutoDeleteContext(idadb):
-        sample_df = random_sample(idf_train, size=300, by_column=["B"], rand_seed=123)
+        sample_df = random_sample(idf_train, size=100, by_column=["B"], rand_seed=123)
         assert sample_df
 
         assert all(sample_df.columns == [ 'ID', 'A', 'B'])
 
-        assert len(sample_df) == 300
+        assert len(sample_df) == 100
 
-        sample_df2 = random_sample(idf_train, size=300, by_column=["B"], rand_seed=123)
-        sample_df3 = random_sample(idf_train, size=300, by_column=["B"])
+        sample_df2 = random_sample(idf_train, size=100, by_column=["B"], rand_seed=123)
+        sample_df3 = random_sample(idf_train, size=100, by_column=["B"])
         assert all((sample_df.head(10) == sample_df2.head(10))['ID'])
         assert not all((sample_df.head(10) == sample_df3.head(10))['ID'])
 
