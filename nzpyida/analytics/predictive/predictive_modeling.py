@@ -106,7 +106,11 @@ class PredictiveModeling:
         """
         if not isinstance(in_df, IdaDataFrame):
             raise TypeError("Argument in_df should be an IdaDataFrame")
-
+        
+        if not ModelManager(self.idadb).model_exists(self.model_name):
+                raise KeyError("Model name not found in Model Manager, "
+                            "use 'fit' function to train the model first")
+        
         params['model'] = self.model_name
         return call_proc_df_in_out(proc=self.predict_proc, in_df=in_df, params=params,
             out_table=out_table)[0]
@@ -133,6 +137,10 @@ class PredictiveModeling:
         """
         if not isinstance(in_df, IdaDataFrame):
             raise TypeError("Argument in_df should be an IdaDataFrame")
+        
+        if not ModelManager(self.idadb).model_exists(self.model_name):
+            raise KeyError("Model name not found in Model Manager, "
+                            "use 'fit' function to train the model first")
 
         if not predict_params.get('id', None):
             if in_df.indexer:
