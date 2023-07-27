@@ -175,10 +175,11 @@ class PredictiveModeling:
             res = self.idadb.ida_query(f'call NZA..{self.score_proc}(\'{params}\')')
             return 1-res[0] if self.score_inv else res[0]
         finally:
-            self.idadb.drop_table(out_table)
-            if pred_view_needs_delete:
+            if self.idadb.exists_table_or_view(out_table):
+                self.idadb.drop_table(out_table)
+            if pred_view_needs_delete and self.idadb.exists_table_or_view(pred_view):
                 self.idadb.drop_view(pred_view)
-            if true_view_needs_delete:
+            if true_view_needs_delete and self.idadb.exists_table_or_view(true_view):
                 self.idadb.drop_view(true_view)
 
     def describe(self) -> str:
