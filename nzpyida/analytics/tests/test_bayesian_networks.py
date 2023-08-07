@@ -15,12 +15,10 @@ from nzpyida.analytics.model_manager import ModelManager
 from nzpyida.analytics.predictive.bayesian_networks import TreeBayesNetwork, TreeBayesNetwork1G, \
      TreeBayesNetwork1G2P, TreeBayesNetwork2G, TreeAgumentedNetwork, BinaryTreeBayesNetwork, \
      MultiTreeBayesNetwork
-from nzpyida.analytics.tests.conftest import MOD_NAME, OUT_TABLE_PRED, TAB_NAME_TEST, \
-    TAB_NAME_TRAIN, df_train_reg, df_test_reg
+from nzpyida.analytics.tests.conftest import MOD_NAME, MOD_NAME2, OUT_TABLE_PRED,\
+      OUT_TABLE_PRED2
 import pytest
 
-MOD_NAME2 = "TEST_MOD2"
-OUT_TABLE_PRED2 = "OUT_TABLE_PRED2"
 
 @pytest.fixture(scope='module')
 def mm(idadb: IdaDataBase):
@@ -46,66 +44,40 @@ def clear_up(idadb: IdaDataBase, mm: ModelManager):
     if idadb.exists_table(OUT_TABLE_PRED2):
         idadb.drop_table(OUT_TABLE_PRED2)
 
-@pytest.fixture(scope='module')
-def idf_train_nom(idadb: IdaDataBase):
-    TAB_NAME_TRAIN_NOM = TAB_NAME_TRAIN + "_NOM"
-    df_train_reg["C"] = ['n', 'p', 'n', 'p', 'n', 'p', 'n', 'p', 'n', 'p']*100
-    yield idadb.as_idadataframe(df_train_reg, tablename=TAB_NAME_TRAIN_NOM, clear_existing=True)
-    if idadb.exists_table(TAB_NAME_TRAIN_NOM):
-        idadb.drop_table(TAB_NAME_TRAIN_NOM)
-
-@pytest.fixture(scope='module')
-def idf_test_nom(idadb: IdaDataBase):
-    TAB_NAME_TEST_NOM = TAB_NAME_TEST + "_NOM"
-    df_test_reg["C"]=['n', 'n', 'p', 'p', 'n']
-    yield idadb.as_idadataframe(df_test_reg, tablename=TAB_NAME_TEST_NOM, clear_existing=True)
-    if idadb.exists_table(TAB_NAME_TEST_NOM):
-        idadb.drop_table(TAB_NAME_TEST_NOM)
-
-@pytest.fixture(scope='module')
-def idf_train(idadb: IdaDataBase):
-    yield idadb.as_idadataframe(df_train_reg, tablename=TAB_NAME_TRAIN, clear_existing=True)
-    if idadb.exists_table(TAB_NAME_TRAIN):
-        idadb.drop_table(TAB_NAME_TRAIN)
-
-@pytest.fixture(scope='module')
-def idf_test(idadb: IdaDataBase):
-    yield idadb.as_idadataframe(df_test_reg, tablename=TAB_NAME_TEST, clear_existing=True)
-    if idadb.exists_table(TAB_NAME_TEST):
-        idadb.drop_table(TAB_NAME_TEST)
-
-def test_tree_bayes_network(idadb: IdaDataBase, mm: ModelManager, idf_train: IdaDataFrame,
-                            idf_test: IdaDataFrame, clear_up):
+def test_tree_bayes_network(idadb: IdaDataBase, mm: ModelManager, idf_train_reg,
+                            idf_test_reg, clear_up):
     model = TreeBayesNetwork(idadb, MOD_NAME)
     assert model
     assert not mm.model_exists(MOD_NAME)
 
-    model.fit(idf_train, in_columns=["A", "B"])
+    model.fit(idf_train_reg, in_columns=["A", "B"])
     assert mm.model_exists(MOD_NAME)
 
-    pred  = model.predict(idf_test, target_column="B", id_column="ID", out_table=OUT_TABLE_PRED)
+    pred  = model.predict(idf_test_reg, target_column="B", id_column="ID", out_table=OUT_TABLE_PRED)
     assert pred
     assert all(pred.columns == ["ID", "B_" + idadb.to_def_case("PRED")])
     # assert any(round(x) == y for x, y in zip(list(pred.as_dataframe()['B_PRED'].values),  [2, 4, 2223, -999, 11112]))
 
 
-def test_binary_tree_bayes_network(idadb: IdaDataBase, mm: ModelManager, idf_train: IdaDataFrame ,
-                                   idf_test: IdaDataFrame , clear_up):
+def test_binary_tree_bayes_network(idadb: IdaDataBase, mm: ModelManager, idf_train_reg,
+                                   idf_test_reg, clear_up):
     model = BinaryTreeBayesNetwork(idadb, MOD_NAME)
     assert model
     assert not mm.model_exists(MOD_NAME)
 
-    model.fit(idf_train, in_columns=["A", "B"])
+    model.fit(idf_train_reg, in_columns=["A", "B"])
     assert mm.model_exists(MOD_NAME)
 
-    pred  = model.predict(idf_test, target_column="B", id_column="ID", out_table=OUT_TABLE_PRED)
+    pred  = model.predict(idf_test_reg, target_column="B", id_column="ID", out_table=OUT_TABLE_PRED)
     assert pred
     assert all(pred.columns == ["ID", "B_" + idadb.to_def_case("PRED")])
-    assert any(round(x) == y for x, y in zip(list(pred.head()['B_'+idadb.to_def_case('PRED')].values),  [2, 4, 2223, -999, 11112]))
+    assert any(round(x) == y for x, y in zip(
+        list(pred.head()['B_'+idadb.to_def_case('PRED')].values),  
+        [2, 4, 2223, -999, 11112]))
 
 
-def test_multi_tree_bayes_network(idadb: IdaDataBase, mm: ModelManager, idf_train_nom: IdaDataFrame ,
-                                   idf_test_nom: IdaDataFrame , clear_up):
+def test_multi_tree_bayes_network(idadb: IdaDataBase, mm: ModelManager, idf_train_nom,
+                                   idf_test_nom, clear_up):
     model = MultiTreeBayesNetwork(idadb, MOD_NAME)
     assert model
     assert not mm.model_exists(MOD_NAME)
@@ -116,49 +88,50 @@ def test_multi_tree_bayes_network(idadb: IdaDataBase, mm: ModelManager, idf_trai
     pred  = model.predict(idf_test_nom, target_column="B", id_column="ID", out_table=OUT_TABLE_PRED)
     assert pred
     assert all(pred.columns == ["ID", "B_" + idadb.to_def_case("PRED")])
-    assert any(round(x) == y for x, y in zip(list(pred.head()['B_' + idadb.to_def_case('PRED')].values),  [2, 4, 2223, -999, 11112]))
+    assert any(round(x) == y for x, y in zip(
+        list(pred.head()['B_' + idadb.to_def_case('PRED')].values),  
+        [2, 4, 2223, -999, 11112]))
 
 
-def test_tree_bayes_network_1g(idadb: IdaDataBase, mm: ModelManager, idf_train: IdaDataFrame,
+def test_tree_bayes_network_1g(idadb: IdaDataBase, mm: ModelManager, idf_train_reg,
                                clear_up):
-    
     model = TreeBayesNetwork1G(idadb, MOD_NAME)
     assert model
     assert not mm.model_exists(MOD_NAME)
 
-    outtab = model.grow(idf_train, in_columns=["A", "B"])
+    outtab = model.grow(idf_train_reg, in_columns=["A", "B"])
     assert mm.model_exists(MOD_NAME)
     assert outtab
     # TODO: check output of an outtab
 
 
-def test_tree_bayes_network_2g(idadb: IdaDataBase, mm: ModelManager, idf_train: IdaDataFrame,
+def test_tree_bayes_network_2g(idadb: IdaDataBase, mm: ModelManager, idf_train_reg,
                                clear_up):
     
     model = TreeBayesNetwork2G(idadb, MOD_NAME2)
     assert model
     assert not mm.model_exists(MOD_NAME2)
 
-    outtab = model.grow(idf_train, in_columns=["A", "B"])
+    outtab = model.grow(idf_train_reg, in_columns=["A", "B"])
     assert mm.model_exists(MOD_NAME2)
     assert outtab
     # TODO: check output of an outtab
 
-def test_tree_bayes_network_1g2p(idadb: IdaDataBase, mm: ModelManager, idf_train: IdaDataFrame,
+def test_tree_bayes_network_1g2p(idadb: IdaDataBase, mm: ModelManager, idf_train_reg,
                                clear_up):
     
     model = TreeBayesNetwork1G2P(idadb, MOD_NAME2)
     assert model
     assert not mm.model_exists(MOD_NAME2)
 
-    outtab = model.grow(idf_train, in_columns=["A", "B"])
+    outtab = model.grow(idf_train_reg, in_columns=["A", "B"])
     assert mm.model_exists(MOD_NAME2)
     assert outtab
     # TODO: check output of an outtab
 
 
-def test_tree_agumented_network(idadb: IdaDataBase, mm: ModelManager, idf_train_nom: IdaDataFrame ,
-                                   idf_test_nom: IdaDataFrame , clear_up):
+def test_tree_agumented_network(idadb: IdaDataBase, mm: ModelManager, idf_train_nom,
+                                   idf_test_nom, clear_up):
     model = BinaryTreeBayesNetwork(idadb, MOD_NAME2)
     assert model
     assert not mm.model_exists(MOD_NAME2)

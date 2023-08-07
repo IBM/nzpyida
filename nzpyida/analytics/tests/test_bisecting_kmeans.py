@@ -15,12 +15,9 @@ from nzpyida.base import IdaDataBase
 from nzpyida.analytics.model_manager import ModelManager
 from nzpyida.analytics.predictive.bisecting_kmeans import BisectingKMeans
 
-from nzpyida.analytics.tests.conftest import MOD_NAME, OUT_TABLE_PRED, TAB_NAME_TEST, \
-    TAB_NAME_TRAIN, df_train_clust, df_test_clust
+from nzpyida.analytics.tests.conftest import MOD_NAME, OUT_TABLE_PRED, OUT_TABLE_CLUST
 import pandas as pd
 import pytest
-
-OUT_TABLE_CLUST = "OUT_TABLE_CLUST"
 
 @pytest.fixture(scope='module')
 def mm(idadb: IdaDataBase):
@@ -42,25 +39,21 @@ def clear_up(idadb: IdaDataBase, mm: ModelManager):
     if idadb.exists_table(OUT_TABLE_CLUST):
         idadb.drop_table(OUT_TABLE_CLUST)
 
-def test_bisecting_kmeans(idadb: IdaDataBase, mm: ModelManager, clear_up):
-    idf_train = idadb.as_idadataframe(df_train_clust, tablename=TAB_NAME_TRAIN, clear_existing=True, indexer='ID')
-    idf_test = idadb.as_idadataframe(df_test_clust, tablename=TAB_NAME_TEST, clear_existing=True, indexer='ID')
-    assert idf_train
-    assert idf_test
-
+def test_bisecting_kmeans(idadb: IdaDataBase, mm: ModelManager, idf_train_clust,
+                          idf_test_clust, clear_up):
     model = BisectingKMeans(idadb, MOD_NAME)
     assert model
     assert not mm.model_exists(MOD_NAME)
     
-    model.fit(idf_train, distance='manhattan', max_iter=4, min_split=3, max_depth=2,
+    model.fit(idf_train_clust, distance='manhattan', max_iter=4, min_split=3, max_depth=2,
               rand_seed=4321, out_table=OUT_TABLE_CLUST)
     assert mm.model_exists(MOD_NAME)
 
-    pred = model.predict(idf_test, level=5, out_table=OUT_TABLE_PRED)
+    pred = model.predict(idf_test_clust, level=5, out_table=OUT_TABLE_PRED)
     assert pred
     assert all(pred.columns == idadb.to_def_case(['ID', 'CLUSTER_ID', 'DISTANCE']))
     assert all(list(pred.as_dataframe()[idadb.to_def_case('CLUSTER_ID')].values))
 
-    score = model.score(idf_test, target_column="A")
+    score = model.score(idf_test_clust, target_column="A")
 
     assert score

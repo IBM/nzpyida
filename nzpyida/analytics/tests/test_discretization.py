@@ -8,23 +8,14 @@
 #
 # The full license is in the LICENSE file, distributed with this software.
 #-----------------------------------------------------------------------------
-import pytest
+
 from nzpyida.base import IdaDataBase
 from nzpyida.analytics.auto_delete_context import AutoDeleteContext
-from nzpyida.analytics.tests.conftest import df_train, TAB_NAME_TRAIN
 from nzpyida.analytics.transform.discretization import EFDisc, EMDisc, EWDisc
 
 
-
-@pytest.fixture(scope='module')
-def idf(idadb: IdaDataBase):
-    idf = idadb.as_idadataframe(df_train, tablename=TAB_NAME_TRAIN, clear_existing=True, indexer='ID')[:10]['A']
-    yield idf
-    if idadb.exists_table(TAB_NAME_TRAIN):
-        idadb.drop_table(TAB_NAME_TRAIN)
-
-
-def test_ewdisc(idadb: IdaDataBase, idf):
+def test_ewdisc(idadb: IdaDataBase, idf_train):
+    idf = idf_train[:10]['A']
     with AutoDeleteContext(idadb):
         ewdisc = EWDisc(idadb, bins=5)
         bin_df = ewdisc.fit(idf)
@@ -39,7 +30,8 @@ def test_ewdisc(idadb: IdaDataBase, idf):
         assert set(ew_df[idadb.to_def_case('DISC') + '_A'].head(10).values) == {'1', '2', '3', '4', '5'}
 
 
-def test_efdisc(idadb: IdaDataBase, idf):
+def test_efdisc(idadb: IdaDataBase, idf_train):
+    idf = idf_train[:10]['A']
     with AutoDeleteContext(idadb):
         efdisc = EFDisc(idadb, bins=2)
         bin_df = efdisc.fit(idf)
@@ -54,7 +46,8 @@ def test_efdisc(idadb: IdaDataBase, idf):
         assert set(ef_df[idadb.to_def_case('DISC') + '_A'].head(10).values) == {'1', '2'}
 
 
-def test_emdisc(idadb: IdaDataBase, idf):
+def test_emdisc(idadb: IdaDataBase, idf_train):
+    idf = idf_train[:10]['A']
     with AutoDeleteContext(idadb):
         emdisc = EMDisc(idadb, target='A')
         bin_df = emdisc.fit(idf)
