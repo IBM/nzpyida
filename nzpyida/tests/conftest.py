@@ -267,6 +267,41 @@ def idadf_indexer(request, idadb, idadf):
     idadb.commit()
     return idadf_index
 
+@pytest.fixture(scope='session')
+def idadf_iris(idadb, request):
+    def fin():
+        try:
+            idadb.drop_table("TEST_NZPYIDA_IRIS")
+            idadb.commit()
+        except:
+            pass
+    request.addfinalizer(fin)
+    from nzpyida.sampledata.iris import iris
+    iris = iris.reset_index()
+    idadf = idadb.as_idadataframe(iris, "TEST_NZPYIDA_IRIS", clear_existing=True,
+                                  indexer=iris.columns[0])
+    idadb.commit()
+    return idadf
+
+@pytest.fixture(scope='session')
+def idadf_iris2(idadb, request):
+    def fin():
+        try:
+            idadb.drop_table("TEST_NZPYIDA_IRIS2")
+            idadb.commit()
+        except:
+            pass
+    request.addfinalizer(fin)
+    from nzpyida.sampledata.iris import iris
+    iris = iris.reset_index()
+    iris['index'] = iris['index']+50
+    iris.columns = [iris.columns[i] if i <4 else iris.columns[i].upper() 
+                    for i in range(len(iris.columns))]
+    idadf = idadb.as_idadataframe(iris, "TEST_NZPYIDA_IRIS2", clear_existing=True,
+                                  indexer=iris.columns[0])
+    idadb.commit()
+    return idadf
+
 @pytest.fixture(scope="function")
 def idadf_tmp(request, idadb):
     """

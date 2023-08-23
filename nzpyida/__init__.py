@@ -20,6 +20,7 @@ from .frame import IdaDataFrame
 from .series import IdaSeries
 from .geo_frame import IdaGeoDataFrame
 from .geo_series import IdaGeoSeries
+from .join_tables import concat, merge
 
 
 __all__ = ['sampledata', 'tests', 'aggregation', 

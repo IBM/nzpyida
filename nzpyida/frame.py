@@ -1236,16 +1236,18 @@ class IdaDataFrame(object):
         raise NotImplementedError()
 
     @idadf_state
-    def merge(self):
-        raise NotImplementedError()
-
-    @idadf_state
-    def concat(self):
-        raise NotImplementedError()
-
-    @idadf_state
-    def join(self):
-        raise NotImplementedError()
+    def join(self, other, on=None, how='left', lsuffix='_x', rsuffix='_y'):
+        """
+        Implement pandas-like interface to join tables
+        """
+        if not on:
+            left_index = True
+        else:
+            left_index = False
+        return nzpyida.join_tables.merge(self, other, left_index=left_index, 
+                                         left_on=on, right_index=True, 
+                                         how=how, suffixes=(lsuffix, rsuffix))
+        
 
     # TODO : implement NULL FIRST option
     @idadf_state
