@@ -9,14 +9,11 @@
 # The full license is in the LICENSE file, distributed with this software.
 #-----------------------------------------------------------------------------
 
-from nzpyida.frame import IdaDataFrame
 from nzpyida.base import IdaDataBase
 from nzpyida.analytics.model_manager import ModelManager
 from nzpyida.analytics.predictive.glm import BernoulliRegressor, NegativeBinomialRegressor, BinomialRegressor, \
     GaussianRegressor, GammaRegressor, PoissonRegressor, WaldRegressor
-from nzpyida.analytics.tests.conftest import MOD_NAME, OUT_TABLE_PRED, OUT_TABLE_CM, TAB_NAME_TEST, \
-    TAB_NAME_TRAIN, df_test_reg, df_train_reg
-import pandas as pd
+from nzpyida.analytics.tests.conftest import MOD_NAME, OUT_TABLE_PRED
 import pytest
 
 @pytest.fixture(scope='module')
@@ -57,12 +54,8 @@ def model_family(idadb: IdaDataBase, model_name: str):
 @pytest.mark.parametrize("model_name", ['bernoulli', 'gaussian', 'poisson', 
                                         'binomial', 'negativebinomial', 'wald', 'gamma'
                                         ])
-def test_glm(idadb: IdaDataBase, mm: ModelManager, clear_up, model_name):
-    idf_train = idadb.as_idadataframe(df_train_reg, tablename=TAB_NAME_TRAIN, clear_existing=True)
-    idf_test = idadb.as_idadataframe(df_test_reg, tablename=TAB_NAME_TEST, clear_existing=True)
-    assert idf_train
-    assert idf_test
-    
+def test_glm(idadb: IdaDataBase, mm: ModelManager, clear_up, model_name,
+             idf_train_reg, idf_test_reg):
     model_info = model_family(idadb, model_name)
     
     model = model_info["model"]
@@ -70,7 +63,7 @@ def test_glm(idadb: IdaDataBase, mm: ModelManager, clear_up, model_name):
     assert not mm.model_exists(MOD_NAME)
 
     params = {
-        'in_df': idf_train,
+        'in_df': idf_train_reg,
         'id_column': "ID",
         'target_column': "B",
         'in_columns': None,  
@@ -94,14 +87,14 @@ def test_glm(idadb: IdaDataBase, mm: ModelManager, clear_up, model_name):
     model.fit(**params)
     assert mm.model_exists(MOD_NAME)
 
-    pred = model.predict(idf_test, id_column="ID", out_table=OUT_TABLE_PRED)
+    pred = model.predict(idf_test_reg, id_column="ID", out_table=OUT_TABLE_PRED)
     assert pred
     assert all(pred.columns == ['ID', idadb.to_def_case('PRED')])
     # assert any(round(x) == y for x, y in zip(list(pred.as_dataframe()['CLASS'].values),  [1, 4, 2223, -999, 11112]))
 
-    score = model.score(idf_test, id_column="ID", target_column="B")
+    score = model.score(idf_test_reg, id_column="ID", target_column="B")
 
     assert score
 
-    mse, mae, rse, rae = model.score_all(idf_test, id_column='ID', target_column='B')
+    mse, mae, rse, rae = model.score_all(idf_test_reg, id_column='ID', target_column='B')
     assert all([mse, mae, rse, rae])

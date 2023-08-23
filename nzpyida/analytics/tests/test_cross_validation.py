@@ -13,10 +13,7 @@ import numpy as np
 from nzpyida.base import IdaDataBase
 from nzpyida.analytics.model_manager import ModelManager
 from nzpyida.analytics.predictive.decision_trees import DecisionTreeClassifier
-from nzpyida.analytics.tests.conftest import MOD_NAME, OUT_TABLE_PRED, OUT_TABLE_CM, TAB_NAME_TEST, \
-    TAB_NAME_TRAIN, df_test, df_train
-from nzpyida.analytics.tests.conftest import df_train, TAB_NAME_TRAIN, \
-    TAB_NAME_TEST
+from nzpyida.analytics.tests.conftest import MOD_NAME, OUT_TABLE_PRED, OUT_TABLE_CM
 from nzpyida.analytics import AutoDeleteContext
 
 @pytest.fixture(scope='module')
@@ -39,16 +36,14 @@ def clear_up(idadb: IdaDataBase, mm: ModelManager):
     if idadb.exists_table(OUT_TABLE_CM):
         idadb.drop_table(OUT_TABLE_CM)
     
-def test_cross_validation(idadb: IdaDataBase, clear_up):
-    idf = idadb.as_idadataframe(df_train, tablename=TAB_NAME_TRAIN, clear_existing=True, 
-                                indexer="ID")
+def test_cross_validation(idadb: IdaDataBase, idf_train, clear_up):
 
     model = DecisionTreeClassifier(idadb, MOD_NAME)
     with AutoDeleteContext(idadb):
-        df_cv, acc = model.cross_validation(idf, id_column="ID", target_column="B")
+        df_cv, acc = model.cross_validation(idf_train, id_column="ID", target_column="B")
         assert acc
         assert acc > 0.99
 
         assert df_cv
-        assert len(df_cv) == len(idf)
+        assert len(df_cv) == len(idf_train)
         assert all(df_cv.columns == idadb.to_def_case(["ID", "CLASS", "FOLD"]))

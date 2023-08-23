@@ -23,7 +23,6 @@ from .geo_series import IdaGeoSeries
 from .join_tables import concat, merge
 
 
-__all__ = ['sampledata', 'tests', 'aggregation', 
-		   'base', 'exceptions', 'filtering', 'frame', 'indexing', 
-		   'internals', 'series', 'sql', 'statistics', 'utils', 'analytics',
-           'geo_frame', 'geo_series']
+__all__ = ['sampledata', 'aggregation', 'base', 'exceptions', 'filtering', 
+           'frame', 'indexing', 'internals', 'series', 'sql', 'statistics', 
+           'utils', 'analytics', 'geo_frame', 'geo_series']

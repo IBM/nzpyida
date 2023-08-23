@@ -142,7 +142,7 @@ def call_proc_df_in_out(proc: str, in_df: IdaDataFrame, params: dict,
     try:
         out_query = in_df.ida_query(f'call NZA..{proc}(\'{params_s}\')')
     finally:
-        if need_delete:
+        if need_delete and in_df._idadb.exists_table_or_view(temp_view_name):
             in_df._idadb.drop_view(temp_view_name)
 
     if not in_df._idadb.exists_table_or_view(out_table):

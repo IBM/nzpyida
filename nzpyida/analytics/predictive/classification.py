@@ -198,8 +198,8 @@ class Classification(PredictiveModeling):
             if true_view_needs_delete:
                 self.idadb.drop_view(true_view)
     
-    def cross_validation(self, in_df: IdaDataFrame, id_column: str=None, 
-                         target_column: str=None, out_table: str=None, folds: int=10, 
+    def cross_validation(self, in_df: IdaDataFrame, target_column: str,  
+                         id_column: str=None, out_table: str=None, folds: int=10, 
                          rand_seed: float=None) -> Tuple[IdaDataFrame, float]:
         """
         Performs a cross validation on <in_df> data for given model. Numer of batches 
@@ -209,13 +209,13 @@ class Classification(PredictiveModeling):
         ----------
         in_df : IdaDataFrame
             the input data frame for scoring
+        
+        target_column : str
+            the input table column representing the class
 
         id_column : str, optional
             the input table column identifying a unique instance id - if skipped, 
             the input data frame indexer must be set and will be used as an instance id
-
-        target_column : str
-            the input table column representing the class
 
         out_table : str, optional
             the output table where the predicted values will be stored
@@ -237,6 +237,14 @@ class Classification(PredictiveModeling):
             'outtable': out_table,
             'folds': folds,
         }
+
+        if not params.get('id'):
+            if in_df.indexer:
+                params['id'] = q(in_df.indexer)
+            else:
+                raise TypeError('Missing id column - either use id_column attribute or set '
+                    'indexer column in the input data frame')
+
         if isinstance(rand_seed, int):
             params['seed'] = rand_seed
         
