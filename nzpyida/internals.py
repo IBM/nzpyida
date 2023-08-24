@@ -12,17 +12,6 @@
 """
 Definition of internal tools for non-destructive modification of IdaDataFrames.
 """
-
-# Python 2 compatibility
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-from builtins import str
-from builtins import range
-from future import standard_library
-standard_library.install_aliases()
-
 from functools import wraps, partial
 from numbers import Number
 from collections import OrderedDict

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #-----------------------------------------------------------------------------
-# Copyright (c) 2015, IBM Corp.
+# Copyright (c) 2015-2023, IBM Corp.
 # All rights reserved.
 #
 # Distributed under the terms of the BSD Simplified License.
@@ -25,13 +25,6 @@ Examples
 --------
 >>> from nzpyida.sampledata.swiss import swiss
 '''
-
-from __future__ import absolute_import
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from future import standard_library
-standard_library.install_aliases()
 from os.path import dirname, join
 import pandas as pd
 

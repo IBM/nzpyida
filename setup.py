@@ -66,7 +66,7 @@ classifiers = [
       ]
 
 setup(name='nzpyida',
-      install_requires=['pandas','numpy','future','six','pypyodbc','pyodbc', 'lazy', 'nzpy'],
+      install_requires=['pandas','numpy','six','pypyodbc','pyodbc', 'lazy', 'nzpy'],
 
       extras_require={
         'jdbc':['JayDeBeApi==1.*', 'Jpype1==0.6.3'],
