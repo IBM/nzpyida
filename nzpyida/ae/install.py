@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # -----------------------------------------------------------------------------
-# Copyright (c) 2015, IBM Corp.
+# Copyright (c) 2015-2023, IBM Corp.
 # All rights reserved.
 #
 # Distributed under the terms of the BSD Simplified License.
@@ -12,20 +12,11 @@
 """
 In-Database User defined functions
 """
-from __future__ import print_function
-from __future__ import unicode_literals
-from __future__ import division
-from __future__ import absolute_import
-
 import inspect
 import textwrap
-from builtins import dict
-from future import standard_library
 from nzpyida import IdaDataBase, IdaDataFrame
 
 from nzpyida.ae import shaper, result_builder
-
-standard_library.install_aliases()
 
 
 class NZInstall(object):

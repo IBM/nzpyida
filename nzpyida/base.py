@@ -16,17 +16,6 @@
 An IdaDataBase instance represents a reference to a remote Netezza Warehouse database
 maintaining attributes and methods for administration of the database.
 """
-
-from __future__ import print_function
-from __future__ import unicode_literals
-from __future__ import division
-from __future__ import absolute_import
-from builtins import zip
-from builtins import int
-from builtins import str
-from future import standard_library
-standard_library.install_aliases()
-
 import os
 #from os import path
 import sys

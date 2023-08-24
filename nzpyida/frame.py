@@ -20,19 +20,6 @@ Also similar to its R counterpart, data.frame, except providing automatic data
 alignment and a host of useful data manipulation methods having to do with the
 labeling information
 """
-
-# Ensure Python 2 compatibility
-from __future__ import print_function
-from __future__ import division
-from __future__ import unicode_literals
-from __future__ import absolute_import
-from builtins import dict
-from builtins import zip
-from builtins import str
-from builtins import int
-from future import standard_library
-standard_library.install_aliases()
-
 import sys
 import os
 from copy import deepcopy

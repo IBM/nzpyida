@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #-----------------------------------------------------------------------------
-# Copyright (c) 2015, IBM Corp.
+# Copyright (c) 2015-2023, IBM Corp.
 # All rights reserved.
 #
 # Distributed under the terms of the BSD Simplified License.
@@ -12,16 +12,6 @@
 """
 idaSeries
 """
-
-# Ensure Python 2 compatibility
-from __future__ import print_function
-from __future__ import division
-from __future__ import unicode_literals
-from __future__ import absolute_import
-from builtins import super
-from future import standard_library
-standard_library.install_aliases()
-
 from copy import deepcopy
 
 from lazy import lazy

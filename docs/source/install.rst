@@ -46,7 +46,6 @@ nzpyida uses data structures and methods from two common Python libraries - Pand
 
 	* pandas
 	* numpy
-	* future
 	* six
 	* lazy
 
