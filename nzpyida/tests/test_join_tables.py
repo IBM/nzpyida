@@ -18,7 +18,7 @@ import nzpyida
 from nzpyida import IdaDataBase
 
 class TestMerge:
-    def test_inner_join(self, idadf_iris, idadf_iris2):
+    def test_inner_join(self, idadf_iris, idadf_iris2, idadb):
         ida_nzpyida_join = nzpyida.merge(idadf_iris, idadf_iris2, on='index', 
                                         suffixes=("_a", "_b"), indicator=True)
         assert len(ida_nzpyida_join) == 100
@@ -26,7 +26,7 @@ class TestMerge:
                                                 'petal_length_a', 'petal_width',
                                                 'species', 'sepal_length_b', 'sepal_width_b',
                                                 'petal_length_b', 'PETAL_WIDTH', 'SPECIES',
-                                                'INDICATOR'])
+                                                idadb.to_def_case('INDICATOR')])
         assert idadf_iris.indexer == ida_nzpyida_join.indexer
         
     def test_left_join(self, idadf_iris, idadf_iris2):
@@ -111,10 +111,10 @@ class TestMerge:
             assert str(e) == "Can not pass on, right_on, left_on or set right_index=True or left_index=True"
 
 class TestConcat:
-    def test_outer_join(self, idadf_iris, idadf_iris2):
+    def test_outer_join(self, idadf_iris, idadf_iris2, idadb):
         ida_nzpyida_union = nzpyida.concat([idadf_iris, idadf_iris2], keys=['a', 'b'])
         assert len(ida_nzpyida_union) == len(idadf_iris) + len(idadf_iris2)
-        assert all(ida_nzpyida_union.columns == ['KEYS', 'index', 'sepal_length', 'sepal_width', 
+        assert all(ida_nzpyida_union.columns == [idadb.to_def_case('keys'), 'index', 'sepal_length', 'sepal_width', 
                                                  'petal_length', 'petal_width', 'species', 
                                                  'PETAL_WIDTH', "SPECIES"])
         assert ida_nzpyida_union.indexer == 'KEYS'

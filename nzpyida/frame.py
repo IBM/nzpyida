@@ -1261,9 +1261,50 @@ class IdaDataFrame(object):
         return groupby_object
 
     @idadf_state
-    def join(self, other, on=None, how='left', lsuffix='_x', rsuffix='_y'):
+    def join(self, other, on: str=None, how: str='left', lsuffix: str='_x', rsuffix: str='_y'):
         """
         Implement pandas-like interface to join tables
+
+        Parameters
+        ----------
+        other : IdaDataFrame
+            IdaDataFrame to join to this object
+        on : str, optional
+            name of column in both IdaDataFrames to do join on
+        how : str, optional
+            type of join, possible types - 'outer', 'inner', 'right', 'left', 'cross'
+        lsuffix : str, optional
+            suffix to add to columns in this IdaDataFrame that are present in both IdaDataFrames
+        rsuffix : str, optional
+            suffix to add to columns in other IdaDataFrame that are present in both IdaDataFrames
+        
+        Returns
+        -------
+        IdaDataFrame
+            result of joining IdaDataFrames 
+        
+        Examples
+        --------
+        >>> from nzpyida.sampledata.iris import iris
+        >>> from nzpyida.sampledata.iris import iris as iris2
+        >>> iris.reset_index()
+        >>> iris2.reset_index()
+        >>> iris2.columns = ['id', 'sepal_length', 'sepal_width', 'petal_length', \
+            'PETAL_WIDTH', 'CLASS']
+        >>> iris2['id'] = iris2['id'] + 50
+        >>> iris1_ida = idadb.as_idadataframe(iris, 'IRIS_TEST1', indexer='index')
+        >>> iris2_ida = idadb.as_idadataframe(iris2, 'IRIS_TEST2', indexer='id')
+        >>> iris_merge = iris1_ida.join(iris2_ida)
+        >>> iris_merge.tail()
+            index 	sepal_length_x 	sepal_width_x 	petal_length_x 	petal_width 	species     id 	sepal_length_y 	sepal_width_y 	petal_length_y 	PETAL_WIDTH     CLASS												
+        95 	145 	6.7 	        3.0 	        5.2 	        2.3 	        virginica   145 5.7 	        3.0 	        4.2 	        1.2 	        versicolor
+        96 	146 	6.3 	        2.5 	        5.0 	        1.9 	        virginica   146 5.7 	        2.9 	        4.2 	        1.3 	        versicolor
+        97 	147 	6.5 	        3.0 	        5.2 	        2.0 	        virginica   147 6.2 	        2.9 	        4.3 	        1.3 	        versicolor
+        98 	148 	6.2 	        3.4 	        5.4 	        2.3 	        virginica   148 5.1 	        2.5 	        3.0 	        1.1 	        versicolor
+        99 	149 	5.9 	        3.0 	        5.1 	        1.8 	        virginica   149 5.7 	        2.8 	        4.1 	        1.3 	        versicolor
+        >>> len(iris_merge)
+        100
+    
         """
         if not on:
             left_index = True
