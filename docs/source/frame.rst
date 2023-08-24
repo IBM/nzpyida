@@ -187,10 +187,23 @@ pivot_table
 -----------
 .. automethod:: IdaDataFrame.pivot_table
 
+join
+----
+.. automethod:: IdaDataFrame.join
+
+merge
+-----
+.. automethod:: nzpyida.join_tables.merge
+
+concat
+------
+.. automethod:: nzpyida.join_tables.concat
+
 sort
 ----
 .. automethod:: IdaDataFrame.sort
 
+=======
 groupby
 -------
 .. automethod:: IdaDataFrame.groupby
