@@ -59,6 +59,7 @@ def concat(objs: List[IdaDataFrame], axis: int=0, join: str='outer', keys: List[
         raise ValueError("Argument 'objs' should contain at least 2 elements")
 
     idadb = objs[0]._idadb
+    idx = None
     if axis == 0:
         if keys:
             case_statments = [f" '{q(keys[i])}' as keys, " if i < len(keys) else f" '{q(keys[-1])}' as keys, "
@@ -68,8 +69,6 @@ def concat(objs: List[IdaDataFrame], axis: int=0, join: str='outer', keys: List[
         if all(list(obj.columns) == list(objs[0].columns) for obj in objs):
             names_list = [df.internal_state.current_state for df in objs]
             query = "SELECT * FROM " + " UNION ALL SELECT * FROM ".join(names_list)
-            viewname = idadb._create_view_from_expression(query)
-            idadf = nzpyida.IdaDataFrame(idadb, viewname)
         else:
             in_columns_table = [obj.columns for obj in objs]
 
@@ -94,16 +93,14 @@ def concat(objs: List[IdaDataFrame], axis: int=0, join: str='outer', keys: List[
             viewname = idadb._create_view_from_expression(query)
             if keys:
                 idx = "KEYS"
-            else:
-                idx = None
-            idadf = nzpyida.IdaDataFrame(idadb, viewname, indexer=idx)
+        idadf = nzpyida.IdaDataFrame(idadb, objs[0].tablename, indexer=idx)
+        idadf.internal_state._views.append(query)
     elif axis == 1:
         idadf = objs[0] 
         for i in range(1, len(objs)):
             idadf = idadf.join(objs[i], how=join)
     else:
         raise ValueError("Axis must be 0 or 1")
-        
     return idadf
 
 
@@ -267,7 +264,6 @@ def merge(left: IdaDataFrame, right: IdaDataFrame, how: str='inner', on: str=Non
         case_statement = ""
     query = f"select {cols} {case_statement} from {left.internal_state.current_state}" + \
         f" {join_type[how]} join {right.internal_state.current_state}" + on_query
-    viewname = idadb._create_view_from_expression(query)
 
     if how == 'right':
         idx = right_indexer
@@ -275,7 +271,8 @@ def merge(left: IdaDataFrame, right: IdaDataFrame, how: str='inner', on: str=Non
         idx = None
     else:
         idx = left_indexer
-    idadf = nzpyida.IdaDataFrame(idadb, viewname, indexer=idx)
+    idadf = nzpyida.IdaDataFrame(idadb, left.tablename, indexer=idx)
+    idadf.internal_state._views.append(query)
     return idadf
 
         

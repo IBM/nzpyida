@@ -143,7 +143,7 @@ class IdaDataFrameGroupBy(object):
         query = 'SELECT ' + select_string + f', \"{self.by_column}\"' + \
             f' FROM {self.name} ' + groupby_string
 
-        viewname=self.in_df._idadb._create_view_from_expression(query)
-        idageodf=nzpyida.IdaGeoDataFrame(self.in_df._idadb, viewname)
-        return idageodf
+        idadf=nzpyida.IdaGeoDataFrame(self.in_df._idadb, self.in_df.tablename)
+        idadf.internal_state._views.append(query)
+        return idadf
         
