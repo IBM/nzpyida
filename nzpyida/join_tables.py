@@ -90,7 +90,6 @@ def concat(objs: List[IdaDataFrame], axis: int=0, join: str='outer', keys: List[
                                 for i in range(len(objs))
                                ]
             query = " UNION ALL ".join(columns_queries)
-            viewname = idadb._create_view_from_expression(query)
             if keys:
                 idx = "KEYS"
         idadf = nzpyida.IdaDataFrame(idadb, objs[0].tablename, indexer=idx)
