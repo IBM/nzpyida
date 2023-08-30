@@ -26,6 +26,7 @@ from copy import deepcopy
 import warnings
 from numbers import Number
 from collections import OrderedDict
+from typing import List
 
 import numpy as np
 import pandas as pd
@@ -1300,6 +1301,74 @@ class IdaDataFrame(object):
         return nzpyida.join_tables.merge(self, other, left_index=left_index, 
                                          left_on=on, right_index=True, 
                                          how=how, suffixes=(lsuffix, rsuffix))
+    
+    def merge(self, right, how: str='inner', on=None, 
+          left_on=None, right_on=None, left_index: bool=False, 
+          right_index: bool=False, suffixes: List[str]=["_x", "_y"],
+          indicator: bool=False):
+        """
+        Implement pandas-like interface to merge IdaDataFrames
+
+        Parameters
+        ----------
+        right : IdaDataFrame
+            right IdaDataDrame to merge
+        how : str, optional
+            type of join, possible types - 'outer', 'inner', 'right', 'left', 'cross'
+        on : str, optional
+            name of column in both IdaDataFrames to do join on
+        left_on : str, optional
+            name of column in left IdaDataFrame to do join on
+        right_on : str, optional
+            name of column in right IdaDataFrame to do join on
+        left_index : bool, optional
+            whether to join on indexer of left IdaDataFrame
+        right_index : bool, optional
+            whether to join on indexer of right IdaDataFrame
+        suffixes: List[str], optional
+            list of suffixes to add to columns that are present in both IdaDataFrames
+        indicator: bool optional
+            whether to add to output IdaDataFrame, column with information
+            about the source of a given row
+        
+        Returns
+        -------
+        IdaDataFrame
+            result of merging IdaDataFrames
+
+        Examples
+        --------
+        >>> from nzpyida.sampledata.iris import iris
+        >>> from nzpyida.sampledata.iris import iris
+        >>> iris.reset_index()
+        >>> iris2.reset_index()
+        >>> iris2.columns = ['id', 'sepal_length', 'sepal_width', 'petal_length', \
+            'PETAL_WIDTH', 'CLASS']
+        >>> iris2['id'] = iris2['id'] + 50
+        >>> iris1_ida = idadb.as_idadataframe(iris, 'IRIS_TEST1', indexer='index')
+        >>> iris2_ida = idadb.as_idadataframe(iris2, 'IRIS_TEST2', indexer='id')
+        >>> iris_merge = iris1_ida.merge(iris2_ida, left_on='index', right_on='id')
+        >>> iris_merge.tail()
+            index 	sepal_length_x 	sepal_width_x 	petal_length_x 	petal_width 	species     id 	sepal_length_y 	sepal_width_y 	petal_length_y 	PETAL_WIDTH     CLASS												
+        95 	145 	6.7 	        3.0 	        5.2 	        2.3 	        virginica   145 5.7 	        3.0 	        4.2 	        1.2 	        versicolor
+        96 	146 	6.3 	        2.5 	        5.0 	        1.9 	        virginica   146 5.7 	        2.9 	        4.2 	        1.3 	        versicolor
+        97 	147 	6.5 	        3.0 	        5.2 	        2.0 	        virginica   147 6.2 	        2.9 	        4.3 	        1.3 	        versicolor
+        98 	148 	6.2 	        3.4 	        5.4 	        2.3 	        virginica   148 5.1 	        2.5 	        3.0 	        1.1 	        versicolor
+        99 	149 	5.9 	        3.0 	        5.1 	        1.8 	        virginica   149 5.7 	        2.8 	        4.1 	        1.3 	        versicolor
+        >>> len(iris_merge)
+        100
+        >>> iris_merge = iris1_ida.merge() iris2_ida, left_on='index', right_index=True, 
+                            how='outer', indicator=True, suffixes=("_a", "_b"))
+        >>> iris_merge.head()
+            index 	sepal_length_a 	sepal_width_a 	petal_length_a 	petal_width 	species 	id 	sepal_length_b 	sepal_width_b 	petal_length_b 	PETAL_WIDTH CLASS 	INDICATOR
+        0 	None 	None 	        None 	        None 	        None 	        None 	        152 	7.1 	        3.0 	        5.9 	        2.1         virginica 	right_only
+        1 	None 	None 	        None 	        None 	        None 	        None 	        151 	5.8 	        2.7 	        5.1 	        1.9         virginica 	right_only
+        2 	None 	None 	        None 	        None 	        None 	        None 	        154 	6.5 	        3.0 	        5.8 	        2.2         virginica 	right_only
+        3 	None 	None 	        None 	        None 	        None 	        None 	        153 	6.3 	        2.9 	        5.6 	        1.8         virginica 	right_only
+        4 	None 	None 	        None 	        None 	        None 	        None 	        150 	6.3 	        3.3 	        6.0 	        2.5         virginica 	right_only
+        """
+        return nzpyida.merge(self, right, how, on, left_on, right_on, 
+                             left_index, right_index, suffixes, indicator)
         
 
     # TODO : implement NULL FIRST option
