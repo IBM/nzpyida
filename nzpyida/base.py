@@ -1666,10 +1666,6 @@ class IdaDataBase(object):
 
         idadf._reset_attributes(['shape', 'axes', 'dtypes', 'index'])
 
-    def merge(self, idadf, other, key):
-        # TODO:
-        pass
-
     ###############################################################################
     #### Connection management
     ###############################################################################

@@ -193,7 +193,7 @@ join
 
 merge
 -----
-.. automethod:: nzpyida.join_tables.merge
+.. automethod:: IdaDataFrame.merge
 
 concat
 ------

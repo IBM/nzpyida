@@ -103,8 +103,8 @@ def concat(objs: List[IdaDataFrame], axis: int=0, join: str='outer', keys: List[
     return idadf
 
 
-def merge(left: IdaDataFrame, right: IdaDataFrame, how: str='inner', on: str=None, 
-          left_on: str=None, right_on: str=None, left_index: bool=False, 
+def merge(left: IdaDataFrame, right: IdaDataFrame, how: str='inner', on=None, 
+          left_on=None, right_on=None, left_index: bool=False, 
           right_index: bool=False, suffixes: List[str]=["_x", "_y"],
           indicator: bool=False):
     """
@@ -150,7 +150,7 @@ def merge(left: IdaDataFrame, right: IdaDataFrame, how: str='inner', on: str=Non
     >>> iris2['id'] = iris2['id'] + 50
     >>> iris1_ida = idadb.as_idadataframe(iris, 'IRIS_TEST1', indexer='index')
     >>> iris2_ida = idadb.as_idadataframe(iris2, 'IRIS_TEST2', indexer='id')
-    >>> iris_merge = nzpyida.merge(iris1_ida, iris2_ida)
+    >>> iris_merge = nzpyida.merge(iris1_ida, iris2_ida, left_on='index', right_on='id')
     >>> iris_merge.tail()
         index 	sepal_length_x 	sepal_width_x 	petal_length_x 	petal_width 	species     id 	sepal_length_y 	sepal_width_y 	petal_length_y 	PETAL_WIDTH     CLASS												
     95 	145 	6.7 	        3.0 	        5.2 	        2.3 	        virginica   145 5.7 	        3.0 	        4.2 	        1.2 	        versicolor
@@ -164,11 +164,11 @@ def merge(left: IdaDataFrame, right: IdaDataFrame, how: str='inner', on: str=Non
                            how='outer', indicator=True, suffixes=("_a", "_b"))
     >>> iris_merge.head()
         index 	sepal_length_a 	sepal_width_a 	petal_length_a 	petal_width 	species 	id 	sepal_length_b 	sepal_width_b 	petal_length_b 	PETAL_WIDTH CLASS 	INDICATOR
-    0 	None 	None 	        None 	        None 	        None 	        None 	        152 	7.1 	        3.0 	        5.9 	        2.1         virginica 	only right
-    1 	None 	None 	        None 	        None 	        None 	        None 	        151 	5.8 	        2.7 	        5.1 	        1.9         virginica 	only right
-    2 	None 	None 	        None 	        None 	        None 	        None 	        154 	6.5 	        3.0 	        5.8 	        2.2         virginica 	only right
-    3 	None 	None 	        None 	        None 	        None 	        None 	        153 	6.3 	        2.9 	        5.6 	        1.8         virginica 	only right
-    4 	None 	None 	        None 	        None 	        None 	        None 	        150 	6.3 	        3.3 	        6.0 	        2.5         virginica 	only right
+    0 	None 	None 	        None 	        None 	        None 	        None 	        152 	7.1 	        3.0 	        5.9 	        2.1         virginica 	right_only
+    1 	None 	None 	        None 	        None 	        None 	        None 	        151 	5.8 	        2.7 	        5.1 	        1.9         virginica 	right_only
+    2 	None 	None 	        None 	        None 	        None 	        None 	        154 	6.5 	        3.0 	        5.8 	        2.2         virginica 	right_only
+    3 	None 	None 	        None 	        None 	        None 	        None 	        153 	6.3 	        2.9 	        5.6 	        1.8         virginica 	right_only
+    4 	None 	None 	        None 	        None 	        None 	        None 	        150 	6.3 	        3.3 	        6.0 	        2.5         virginica 	right_only
     """
     idadb = left._idadb
     suffixes = [suffix if suffix else "" for suffix in suffixes ]
@@ -181,23 +181,61 @@ def merge(left: IdaDataFrame, right: IdaDataFrame, how: str='inner', on: str=Non
     if how not in available_join_types:
         raise ValueError(f"Invalid value in 'how', should be one of: {available_join_types}")
 
+
+    if not on and not any([left_on, right_on, left_index, right_index]):
+        if how != "cross":
+            on = common_columns
+            if not on:
+                raise ValueError("No common columns to perform merge on.", 
+                                 "Merge options: left_on=None, right_on=None,", 
+                                 "left_index=False, right_index=False")
     if on:
-        if on and not on in left.columns:
-            raise KeyError(f"No column {on} in {left.name} dataframe")
-        if on and not on in right.columns:
-            raise KeyError(f"No column {on} in {right.name} dataframe")
-        on_query = f" using ({q(on)})"
-        common_columns.remove(on)
-        left_indexer = on
-        right_indexer = on
+        if isinstance(on, str):
+            if not on in left.columns:
+                raise KeyError(f"No column {on} in {left.name} dataframe")
+            if not on in right.columns:
+                raise KeyError(f"No column {on} in {right.name} dataframe")
+            on_query = f" using ({q(on)})"
+            left_indexer = on
+            right_indexer = on
+            on = [on]
+        else:
+            if not all(on_col in left.columns for on_col in on):
+                raise KeyError(f"Not all on columns {on} in {left.name} dataframe")
+            if not all(on_col in right.columns for on_col in on):
+                raise KeyError(f"Not all on columns {on} in {right.name} dataframe")
+            if len(on) == 1:
+                on_query = f" using ({q(on[0])})"
+            else:
+                on_queries = [f"left_table.{q(on_col)} = right_table.{q(on_col)}" 
+                              for on_col in on]
+                on_query = " on " + " and ".join(on_queries)
+            
+        
 
     elif any([left_on, right_on, left_index, right_index]):
         if how == "cross":
             raise ValueError("Can not pass on, right_on, left_on or set right_index=True or left_index=True")
-        if left_on and not left_on in left.columns:
-            raise KeyError(f"No column {left_on} in {left.name} dataframe")
-        if right_on and not right_on in right.columns:
-            raise KeyError(f"No column {right_on} in {right.name} dataframe")
+        if left_on:
+            if isinstance(left_on, str):
+                if not left_on in left.columns:
+                    raise KeyError(f"No column {left_on} in {left.name} dataframe")
+                left_on = [left_on]
+            elif not all(left_on_col in left.columns for left_on_col in left_on):
+                raise KeyError(f"Not all columns {left_on} in {left.name} dataframe")
+        if right_on:
+            if isinstance(right_on, str):
+                if not right_on in right.columns:
+                    raise KeyError(f"No column {right_on} in {right.name} dataframe")
+                right_on = [right_on]
+            elif not all(right_on_col in right.columns for right_on_col in right_on):
+                raise KeyError(f"Not all columns {right_on} in {right.name} dataframe")
+        if left_on and len(left_on) > 1:
+            if not right_on or len(right_on) != len(left_on):
+                raise ValueError("len(right_on) must equal len(left_on)")
+        if right_on and len(right_on) > 1:
+            if not left_on or len(left_on) != len(right_on):
+                raise ValueError("len(right_on) must equal len(left_on)")
         if (left_on or left_index) and not (right_on or right_index):
             raise ValueError('Must pass "right_on" OR "right_index"')
         if (right_on or right_index) and not (left_on or left_index):
@@ -210,38 +248,46 @@ def merge(left: IdaDataFrame, right: IdaDataFrame, how: str='inner', on: str=Non
             raise ValueError(f"'left_index' set to True, but {left.name} has no indexer")
         if right_index and not right.indexer:
             raise ValueError(f"'right_index' set to True, but {right.name} has no indexer")
-        
-        left_indexer = left_on if left_on else left.indexer
-        right_indexer = right_on if right_on else right.indexer
-        if left_indexer == right_indexer:
-            on = left_indexer
-            on_query = f" using ({q(on)})"
-            common_columns.remove(on)
+        if not left_on or len(left_on) == 1:
+            left_indexer = left_on[0] if left_on else left.indexer
+            right_indexer = right_on[0] if right_on else right.indexer
+            if left_indexer == right_indexer:
+                on = left_indexer
+                on_query = f" using ({q(on)})"
+                on = [on]
+            else:
+                on_query = f" on left_table.{q(left_indexer)} = right_table.{q(right_indexer)}"
         else:
-            on_query = f" on {left.name}.{q(left_indexer)} = {right.name}.{q(right_indexer)}"
-    else:
-        if how != "cross":
-            on_columns = [f"{left.name}.{q(col)} = {right.name}.{q(col)}" 
-                          for col in common_columns]
-            on_query = f" on {' AND '.join(on_columns)}"
+            on_queries = [f"left_table.{q(left_on[i])} = right_table.{q(right_on[i])}" 
+                          for i in range(len(left_on))]
+            on_query = " on " + " and ".join(on_queries)
         
-    if common_columns:
-        lcols = [f"{left.name}.{q(lcol)}" if lcol not in common_columns 
-                 else f"{left.name}.{q(lcol)} AS {q(lcol + suffixes[0])}" 
-                 for lcol in left.columns]
-        rcols = [f"{right.name}.{q(rcol)}" if rcol not in common_columns 
-                 else f"{right.name}.{q(rcol)} AS {q(rcol + suffixes[1])}" 
-                 for rcol in right.columns]
+    lcols = [f"left_table.{q(lcol)}" if lcol not in common_columns 
+            else f"left_table.{q(lcol)} AS {q(lcol + suffixes[0])}" 
+            for lcol in left.columns]
+    rcols = [f"right_table.{q(rcol)}" if rcol not in common_columns 
+            else f"right_table.{q(rcol)} AS {q(rcol + suffixes[1])}" 
+            for rcol in right.columns]
+    nvl_statement = ""
+    if on and len(on) == 1: 
+        lcols.remove(f"left_table.{q(on[0])} AS {q(on[0] + suffixes[0])}")
+        rcols.remove(f"right_table.{q(on[0])} AS {q(on[0] + suffixes[1])}") 
+        all_cols = [q(on[0])] + lcols + rcols
+    else:  
         if on:
-            lcols.remove(f"{left.name}.{q(on)}")
-            rcols.remove(f"{right.name}.{q(on)}")
-            all_cols = [q(on)] + lcols + rcols
-        else:
-            all_cols = lcols + rcols
-        cols = ", ".join(all_cols)
-    else:
-        cols = "*"
-    
+            for on_col in on:
+                lcols.remove(f"left_table.{q(on_col)} AS {q(on_col + suffixes[0])}")
+                rcols.remove(f"right_table.{q(on_col)} AS {q(on_col + suffixes[1])}")
+                nvl_statement += f" nvl(left_table.{q(on_col)},right_table.{q(on_col)}) AS {q(on_col)}, "
+        elif left_on and len(left_on) > 1:
+            for i in range(len(left_on)):
+                if left_on[i] == right_on[i]:
+                    lcols.remove(f"left_table.{q(left_on[i])} AS {q(left_on[i] + suffixes[0])}")
+                    rcols.remove(f"right_table.{q(right_on[i])} AS {q(right_on[i] + suffixes[1])}")
+                    nvl_statement += f" nvl(left_table.{q(left_on[i])},right_table.{q(right_on[i])}) AS {q(left_on[i])}, "
+        all_cols = lcols + rcols
+    cols = ", ".join(all_cols)
+
     join_type = {
         "inner": "inner",
         "left": "left outer",
@@ -250,19 +296,22 @@ def merge(left: IdaDataFrame, right: IdaDataFrame, how: str='inner', on: str=Non
         "cross": "cross"
     }
     if indicator:
-        case_statement = f", case when {left.name}.{q(left_indexer)} is not null " + \
-                         f"and {right.name}.{q(right_indexer)} is not null " + \
-                         f"then 'both' " + \
-                         f"when {left.name}.{q(left_indexer)} is not null " + \
-                         f"then 'only left' " + \
-                         f"when {right.name}.{q(right_indexer)} is not null " + \
-                         f"then 'only right' " + \
-                         f"else null end as indicator"
-
+        case_statement = ", case when t1=1 and t2=1 then 'both' when t1=1 then 'left_only'" + \
+            "else 'right_only' end as indicator"
+        select_statement1 = "(select 1 as t1, * from "
+        select_statement2 = "(select 1 as t2, * from "
+        as_statement1 = ") as left_table "
+        as_statement2 = ") as right_table "
     else:
         case_statement = ""
-    query = f"select {cols} {case_statement} from {left.internal_state.current_state}" + \
-        f" {join_type[how]} join {right.internal_state.current_state}" + on_query
+        select_statement1 = ""
+        select_statement2 = ""
+        as_statement1 = " as left_table"
+        as_statement2 = " as right_table"
+    query = f"select {nvl_statement} {cols} {case_statement} from" + \
+        f"{select_statement1} {left.internal_state.current_state}{as_statement1}" + \
+        f" {join_type[how]} join {select_statement2}" + \
+        f"{right.internal_state.current_state}{as_statement2}" + on_query
 
     if how == 'right':
         idx = right_indexer
