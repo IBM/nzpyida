@@ -63,7 +63,7 @@ class IdaDataFrameGroupBy(object):
         self.in_df = in_df
         self.columns_to_aggregate = columns_to_aggregate
         self.by_column = by_column
-        self.name = in_df.internal_state.current_state
+        self.name = in_df.internal_state.get_state()
     
     def count(self):
         """
@@ -141,7 +141,7 @@ class IdaDataFrameGroupBy(object):
             
         groupby_string = f'GROUP BY \"{self.by_column}\"'
         query = 'SELECT ' + select_string + f', \"{self.by_column}\"' + \
-            f' FROM {self.name} ' + groupby_string
+            f' FROM ({self.name}) AS TEMP_GB ' + groupby_string
 
         idadf=nzpyida.IdaGeoDataFrame(self.in_df._idadb, self.in_df.tablename)
         idadf.internal_state._views.append(query)

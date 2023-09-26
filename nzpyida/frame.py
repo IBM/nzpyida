@@ -180,6 +180,9 @@ class IdaDataFrame(object):
         # A cache for unique value of each column
         self._unique = dict()
 
+        # Variable for storing original columns names
+        self._org_columns_names = None
+
 ###############################################################################
 ### Attributes & Metadata computation
 ###############################################################################
@@ -312,6 +315,16 @@ class IdaDataFrame(object):
         return self._get_index()
 
     @lazy
+    def get_columns(self):
+        if hasattr(self, "internal_state"):
+            self.internal_state._create_view()
+            cols = self._get_columns()
+            self.internal_state._delete_view()
+            return cols
+        else:
+            return self._get_columns()
+
+    @property
     def columns(self):
         """
         Index containing the column names in self.
@@ -327,13 +340,28 @@ class IdaDataFrame(object):
         'species'],
         dtype='object')
         """
-        if hasattr(self, "internal_state"):
-            self.internal_state._create_view()
-            cols = self._get_columns()
-            self.internal_state._delete_view()
-            return cols
-        else:
-            return self._get_columns()
+        if not self._org_columns_names:
+            self._org_columns_names = list(self.get_columns)
+        return self.get_columns
+        
+    
+    @columns.setter
+    def columns(self, new_names):
+        newColumndict = {new_names[i]: list(self.internal_state.columndict.values())[i] for i in range(len(self.columns))}
+        self._reset_attributes(["get_columns"])
+        self.internal_state.columndict = newColumndict
+        self.internal_state.update()
+
+
+    @columns.deleter
+    def columns(self):
+        self._columns = []
+
+    @lazy
+    def org_columns_names(self):
+        if not self._org_columns_names:
+            return list(self.get_columns)
+        return self._org_columns_names
 
     @lazy
     @idadf_state
@@ -457,15 +485,14 @@ class IdaDataFrame(object):
                 if item not in self.columns:
                     raise KeyError(item)
                 newidaseries = self._clone_as_serie(item)
-
                 # Form the new columndict
                 for column in list(newidaseries.internal_state.columndict):
                     if column != item:
                         del newidaseries.internal_state.columndict[column]
                 newColumndict = newidaseries.internal_state.columndict
-
+                
                 # Erase attributes
-                newidaseries._reset_attributes(["columns", "shape", "dtypes"])
+                newidaseries._reset_attributes(["get_columns", "shape", "dtypes"])
                 # Set columns and columndict attributes
                 newidaseries.internal_state.columns = ["\"%s\""%col for col in item]
                 newidaseries.internal_state.columndict = newColumndict
@@ -492,7 +519,7 @@ class IdaDataFrame(object):
                 newColumndict[col] = self.internal_state.columndict[col]
 
             # Erase attributes
-            newidadf._reset_attributes(["columns", "shape", "dtypes"])
+            newidadf._reset_attributes(["get_columns", "shape", "dtypes"])
             # Set columns and columndict attributes
             newidadf.internal_state.columns = ["\"%s\""%col for col in item]
             newidadf.internal_state.columndict = newColumndict
@@ -525,15 +552,14 @@ class IdaDataFrame(object):
             key = [key]
         if len(key) != len(item.columns):
                 raise ValueError("Wrong number of items passed %s, placement implies %s"%(len(item.columns),len(key)))
-
         #form the new columndict
         for newname, oldname in zip(key, item.columns):
             self.internal_state.columndict[newname] = item.internal_state.columndict[oldname]
         newColumndict = self.internal_state.columndict
-
         #erase attributes
-        self._reset_attributes(["columns", "shape", "dtypes"])
+        self._reset_attributes(["get_columns", "shape", "dtypes"])
         #set columns and columndict attributes
+        
         self.internal_state.columndict = newColumndict
         self.internal_state.columns = ["\"%s\""%col for col in newColumndict.keys()]
         #update, i.e. appends an entry to internal_state._cumulative
@@ -2212,8 +2238,8 @@ class IdaDataFrame(object):
         Clone the actual object.
         """
         newida = IdaDataFrame(self._idadb, self._name, self.indexer)
-        newida.columns = self.columns
-        newida.dtypes = self.dtypes     # avoid recomputing it
+        # newida.columns = self.columns
+        # newida.dtypes = self.dtypes     # avoid recomputing it
         # otherwise risk of infinite loop between
         # idadf.columns and internalstate.columndict
 
@@ -2229,6 +2255,9 @@ class IdaDataFrame(object):
         newida.internal_state._cumulative = deepcopy(self.internal_state._cumulative)
         newida.internal_state.order = deepcopy(self.internal_state.order)
         newida.internal_state.columndict = deepcopy(self.internal_state.columndict)
+        newida.columns = self.columns
+        newida._org_columns_names = deepcopy(self._org_columns_names)
+        newida.dtypes = self.dtypes
         return newida
 
     def _clone_as_serie(self, column):
@@ -2245,6 +2274,7 @@ class IdaDataFrame(object):
         newida.internal_state._cumulative = deepcopy(self.internal_state._cumulative)
         newida.internal_state.order = deepcopy(self.internal_state.order)
         newida.internal_state.columndict = deepcopy(self.internal_state.columndict)
+        newida._org_columns_names = [self.internal_state.columndict[column]]
         return newida
 
     def _get_type(self):
@@ -2367,11 +2397,14 @@ class IdaDataFrame(object):
             attributes = [attributes]
 
         # Special case : resetting columns
-        if "columns" in attributes:
+        if "get_columns" in attributes:
              try:
                  del self.internal_state.columndict
              except:
                  pass
+            
+        if "org_columns_names" in attributes:
+            self._org_columns_names = None
 
         nzpyida.utils._reset_attributes(self, attributes)
 
@@ -2528,16 +2561,15 @@ class IdaDataFrame(object):
                     not_valid.append(column)
             if not_valid:
                 raise TypeError("Arithmetic operation are not defined for %s"%not_valid)
-
         if isinstance(other, IdaDataFrame) | isinstance(other, nzpyida.IdaSeries):
             if self._name != other._name:
                 raise IdaDataFrameError("It is not possible to aggregate columns using columns of a different table.")
-
+        
         if not(isinstance(other, IdaDataFrame) | isinstance(other, nzpyida.IdaSeries) | isinstance(other, Number)):
             if other is not None:
                 raise TypeError("Aggregation makes only sense with numbers, "+
                                 "or IdaDataFrames refering to the same table.")
-
+        
         check_numeric_columns(self)
         if isinstance(other, nzpyida.IdaSeries)|isinstance(other, IdaDataFrame):
             check_numeric_columns(other)
