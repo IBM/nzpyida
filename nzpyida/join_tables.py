@@ -67,7 +67,7 @@ def concat(objs: List[IdaDataFrame], axis: int=0, join: str='outer', keys: List[
         else:
             case_statments = [""] * len(objs)
         if all(list(obj.columns) == list(objs[0].columns) for obj in objs):
-            names_list = [df.internal_state.current_state for df in objs]
+            names_list = [f'{objs[i].internal_state.get_state()} AS TEMP_JOIN_{i} ' for i in range(len(objs))]
             query = "SELECT * FROM " + " UNION ALL SELECT * FROM ".join(names_list)
         else:
             in_columns_table = [obj.columns for obj in objs]
@@ -86,7 +86,7 @@ def concat(objs: List[IdaDataFrame], axis: int=0, join: str='outer', keys: List[
                 
             columns_queries = ['SELECT ' + case_statments[i] + 
                                 ', '.join(out_columns_table[i]) + 
-                                f" FROM {objs[i].internal_state.current_state}" 
+                                f" FROM ({objs[i].internal_state.get_state()}) AS TEMP_{i}" 
                                 for i in range(len(objs))
                                ]
             query = " UNION ALL ".join(columns_queries)
@@ -298,20 +298,20 @@ def merge(left: IdaDataFrame, right: IdaDataFrame, how: str='inner', on=None,
     if indicator:
         case_statement = ", case when t1=1 and t2=1 then 'both' when t1=1 then 'left_only'" + \
             "else 'right_only' end as indicator"
-        select_statement1 = "(select 1 as t1, * from "
-        select_statement2 = "(select 1 as t2, * from "
-        as_statement1 = ") as left_table "
-        as_statement2 = ") as right_table "
+        select_statement1 = "(select 1 as t1, * from ("
+        select_statement2 = "(select 1 as t2, * from ("
+        as_statement1 = ") as lt) as left_table "
+        as_statement2 = ") as rt) as right_table "
     else:
         case_statement = ""
-        select_statement1 = ""
-        select_statement2 = ""
-        as_statement1 = " as left_table"
-        as_statement2 = " as right_table"
+        select_statement1 = "("
+        select_statement2 = "("
+        as_statement1 = ") as left_table"
+        as_statement2 = ") as right_table"
     query = f"select {nvl_statement} {cols} {case_statement} from" + \
-        f"{select_statement1} {left.internal_state.current_state}{as_statement1}" + \
+        f"{select_statement1} ({left.internal_state.get_state()}){as_statement1}" + \
         f" {join_type[how]} join {select_statement2}" + \
-        f"{right.internal_state.current_state}{as_statement2}" + on_query
+        f"{right.internal_state.get_state()}{as_statement2}" + on_query
 
     if how == 'right':
         idx = right_indexer

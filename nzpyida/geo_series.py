@@ -1813,7 +1813,7 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         idaseries.internal_state.update()
 
         # Set the column attribute of the new idaseries
-        idaseries.column = result_column_key
+        idaseries._column = result_column_key
         
         try:
             del(idaseries.columns)

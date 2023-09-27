@@ -40,9 +40,10 @@ class IdaSeries(nzpyida.IdaDataFrame):
     
     @column.setter
     def column(self, value):
+        new_columndict = {value: self.internal_state.columndict[self._column]}
         self._reset_attributes('columns')
         self._column = value
-        #self.columndict = {value: self._org_columns_names[0]}
+        self.internal_state.columndict = new_columndict
         self.internal_state.update()
     
     @lazy

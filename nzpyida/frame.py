@@ -355,7 +355,7 @@ class IdaDataFrame(object):
 
     @columns.deleter
     def columns(self):
-        pass
+        self._reset_attributes(['get_columns'])
 
     @lazy
     def org_columns_names(self):
