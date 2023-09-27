@@ -348,14 +348,14 @@ class IdaDataFrame(object):
     @columns.setter
     def columns(self, new_names):
         newColumndict = {new_names[i]: list(self.internal_state.columndict.values())[i] for i in range(len(self.columns))}
-        self._reset_attributes(["get_columns"])
+        self._reset_attributes(["get_columns", "dtypes"])
         self.internal_state.columndict = newColumndict
         self.internal_state.update()
 
 
     @columns.deleter
     def columns(self):
-        self._columns = []
+        pass
 
     @lazy
     def org_columns_names(self):
@@ -2274,7 +2274,7 @@ class IdaDataFrame(object):
         newida.internal_state._cumulative = deepcopy(self.internal_state._cumulative)
         newida.internal_state.order = deepcopy(self.internal_state.order)
         newida.internal_state.columndict = deepcopy(self.internal_state.columndict)
-        newida._org_columns_names = [self.internal_state.columndict[column]]
+        newida._org_columns_names = [self.internal_state.columndict[column].strip('\"')]
         return newida
 
     def _get_type(self):
@@ -2397,7 +2397,7 @@ class IdaDataFrame(object):
             attributes = [attributes]
 
         # Special case : resetting columns
-        if "get_columns" in attributes:
+        if "get_columns" in attributes or "columns" in attributes:
              try:
                  del self.internal_state.columndict
              except:
