@@ -1806,14 +1806,14 @@ class IdaGeoSeries(nzpyida.IdaSeries):
         result_column_key = result_column.replace('"', '')
         new_columndict[result_column_key] = result_column
 
-        idaseries._reset_attributes(["columns", "shape", "dtypes"])
+        idaseries._reset_attributes(["get_columns", "shape", "dtypes"])
         idaseries.internal_state.columns = ['\"' + result_column_key + '\"']
 
         idaseries.internal_state.columndict = new_columndict
         idaseries.internal_state.update()
 
         # Set the column attribute of the new idaseries
-        idaseries.column = result_column_key
+        idaseries._column = result_column_key
         
         try:
             del(idaseries.columns)

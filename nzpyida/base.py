@@ -1410,7 +1410,7 @@ class IdaDataBase(object):
                 
             
         self.commit()
-        idadf._reset_attributes(["columns", "dtypes", "shape"])
+        idadf._reset_attributes(["get_columns", "dtypes", "shape", 'org_columns_names'])
         
             
     
@@ -1495,7 +1495,7 @@ class IdaDataBase(object):
                 idadf.internal_state.columndict[item[0]] = item[1]
 
             idadf.internal_state.update()
-            idadf._reset_attributes(["columns"])
+            idadf._reset_attributes(["get_columns", "org_columns_names"])
             idadf.indexer = column_id
         else:
             # prepend the columndict OrderedDict
@@ -1508,12 +1508,14 @@ class IdaDataBase(object):
             idadf.internal_state.columndict[column_id] = "((ROW_NUMBER() OVER("+ order_by +"))-1)"
             for item in items:
                 idadf.internal_state.columndict[item[0]] = item[1]
+            newColumndict = idadf.internal_state.columndict
             idadf.internal_state.update()
-            idadf._reset_attributes(["columns"])
+            idadf._reset_attributes(["get_columns"])
+            idadf.internal_state.columndict = newColumndict
             idadf.indexer = column_id
 
         # Reset attributes
-        idadf._reset_attributes(['shape', 'columns', 'axes', 'dtypes'])
+        idadf._reset_attributes(['shape', 'axes', 'dtypes'])
 
     def delete_column(self, idadf, column_name, destructive=False):
         """
@@ -1575,12 +1577,14 @@ class IdaDataBase(object):
             del idadf.internal_state.columndict[column_name]
             idadf.internal_state.update()
             self._reset_attributes("cache_show_tables")
-            idadf._reset_attributes(['shape', 'columns', 'dtypes'])
+            idadf._reset_attributes(['shape', 'get_columns', 'dtypes', 'org_columns_names'])
 
         else:
             del idadf.internal_state.columndict[column_name]
+            newColumndict = idadf.internal_state.columndict
             idadf.internal_state.update()
-            idadf._reset_attributes(["columns", "shape", "dtypes"])
+            idadf._reset_attributes(["get_columns", "shape", "dtypes"])
+            idadf.internal_state.columndict = newColumndict
 
         if column_name == idadf.indexer:
             idadf._reset_attributes(["_indexer"])

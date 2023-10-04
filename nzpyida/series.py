@@ -26,12 +26,31 @@ class IdaSeries(nzpyida.IdaDataFrame):
     """
     def __init__(self, idadb, tablename, indexer, column):
         super(IdaSeries, self).__init__(idadb, tablename, indexer)
-        self.column = column
+        self._column = column
+        self._org_columns_names = [self.column]
 
     ##### legacy
     @lazy
     def columns(self):
         return [self.column]
+    
+    @property
+    def column(self):
+        return self._column
+    
+    @column.setter
+    def column(self, value):
+        new_columndict = {value: self.internal_state.columndict[self._column]}
+        self._reset_attributes('columns')
+        self._column = value
+        self.internal_state.columndict = new_columndict
+        self.internal_state.update()
+    
+    @lazy
+    def org_columns_names(self):
+        if not self._org_columns_names:
+            return [self.column]
+        return self._org_columns_names
 
 # TODO : Override all methods for which the behavior, i.e. the output is
 # different in comparision with the one of an IdaDataFrame. For now the
@@ -58,4 +77,5 @@ class IdaSeries(nzpyida.IdaDataFrame):
         newida.internal_state._views = deepcopy(self.internal_state._views)
         newida.internal_state._cumulative = deepcopy(self.internal_state._cumulative)
         newida.internal_state.order = deepcopy(self.internal_state.order)
+        newida._org_columns_names = self._org_columns_names
         return newida

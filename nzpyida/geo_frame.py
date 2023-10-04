@@ -262,8 +262,6 @@ class IdaGeoDataFrame(IdaDataFrame):
             #behavior based on _clone() method of IdaDataFrame
             newida = IdaGeoDataFrame(
                     idadf._idadb, idadf._name, idadf.indexer, geometry)
-            newida.columns = idadf.columns 
-            newida.dtypes = idadf.dtypes
             
             newida.internal_state.name = deepcopy(idadf.internal_state.name)
             newida.internal_state.ascending = deepcopy(idadf.internal_state.ascending)
@@ -272,6 +270,8 @@ class IdaGeoDataFrame(IdaDataFrame):
             newida.internal_state._cumulative = deepcopy(idadf.internal_state._cumulative)
             newida.internal_state.order = deepcopy(idadf.internal_state.order)
             newida.internal_state.columndict = deepcopy(idadf.internal_state.columndict)
+            newida.columns = idadf.columns 
+            newida.dtypes = idadf.dtypes
             return newida
 
     def set_geometry(self, column_name):

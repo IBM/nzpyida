@@ -130,7 +130,7 @@ class InternalState(object):
         appear in modified SQL queries for creating views.
         """
         #return OrderedDict((cols,"\""+cols+"\"") for cols in self._idadf.columns)
-        columns = deepcopy(OrderedDict((cols,"\""+cols+"\"") for cols in self._idadf.columns))
+        columns = deepcopy(OrderedDict((cols[0],"\""+cols[1]+"\"") for cols in zip(self._idadf.columns, self._idadf.org_columns_names)))
         
         #Remove the quotation marks enclosing DB2GSE functions
         #ibmdbpy stores and keeps track of columns internally enclosing them
