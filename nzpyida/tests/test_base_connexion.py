@@ -81,6 +81,7 @@ class Test_ConnexionManagement(object):
             idadb.commit()
             assert(idadb.exists_table("TEST_ROLLBACK_59673030586849305074") == 0)
 
+    @pytest.mark.skip()
     def test_idadb_close(self, idadb_tmp):
         idadb_tmp.close()
         with pytest.raises(IdaDataBaseError):

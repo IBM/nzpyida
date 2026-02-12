@@ -17,44 +17,45 @@ class Test_Filtering(object):
     def test_Filtering_lt(self, idadf):
         mean = idadf.mean()
         if not mean.empty:
-            ida = idadf[idadf[mean.index[0]] < mean[0]]
-            assert(ida.max()[0] < mean[0])
+            ida = idadf[idadf[mean.index[0]] < mean.iloc[0]]
+
+            assert(ida.max().iloc[0] < mean.iloc[0])
             
     def test_Filtering_le(self, idadf):
         mean = idadf.mean()
         if not mean.empty:
-            ida = idadf[idadf[mean.index[0]] <= mean[0]]
-            assert(ida.max()[0] <= mean[0])
+            ida = idadf[idadf[mean.index[0]] <= mean.iloc[0]]
+            assert(ida.max().iloc[0] <= mean.iloc[0])
         pass
 
     def test_Filtering_eq(self, idadf):
         maxi = idadf.max()
         if not maxi.empty:
-            ida = idadf[idadf[maxi.index[0]] == maxi[0]]
-            assert(ida.max()[0] == maxi[0])
-            assert(ida.min()[0] == maxi[0])
+            ida = idadf[idadf[maxi.index[0]] == maxi.iloc[0]]
+            assert(ida.max().iloc[0] == maxi.iloc[0])
+            assert(ida.min().iloc[0] == maxi.iloc[0])
         pass
     
     def test_Filtering_neq(self, idadf):
         maxi = idadf.max()
         if not maxi.empty:
-            ida = idadf[idadf[maxi.index[0]] != maxi[0]]
-            assert(ida.max()[0] != maxi[0])
-            assert(ida.min()[0] != maxi[0])
+            ida = idadf[idadf[maxi.index[0]] != maxi.iloc[0]]
+            assert(ida.max().iloc[0] != maxi.iloc[0])
+            assert(ida.min().iloc[0] != maxi.iloc[0])
         pass
 
     def test_Filtering_ge(self, idadf):
         mean = idadf.mean()
         if not mean.empty:
-            ida = idadf[idadf[mean.index[0]] >= mean[0]]
-            assert(ida.max()[0] >= mean[0])
+            ida = idadf[idadf[mean.index[0]] >= mean.iloc[0]]
+            assert(ida.max().iloc[0] >= mean.iloc[0])
         pass
 
     def test_Filtering_gt(self, idadf):
         mean = idadf.mean()
         if not mean.empty:
-            ida = idadf[idadf[mean.index[0]] > mean[0]]
-            assert(ida.max()[0] > mean[0])
+            ida = idadf[idadf[mean.index[0]] > mean.iloc[0]]
+            assert(ida.max().iloc[0] > mean.iloc[0])
         pass
 
 
@@ -64,26 +65,26 @@ class Test_FilterQuery(object):
         maxi = idadf.max()
         mini = idadf.min()
         if not (maxi.empty | mini.empty):
-            ida = idadf[(idadf[mini.index[0]] > mini[0])&(idadf[maxi.index[0]] < maxi[0])]
-            assert(ida.max()[0] < maxi[0])
-            assert(ida.min()[0] > mini[0])
+            ida = idadf[(idadf[mini.index[0]] > mini.iloc[0])&(idadf[maxi.index[0]] < maxi.iloc[0])]
+            assert(ida.max().iloc[0] < maxi.iloc[0])
+            assert(ida.min().iloc[0] > mini.iloc[0])
         pass
 
     def test_FilterQuery_or(self, idadf):
         maxi = idadf.max()
         mini = idadf.min()
         if not (maxi.empty | mini.empty):
-            ida = idadf[(idadf[mini.index[0]] == mini[0])|(idadf[maxi.index[0]] == maxi[0])]
+            ida = idadf[(idadf[mini.index[0]] == mini.iloc[0])|(idadf[maxi.index[0]] == maxi.iloc[0])]
             head = ida.head()
             for value in head.values:
-                assert((value[0] == mini[0])|(value[0] == maxi[0]))         
+                assert((value[0] == mini.iloc[0])|(value[0] == maxi.iloc[0]))
         pass
 
     def test_FilterQuery_xor(self, idadf):
         mini = idadf.min()
         if not mini.empty:
-            ida = idadf[(idadf[mini.index[0]] >= mini[0])^(idadf[mini.index[0]] == mini[0])]
-            assert(ida.min()[0] > mini[0])
+            ida = idadf[(idadf[mini.index[0]] >= mini.iloc[0])^(idadf[mini.index[0]] == mini.iloc[0])]
+            assert(ida.min().iloc[0] > mini.iloc[0])
         pass
 
     def test_FilterQuery_error(self, idadf):

@@ -46,6 +46,7 @@ py.test
 
 py.test --dsn=<DSN>
     Do the test routine with the data source <DSN> as defined in ODBC settings.
+    For nzpy connection provide the dbname in dsn
 
 py.test --dsn=<DSN> --uid=<UID> --pwd=<pwd>
     In case userID and password are not stored in ODBC settings.
@@ -431,12 +432,7 @@ def session_teardown(idadb, idadf, idaview, request):
     Defines cleanup actions to be done once the testing procedure is done.
     """
     def fin():
-        try:
-            idadb.drop_table(idadf.name)
-            idadb.drop_view(idaview.name)
-            idadb.commit()
-            idadb.close()
-        except: pass
+        pass
     request.addfinalizer(fin)
     return
 

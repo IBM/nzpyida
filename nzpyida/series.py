@@ -59,12 +59,12 @@ class IdaSeries(nzpyida.IdaDataFrame):
     def min(self):
         result = super(IdaSeries, self).min()
         #import pdb; pdb.set_trace()
-        return result[0]
-        
+        return result.iloc[0]
+
     def max(self):
         result = super(IdaSeries, self).max()
         #import pdb; pdb.set_trace()
-        return result[0]
+        return result.iloc[0]
 
     def _clone(self):
         """

@@ -537,7 +537,7 @@ def pivot_table(idadf, values=None, columns=None, max_entries=1000, sort=None,
         dataframe = catdataframe.join(dataframe[agg_values].stack().reset_index(1))
         dataframe['level_1'] = pd.Categorical(dataframe['level_1'], agg_values)
         dataframe = dataframe.rename(columns={'level_1': None})
-        dataframe = dataframe.sort([None] + categorical_columns)
+        dataframe = dataframe.sort_values(by=[None] + categorical_columns)
 
     dataframe.set_index([None] + categorical_columns, inplace=True)
     dataframe = dataframe.astype(float)
@@ -650,7 +650,7 @@ def quantile(idadf, q=0.5):
     result = result.astype('float')
 
     if len(result) == 1:
-        result = result[0]
+        result = result.iloc[0]
 
     return result
 
@@ -768,50 +768,45 @@ def cov_old(idadf, other=None):
 
     return result
 
-
-def corr(idadf):
-    if not idadf._idadb._is_netezza_system():
-        return corr_old(idadf)
+def corr(idadf, min_periods):
+    import pandas as pd
+    import numpy as np
 
     numerical_columns = idadf._get_numerical_columns()
+
     if len(numerical_columns) < 2:
-        print(idadf.name + " has less than two numeric columns")
-        return
-    column_string = ""
-    for column in numerical_columns:
-        column_string += "\"" + column + "\";"
+        raise ValueError("Need at least 2 numerical columns for correlation")
 
-    result_df = pd.DataFrame(columns=numerical_columns, index=numerical_columns)
+    table_name = idadf._name
 
-    # print(result_df)
+    # Initialize result matrix
+    result_df = pd.DataFrame(
+        index=numerical_columns,
+        columns=numerical_columns,
+        dtype=float
+    )
 
-    table_name = idadf.internal_state.current_state
-    outtable = idadf._idadb._get_valid_tablename(prefix="corr_")
-
-    idadf._idadb._call_stored_procedure("CORRELATION1000MATRIX ",
-                                        intable=table_name,
-                                        incolumn=column_string,
-                                        outtable=outtable)
-
-    # the calls of substring remove the surrounding double quotes
-    result_query = ("SELECT substring(VARXNAME,2,length(VARXNAME)-2) as VARXNAME, " +
-                    "substring(VARYNAME,2,length(VARYNAME)-2) as VARYNAME, " +
-                    "CORRELATION " +
-                    "FROM " + outtable + " ORDER BY varxname, varyname;")
-
-    corr_df = idadf.ida_query(result_query)
-
-    for index in corr_df.index.values:
-
-        col_list = []
-        for column in corr_df.columns.values:
-            col_list.append(corr_df.at[index, column])
-
-        result_df.at[col_list[0], col_list[1]] = col_list[2]
-
-    for column in result_df.columns:
-        result_df[column] = result_df[column].astype(float)
-    value = idadf._idadb.drop_table(outtable)
+    for i, col1 in enumerate(numerical_columns):
+        select_parts = []
+        for col2 in numerical_columns:
+            select_parts.append(f'CORR("{col1}", "{col2}") as "{col2}"')
+        query = f"""
+        SELECT {', '.join(select_parts)}
+        FROM {table_name}
+        """
+        try:
+            result = idadf._idadb.ida_query(query, first_row_only=True)
+            if result is not None and len(result) > 0:
+                for j, col2 in enumerate(numerical_columns):
+                    corr_value = result[j]
+                    result_df.at[col1, col2] = corr_value
+            else:
+                for col2 in numerical_columns:
+                    result_df.at[col1, col2] = np.nan
+        except Exception as e:
+            print(f"Error calculating correlations for {col1}: {e}")
+            for col2 in numerical_columns:
+                result_df.at[col1, col2] = np.nan
     return result_df
 
 
@@ -963,7 +958,7 @@ def mad(idadf):
     result = result.astype('float')
 
     if isinstance(idadf, nzpyida.IdaSeries):
-        result = result[0]
+        result = result.iloc[0]
 
     return result
 
@@ -1016,7 +1011,7 @@ def count(idadf):
     result = result.astype(int)
 
     if isinstance(idadf, nzpyida.IdaSeries):
-        result = result[0]
+        result = result.iloc[0]
 
     return result
 
@@ -1030,7 +1025,7 @@ def count_distinct(idadf):
     result = result.astype(int)
 
     if isinstance(idadf, nzpyida.IdaSeries):
-        result = result[0]
+        result = result.iloc[0]
 
     return result
 
@@ -1050,7 +1045,7 @@ def std(idadf):
     result.index = columns
 
     if isinstance(idadf, nzpyida.IdaSeries):
-        result = result[0]
+        result = result.iloc[0]
 
     return result
 
@@ -1070,7 +1065,7 @@ def var(idadf):
     result.index = columns
 
     if isinstance(idadf, nzpyida.IdaSeries):
-        result = result[0]
+        result = result.iloc[0]
 
     return result
 
@@ -1090,7 +1085,7 @@ def mean(idadf):
     result.index = columns
 
     if isinstance(idadf, nzpyida.IdaSeries):
-        result = result[0]
+        result = result.iloc[0]
 
     return result
 
@@ -1111,7 +1106,7 @@ def ida_sum(idadf):
     result.index = columns
 
     if isinstance(idadf, nzpyida.IdaSeries):
-        result = result[0]
+        result = result.iloc[0]
 
     return result
 
@@ -1132,6 +1127,6 @@ def median(idadf):
     result.index = columns
 
     if isinstance(idadf, nzpyida.IdaSeries):
-        result = result[0]
+        result = result.iloc[0]
 
     return result

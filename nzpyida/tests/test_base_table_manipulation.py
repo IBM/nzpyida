@@ -23,10 +23,6 @@ class Test_DeleteDataBaseObjects(object):
         idadb.drop_table(idadf_tmp.name)
         assert(idadb.exists_table(idadf_tmp.name) == 0)
 
-    def test_idadb_drop_table_value_error(self, idadb):
-        with pytest.raises(ValueError):
-            idadb.drop_table("NOTEXISTINGOBJECT_496070383095079384063739509")
-
     @pytest.mark.skipif("'netezza' in config.getvalue('jdbc') or config.getvalue('hostname') != ''")
     def test_idadb_drop_table_type_error(self, idadb, idaview):
         with pytest.raises(TypeError):

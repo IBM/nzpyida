@@ -603,11 +603,25 @@ class IdaDataFrame(object):
         """
         return self
 
-    def __exit__(self):
+    def __exit__(self, exc_type, exc_val, exc_tb):
         """
         Allow the object to be used with a "with" statement. Make sure that
-        allow possible views related to the IdaDataFrame with be deleted when
+        allow possible views related to the IdaDataFrame will be deleted when
         the object goes out of scope
+        
+        Parameters
+        ----------
+        exc_type : type
+            The type of exception that occurred (None if no exception)
+        exc_val : Exception
+            The exception instance (None if no exception)
+        exc_tb : traceback
+            The traceback object (None if no exception)
+        
+        Returns
+        -------
+        bool or None
+            Return False to propagate exceptions, True to suppress them
         """
         while self.internal_state.viewstack:
             try :
@@ -616,7 +630,9 @@ class IdaDataFrame(object):
                 if view != self.tablename:
                     drop = "DROP VIEW \"%s\"" %view
                     self._prepare_and_execute(drop, autocommit = True)
-            except: pass
+            except:
+                pass
+        return False
 
     #We decided not to allow columns access idadf.columnname like this for now.
     #We could decide to allow it but for this we may have to switch all
@@ -1687,7 +1703,7 @@ class IdaDataFrame(object):
 
     @timed
     @idadf_state
-    def corr(self, method="pearson", features=None, ignore_indexer=True):
+    def corr(self, method="pearson", features=None, ignore_indexer=True, min_periods=1):
         """
         Compute the correlation matrix, composed of correlation coefficients
         between all pairs of columns in self.
@@ -1699,6 +1715,10 @@ class IdaDataFrame(object):
             Method to be used to compute the correlation. By default, compute
             the pearson correlation coefficient. The Spearman rank correlation
             is also available. Admissible values are: "pearson", "spearman".
+
+        min_periods : int, optional
+            Minimum number of observations required per pair of columns to have a valid result. 
+            Currently only available for Pearson and Spearman correlation.
 
         Returns
         -------
@@ -1717,7 +1737,7 @@ class IdaDataFrame(object):
         """
         from nzpyida.statistics import corr
         #return corr(idadf=self, features=features, ignore_indexer=ignore_indexer)
-        return corr(idadf=self)
+        return corr(idadf=self, min_periods=min_periods)
 
     @timed
 

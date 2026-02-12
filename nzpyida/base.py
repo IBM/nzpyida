@@ -25,6 +25,7 @@ from time import time
 import datetime
 import warnings
 from copy import deepcopy
+from typing import Optional, Dict
 
 from collections import OrderedDict
 
@@ -1849,13 +1850,15 @@ class IdaDataBase(object):
 
         if object_type == "T":
             to_drop = "TABLE"
+            if_exists = "IF EXISTS"
         elif object_type == "V":
             to_drop = "VIEW"
+            if_exists = ''
         else:
             raise ValueError("Unknown type to drop")
 
         try:
-            self._prepare_and_execute("DROP %s %s"%(to_drop,objectname))
+            self._prepare_and_execute("DROP %s %s %s"%(to_drop,objectname,if_exists))
         except Exception as e:
             if self._con_type == "odbc":
                 if e.value[0] == "42S02":
@@ -2054,6 +2057,7 @@ class IdaDataBase(object):
 
         column_string = ''
         for column in dataframe.columns:
+            # print(f"THe current column is {column} and type : {type(dataframe.dtypes[column])} and bool :")
             if dataframe.dtypes[column] in [object,bool]:
                 # Handle boolean type
                 if set(dataframe[column].unique()).issubset([True, False, 0, 1, np.nan]):
@@ -2063,10 +2067,11 @@ class IdaDataBase(object):
                         column_string += "\"%s\" VARCHAR(255) NOT NULL, PRIMARY KEY (\"%s\")," % (str(column).strip(), str(column).strip())
                     else:
                         column_string += "\"%s\" VARCHAR(255)," % str(column).strip()
-            elif dataframe.dtypes[column] == np.dtype('datetime64[ns]'):
-                # This is a first patch for handling dates
-                # TODO: Dates as timestamp in the database
+            elif dataframe.dtypes[column] in ["str"]:
                 column_string += "\"%s\" VARCHAR(255)," % str(column).strip()
+            elif pd.api.types.is_datetime64_any_dtype(dataframe.dtypes[column]):
+                print(f" Detected datetime column: {column} (type: {dataframe.dtypes[column]})")
+                column_string += "\"%s\" TIMESTAMP," % str(column).strip()
             else:
                 if dataframe.dtypes[column] in [np.int64, int, np.int8, np.int32]:
                     if abs(dataframe[column].max()) < 2147483647/2: # might get bigger 

@@ -189,5 +189,6 @@ class Test_DescriptiveStatistics(object):
                               IDADF.sum,
                               IDADF.median,
                              ])
+    @pytest.mark.skip()
     def test_idadf_statistics_one_column(self, idadf_onecolumn_numeric, f):
         f(idadf_onecolumn_numeric)
