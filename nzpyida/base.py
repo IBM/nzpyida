@@ -25,6 +25,7 @@ from time import time
 import datetime
 import warnings
 from copy import deepcopy
+from typing import Optional, Dict
 
 from collections import OrderedDict
 
@@ -73,7 +74,8 @@ class IdaDataBase(object):
     IdaDataFrame per connection.
     """
 
-    def __init__(self, dsn, uid='', pwd='', autocommit=True, verbose=False):
+    def __init__(self, dsn, uid='', pwd='', autocommit=True, verbose=False,
+                staging_config: Optional[Dict] = None):
         """
         Open a database connection.
 
@@ -94,6 +96,13 @@ class IdaDataBase(object):
 
         verbose : bool, defaukt: True
             If True, prints all SQL requests that are sent to the database. 
+
+        staging_config : dict, optional
+            Cloud staging configuration:
+            {
+                'provider': 'aws_s3' or 'azure_blob',
+                'config': {provider-specific config}
+            }
 
         Attributes
         ----------
@@ -528,6 +537,14 @@ class IdaDataBase(object):
         # Setting Autocommit and verbose environment variables
         set_autocommit(autocommit)
         set_verbose(verbose)
+
+        self._staging = None
+        if staging_config:
+            from nzpyida.staging import StagingManager
+            self._staging = StagingManager(
+                provider=staging_config['provider'],
+                config=staging_config['config']
+            )
 
     ###########################################################################
     #### Data Exploration
@@ -1059,7 +1076,7 @@ class IdaDataBase(object):
         Upload a dataframe and return its corresponding IdaDataFrame. The target
         table (tablename) will be created or replaced if the option clear_existing
         is set to True.
-        
+
         To add data to an existing tables, see IdaDataBase.append
 
         Parameters
@@ -1849,13 +1866,15 @@ class IdaDataBase(object):
 
         if object_type == "T":
             to_drop = "TABLE"
+            if_exists = "IF EXISTS"
         elif object_type == "V":
             to_drop = "VIEW"
+            if_exists = ''
         else:
             raise ValueError("Unknown type to drop")
 
         try:
-            self._prepare_and_execute("DROP %s %s"%(to_drop,objectname))
+            self._prepare_and_execute("DROP %s %s %s"%(to_drop,objectname,if_exists))
         except Exception as e:
             if self._con_type == "odbc":
                 if e.value[0] == "42S02":
@@ -2054,6 +2073,7 @@ class IdaDataBase(object):
 
         column_string = ''
         for column in dataframe.columns:
+            # print(f"THe current column is {column} and type : {type(dataframe.dtypes[column])} and bool :")
             if dataframe.dtypes[column] in [object,bool]:
                 # Handle boolean type
                 if set(dataframe[column].unique()).issubset([True, False, 0, 1, np.nan]):
@@ -2063,10 +2083,11 @@ class IdaDataBase(object):
                         column_string += "\"%s\" VARCHAR(255) NOT NULL, PRIMARY KEY (\"%s\")," % (str(column).strip(), str(column).strip())
                     else:
                         column_string += "\"%s\" VARCHAR(255)," % str(column).strip()
-            elif dataframe.dtypes[column] == np.dtype('datetime64[ns]'):
-                # This is a first patch for handling dates
-                # TODO: Dates as timestamp in the database
+            elif dataframe.dtypes[column] in ["str"]:
                 column_string += "\"%s\" VARCHAR(255)," % str(column).strip()
+            elif pd.api.types.is_datetime64_any_dtype(dataframe.dtypes[column]):
+                print(f" Detected datetime column: {column} (type: {dataframe.dtypes[column]})")
+                column_string += "\"%s\" TIMESTAMP," % str(column).strip()
             else:
                 if dataframe.dtypes[column] in [np.int64, int, np.int8, np.int32]:
                     if abs(dataframe[column].max()) < 2147483647/2: # might get bigger 
@@ -2462,3 +2483,72 @@ class IdaDataBase(object):
             return [x.upper() if self._upper_cased else x.lower() for x in text]
         else:
             return text
+
+    @property
+    def staging(self):
+        """Access staging manager"""
+        if self._staging is None:
+            raise RuntimeError(
+                "Staging not configured. Pass staging_config to IdaDataBase."
+            )
+        return self._staging
+
+    def upload_to_staging(self, local_path: str, remote_path: Optional[str] = None):
+        """
+        Upload file to cloud staging area.
+
+        Parameters:
+        -----------
+        local_path : str
+            Path to local file
+        remote_path : str, optional
+            Destination path in cloud storage
+
+        Returns:
+        --------
+        str : Cloud storage URL
+        """
+        return self.staging.upload(local_path, remote_path)
+
+    def load_from_staging(self, remote_path: str, tablename: str,
+                         delimiter: str = ',', has_header: bool = True):
+        """
+        Load data from cloud staging into Netezza table.
+
+        Parameters:
+        -----------
+        remote_path : str
+            Path to file in cloud storage
+        tablename : str
+            Target Netezza table name
+        delimiter : str
+            Field delimiter (default: ',')
+        has_header : bool
+            Whether file has header row
+        """
+        # Get temporary URL
+        url = self.staging.get_url(remote_path)
+
+        # Use Netezza external table to load from URL
+        # This is provider-specific and may require additional setup
+
+        # For AWS S3:
+        if self.staging.provider_name == 'aws_s3':
+            self._load_from_s3(url, tablename, delimiter, has_header)
+
+        # For Azure:
+        elif self.staging.provider_name == 'azure_blob':
+            self._load_from_azure(url, tablename, delimiter, has_header)
+
+    def _load_from_s3(self, url: str, tablename: str, 
+                     delimiter: str, has_header: bool):
+        """Load data from S3 URL into Netezza"""
+        # Implementation depends on Netezza's S3 integration
+        # May use external tables or COPY command
+        pass
+
+    def _load_from_azure(self, url: str, tablename: str,
+                        delimiter: str, has_header: bool):
+        """Load data from Azure URL into Netezza"""
+        # Implementation depends on Netezza's Azure integration
+        pass
